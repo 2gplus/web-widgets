@@ -1,4 +1,4 @@
-import { createElement, ReactElement, useEffect, useState, useCallback } from "react";
+import { createElement, ReactElement, useEffect, useState, useCallback, useRef } from "react";
 import { Alert } from "@mendix/pluggable-widgets-commons/components/web";
 import { ModeEnum, TypeEnum, DefaultColorsType, FormatEnum } from "../../typings/ColorPickerProps";
 import {
@@ -19,6 +19,7 @@ import classNames from "classnames";
 import { getColorPicker, parseColor, validateColorFormat, validateProps } from "../utils";
 import { Input } from "./Input";
 import { Button } from "./Button";
+import ReactDOM from "react-dom";
 
 export interface ColorPickerProps {
     id: string;
@@ -58,6 +59,28 @@ export const ColorPicker = (props: ColorPickerProps): ReactElement => {
     const [hidden, setHidden] = useState(mode !== "inline");
     const [currentColor, setCurrentColor] = useState<string | undefined>(color);
     const [alertMessage, setAlertMessage] = useState<string | undefined>();
+    const inputRef = useRef<HTMLDivElement>(null);
+    const setColorPickerDiv = (colorPickerDiv: HTMLDivElement | undefined): void => {
+        if (colorPickerDiv && inputRef?.current) {
+            const inputRect = inputRef.current.getBoundingClientRect();
+            const pickerRect = colorPickerDiv.getBoundingClientRect();
+            const style: { top: number; left: number } = {
+                top: 0,
+                left: inputRect.left + inputRect.width * 0.5
+            };
+
+            // Set picker above input
+            if (inputRect.top + pickerRect.height >= document.body.clientHeight) {
+                style.top = inputRect.top - pickerRect.height;
+            }
+            // Set picker below input
+            else {
+                style.top = inputRect.top + inputRect.height;
+            }
+            colorPickerDiv.style.top = String(style.top + "px");
+            colorPickerDiv.style.left = String(style.left + "px");
+        }
+    };
 
     const submitColor = (color: string): void => {
         setCurrentColor(color);
@@ -131,6 +154,8 @@ export const ColorPicker = (props: ColorPickerProps): ReactElement => {
         };
         return (
             <div
+                // @ts-ignore
+                ref={setColorPickerDiv}
                 className={classNames({
                     "widget-color-picker-popover": supportPopover,
                     "widget-color-picker-no-popover": mode !== "inline"
@@ -144,7 +169,6 @@ export const ColorPicker = (props: ColorPickerProps): ReactElement => {
             </div>
         );
     };
-
     useEffect(() => {
         if (color) {
             validateColor(color);
@@ -156,10 +180,13 @@ export const ColorPicker = (props: ColorPickerProps): ReactElement => {
                 "widget-color-picker-disabled": disabled,
                 "has-error": !!alertMessage
             })}
+            ref={inputRef}
         >
             {mode === "input" && renderInput()}
             {mode === "popover" && renderButton()}
-            {hidden || (mode !== "inline" && disabled) ? null : renderColorPicker()}
+            {hidden || (mode !== "inline" && disabled)
+                ? null
+                : ReactDOM.createPortal(renderColorPicker(), document.body)}
             {alertMessage ? (
                 <Alert bootstrapStyle="danger" className={"widget-color-picker-alert has-error"}>
                     {alertMessage}
