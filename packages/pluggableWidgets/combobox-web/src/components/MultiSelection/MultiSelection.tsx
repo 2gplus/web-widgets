@@ -7,12 +7,12 @@ import { useDownshiftMultiSelectProps } from "../../hooks/useDownshiftMultiSelec
 import { ComboboxWrapper } from "../ComboboxWrapper";
 import { InputPlaceholder } from "../Placeholder";
 import { MultiSelectionMenu } from "./MultiSelectionMenu";
+import { SelectAllButton } from "./SelectAllButton";
 
 export function MultiSelection({
     selector,
     tabIndex,
     a11yConfig,
-    showFooter,
     menuFooterContent,
     ...options
 }: SelectionBaseProps<MultiSelector>): ReactElement {
@@ -34,6 +34,7 @@ export function MultiSelection({
     } = useDownshiftMultiSelectProps(selector, options, a11yConfig.a11yStatusMessage);
     const inputRef = useRef<HTMLInputElement>(null);
     const isSelectedItemsBoxStyle = selector.selectedItemsStyle === "boxes";
+    const isOptionsSelected = selector.isOptionsSelected();
     return (
         <Fragment>
             <ComboboxWrapper
@@ -137,7 +138,22 @@ export function MultiSelection({
                     )}
             </ComboboxWrapper>
             <MultiSelectionMenu
-                showFooter={showFooter}
+                menuHeaderContent={
+                    selector.selectAllButton ? (
+                        <SelectAllButton
+                            value={isOptionsSelected}
+                            id={`${options.inputId}-select-all-button`}
+                            ariaLabel={a11yConfig.ariaLabels.selectAll}
+                            onChange={() => {
+                                if (isOptionsSelected === "all") {
+                                    setSelectedItems([]);
+                                } else {
+                                    setSelectedItems(selector.options.getAll());
+                                }
+                            }}
+                        />
+                    ) : undefined
+                }
                 menuFooterContent={menuFooterContent}
                 inputId={options.inputId}
                 selector={selector}
@@ -147,8 +163,10 @@ export function MultiSelection({
                 getItemProps={getItemProps}
                 getMenuProps={getMenuProps}
                 selectedItems={selectedItems}
-                setSelectedItems={setSelectedItems}
                 noOptionsText={options.noOptionsText}
+                onOptionClick={() => {
+                    inputRef.current?.focus();
+                }}
             />
         </Fragment>
     );

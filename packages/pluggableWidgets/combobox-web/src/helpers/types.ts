@@ -6,6 +6,7 @@ import {
     SelectedItemsStyleEnum,
     SelectionMethodEnum
 } from "../../typings/ComboboxProps";
+import { ThreeStateCheckBoxEnum } from "@mendix/widget-plugin-component-kit/ThreeStateCheckBox";
 
 export type Status = "unavailable" | "loading" | "available";
 export type CaptionPlacement = "label" | "options";
@@ -68,7 +69,9 @@ export interface SingleSelector extends SelectorBase<"single", string> {}
 export interface MultiSelector extends SelectorBase<"multi", string[]> {
     selectedItemsStyle: SelectedItemsStyleEnum;
     selectionMethod: SelectionMethodEnum;
+    selectAllButton: boolean;
     getOptions(): string[];
+    isOptionsSelected(): ThreeStateCheckBoxEnum;
 }
 
 export interface SelectionBaseProps<Selector> {
@@ -77,13 +80,13 @@ export interface SelectionBaseProps<Selector> {
     noOptionsText?: string;
     keepMenuOpen?: boolean;
     selector: Selector;
-    showFooter: boolean;
     menuFooterContent?: ReactNode;
     tabIndex: number;
     a11yConfig: {
         ariaLabels: {
             clearSelection: string;
             removeSelection: string;
+            selectAll: string;
         };
         a11yStatusMessage: A11yStatusMessage;
     };

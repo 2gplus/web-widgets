@@ -1,5 +1,5 @@
 import { UseComboboxPropGetters } from "downshift/typings";
-import { ReactElement, ReactNode, createElement } from "react";
+import { ReactElement, ReactNode, createElement, MouseEvent } from "react";
 import { Checkbox } from "../../assets/icons";
 import { MultiSelector } from "../../helpers/types";
 import { ComboboxMenuWrapper } from "../ComboboxMenuWrapper";
@@ -11,11 +11,11 @@ interface MultiSelectionMenuProps extends Partial<UseComboboxPropGetters<string>
     selectedItems: string[];
     highlightedIndex: number | null;
     selector: MultiSelector;
-    setSelectedItems: (v: string[]) => void;
     noOptionsText?: string;
     inputId?: string;
-    showFooter: boolean;
+    menuHeaderContent?: ReactNode;
     menuFooterContent?: ReactNode;
+    onOptionClick?: (e: MouseEvent) => void;
 }
 
 export function MultiSelectionMenu({
@@ -27,8 +27,9 @@ export function MultiSelectionMenu({
     selectableItems,
     noOptionsText,
     inputId,
-    showFooter,
-    menuFooterContent
+    menuHeaderContent,
+    menuFooterContent,
+    onOptionClick
 }: MultiSelectionMenuProps): ReactElement {
     return (
         <ComboboxMenuWrapper
@@ -36,13 +37,16 @@ export function MultiSelectionMenu({
             isEmpty={selectableItems.length <= 0}
             getMenuProps={getMenuProps}
             noOptionsText={noOptionsText}
-            showFooter={showFooter}
+            highlightedIndex={highlightedIndex}
+            menuHeaderContent={menuHeaderContent}
             menuFooterContent={menuFooterContent}
+            onOptionClick={onOptionClick}
         >
             {isOpen &&
                 selectableItems.map((item, index) => {
                     const isActive = highlightedIndex === index;
                     const isSelected = selector.currentValue?.includes(item);
+
                     return (
                         <ComboboxOptionWrapper
                             key={item}

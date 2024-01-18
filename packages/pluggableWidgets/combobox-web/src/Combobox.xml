@@ -141,6 +141,18 @@
                         <enumerationValue key="boxes">Labels</enumerationValue>
                     </enumerationValues>
                 </property>
+                <property key="selectAllButton" type="boolean" defaultValue="false" required="true">
+                    <caption>Show select all</caption>
+                    <description>Add a button to select/deselect all options.</description>
+                </property>
+                <property key="selectAllButtonCaption" type="textTemplate" required="true">
+                    <caption>Caption for select all</caption>
+                    <description />
+                    <translations>
+                        <translation lang="en_US">Select all</translation>
+                        <translation lang="nl_NL">Selecteer alles</translation>
+                    </translations>
+                </property>
             </propertyGroup>
             <!-- END MULTI SELECTION (REFERENCE SET) -->
 

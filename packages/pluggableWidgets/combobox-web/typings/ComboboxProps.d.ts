@@ -40,6 +40,8 @@ export interface ComboboxContainerProps {
     menuFooterContent?: ReactNode;
     selectionMethod: SelectionMethodEnum;
     selectedItemsStyle: SelectedItemsStyleEnum;
+    selectAllButton: boolean;
+    selectAllButtonCaption: DynamicValue<string>;
     onChangeEvent?: ActionValue;
     onEnterEvent?: ActionValue;
     onLeaveEvent?: ActionValue;
@@ -71,6 +73,8 @@ export interface ComboboxPreviewProps {
     menuFooterContent: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     selectionMethod: SelectionMethodEnum;
     selectedItemsStyle: SelectedItemsStyleEnum;
+    selectAllButton: boolean;
+    selectAllButtonCaption: string;
     onChangeEvent: {} | null;
     onEnterEvent: {} | null;
     onLeaveEvent: {} | null;
