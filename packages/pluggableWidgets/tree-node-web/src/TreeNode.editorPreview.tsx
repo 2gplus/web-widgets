@@ -1,5 +1,5 @@
-import { parseStyle } from "@mendix/pluggable-widgets-commons";
-import { mapPreviewIconToWebIcon } from "@mendix/pluggable-widgets-commons/components/web";
+import { parseStyle } from "@mendix/widget-plugin-platform/preview/parse-style";
+import { mapPreviewIconToWebIcon } from "@mendix/widget-plugin-platform/preview/map-icon";
 import { GUID } from "mendix";
 import { createElement, ReactElement } from "react";
 import { TreeNodePreviewProps } from "../typings/TreeNodeProps";
@@ -20,7 +20,7 @@ export function preview(props: TreeNodePreviewProps): ReactElement | null {
             items={[
                 {
                     id: "1" as GUID,
-                    value:
+                    headerContent:
                         props.headerType === "text" ? (
                             renderTextTemplateWithFallback(props.headerCaption, "[No header caption configured]")
                         ) : (
@@ -28,7 +28,7 @@ export function preview(props: TreeNodePreviewProps): ReactElement | null {
                                 <div />
                             </props.headerContent.renderer>
                         ),
-                    content: (
+                    bodyContent: (
                         <props.children.renderer caption="Place other tree nodes here.">
                             <div />
                         </props.children.renderer>
@@ -43,6 +43,7 @@ export function preview(props: TreeNodePreviewProps): ReactElement | null {
             expandedIcon={mapPreviewIconToWebIcon(props.expandedIcon)}
             animateIcon={false}
             animateTreeNodeContent={false}
+            openNodeOn={"headerClick"}
         />
     );
 }

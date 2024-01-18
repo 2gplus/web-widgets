@@ -1,31 +1,31 @@
-import { createElement, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ColumnsType, DatagridContainerProps } from "../typings/DatagridProps";
+import {
+    FilterState,
+    FilterType,
+    useFilterContext,
+    useMultipleFiltering,
+    readInitFilterValues
+} from "@mendix/widget-plugin-filtering";
+import { useCreateSelectionContextValue, useSelectionHelper } from "@mendix/widget-plugin-grid/selection";
+import { useGridSelectionProps } from "@mendix/widget-plugin-grid/selection/useGridSelectionProps";
+import { generateUUID } from "@mendix/widget-plugin-platform/framework/generate-uuid";
 import { FilterCondition } from "mendix/filters";
 import { and } from "mendix/filters/builders";
-import { Table, TableColumn } from "./components/Table";
-import {
-    FilterFunction,
-    FilterType,
-    generateUUID,
-    useFilterContext,
-    useMultipleFiltering
-} from "@mendix/pluggable-widgets-commons/components/web";
-import {
-    getGlobalSelectionContext,
-    isAvailable,
-    useCreateSelectionContextValue,
-    useSelectionHelper
-} from "@mendix/pluggable-widgets-commons";
-import { extractFilters } from "./features/filters";
-import { useCellRenderer } from "./features/cell";
-import { getColumnAssociationProps, isSortable } from "./features/column";
-import { selectionSettings, useOnSelectProps } from "./features/selection";
+import { ReactElement, ReactNode, createElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DatagridContainerProps } from "../typings/DatagridProps";
+import { Cell } from "./components/Cell";
+import { SortProperty, Widget } from "./components/Widget";
+import { WidgetHeaderContext } from "./components/WidgetHeaderContext";
+import { getColumnAssociationProps } from "./features/column";
+import { UpdateDataSourceFn, useDG2ExportApi } from "./features/export";
+import { Column } from "./helpers/Column";
 import "./ui/Datagrid.scss";
+import { useColumnsState } from "./features/use-columns-state";
+import { useShowPagination } from "./utils/useShowPagination";
 
 export default function Datagrid(props: DatagridContainerProps): ReactElement {
     const id = useRef(`DataGrid${generateUUID()}`);
 
-    const [sortParameters, setSortParameters] = useState<{ columnIndex: number; desc: boolean } | undefined>(undefined);
+    const [sortParameters, setSortParameters] = useState<SortProperty | undefined>(undefined);
     const isInfiniteLoad = props.pagination === "virtualScrolling";
     const currentPage = isInfiniteLoad
         ? props.datasource.limit / props.pageSize
@@ -34,15 +34,45 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
     const [filtered, setFiltered] = useState(false);
     const multipleFilteringState = useMultipleFiltering();
     const { FilterContext } = useFilterContext();
-    const SelectionContext = getGlobalSelectionContext();
-    const cellRenderer = useCellRenderer({ columns: props.columns, onClick: props.onClick });
+
+    const columns = useMemo(
+        () => props.columns.map((col, index) => new Column(col, index, id.current)),
+        [props.columns]
+    );
+
+    const [columnsState, { setHidden, setOrder }] = useColumnsState(columns);
+
+    const [{ items, exporting, processedRows }, { abort }] = useDG2ExportApi({
+        columns: columnsState.columnsVisible.map(column => props.columns[column.columnNumber]),
+        hasMoreItems: props.datasource.hasMoreItems || false,
+        items: props.datasource.items,
+        name: props.name,
+        offset: props.datasource.offset,
+        limit: props.datasource.limit,
+        updateDataSource: useCallback<UpdateDataSourceFn>(
+            ({ offset, limit, reload }) => {
+                if (offset != null) {
+                    props.datasource?.setOffset(offset);
+                }
+
+                if (limit != null) {
+                    props.datasource?.setLimit(limit);
+                }
+
+                if (reload) {
+                    props.datasource.reload();
+                }
+            },
+            [props.datasource]
+        )
+    });
 
     useEffect(() => {
-        props.datasource.requestTotalCount(true);
+        props.datasource.requestTotalCount(!isInfiniteLoad);
         if (props.datasource.limit === Number.POSITIVE_INFINITY) {
             props.datasource.setLimit(props.pageSize);
         }
-    }, [props.datasource, props.pageSize]);
+    }, [props.datasource, props.pageSize, isInfiniteLoad]);
 
     useEffect(() => {
         if (props.datasource.filter && !filtered && !viewStateFilters.current) {
@@ -59,7 +89,7 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
     }, [props.datasource, props.refreshInterval]);
 
     const setPage = useCallback(
-        computePage => {
+        (computePage: (prevPage: number) => number) => {
             const newPage = computePage(currentPage);
             if (isInfiniteLoad) {
                 props.datasource.setLimit(newPage * props.pageSize);
@@ -73,7 +103,7 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
     // TODO: Rewrite this logic with single useReducer (or write
     // custom hook that will use useReducer)
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const customFiltersState = props.columns.map(() => useState<FilterFunction>());
+    const customFiltersState = props.columns.map(() => useState<FilterState>());
 
     const filters = customFiltersState
         .map(([customFilter]) => customFilter?.getFilterCondition?.())
@@ -101,48 +131,33 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
         props.datasource.setSortOrder(undefined);
     }
 
-    const columns = useMemo(() => transformColumnProps(props.columns), [props.columns]);
-
-    /**
-     * Multiple filtering properties
-     */
-    const filterList = useMemo(
-        () => props.filterList.reduce((filters, { filter }) => ({ ...filters, [filter.id]: filter }), {}),
-        [props.filterList]
+    const selectionHelper = useSelectionHelper(
+        props.itemSelection,
+        props.datasource,
+        props.onSelectionChange,
+        props.pageSize
     );
-    const multipleInitialFilters = useMemo(
-        () =>
-            props.filterList.reduce(
-                (filters, { filter }) => ({
-                    ...filters,
-                    [filter.id]: extractFilters(filter, viewStateFilters.current)
-                }),
-                {}
-            ),
-        [props.filterList]
-    );
-
-    const selection = useSelectionHelper(props.itemSelection, props.datasource, props.onSelectionChange);
-    const selectActionProps = useOnSelectProps(selection);
-    const { selectionStatus, selectionMethod } = selectionSettings(props, selection);
-
-    const selectionContextValue = useCreateSelectionContextValue(selection);
+    const selectionContextValue = useCreateSelectionContextValue(selectionHelper);
+    const selectionProps = useGridSelectionProps({
+        selection: props.itemSelection,
+        selectionMethod: props.itemSelectionMethod,
+        helper: selectionHelper,
+        showSelectAllToggle: props.showSelectAllToggle
+    });
 
     return (
-        <Table
-            selectionStatus={selectionStatus}
-            selectionMethod={selectionMethod}
-            cellRenderer={cellRenderer}
+        <Widget
             className={props.class}
-            columns={columns}
+            CellComponent={Cell}
+            columnsState={columnsState}
             columnsDraggable={props.columnsDraggable}
             columnsFilterable={props.columnsFilterable}
             columnsHidable={props.columnsHidable}
             columnsResizable={props.columnsResizable}
             columnsSortable={props.columnsSortable}
-            data={props.datasource.items ?? []}
+            data={items}
             emptyPlaceholderRenderer={useCallback(
-                renderWrapper =>
+                (renderWrapper: (children: ReactNode) => ReactElement) =>
                     props.showEmptyPlaceholder === "custom" ? renderWrapper(props.emptyPlaceholder) : <div />,
                 [props.emptyPlaceholder, props.showEmptyPlaceholder]
             )}
@@ -152,7 +167,7 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
                     const { attribute, filter } = column;
                     const associationProps = getColumnAssociationProps(column);
                     const [, filterDispatcher] = customFiltersState[columnIndex];
-                    const initialFilters = extractFilters(attribute, viewStateFilters.current);
+                    const initialFilters = readInitFilterValues(attribute, viewStateFilters.current);
 
                     if (!attribute && !associationProps) {
                         return renderWrapper(filter);
@@ -177,41 +192,39 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
                 },
                 [FilterContext, customFiltersState, props.columns]
             )}
+            headerTitle={props.filterSectionTitle?.value}
+            headerContent={
+                props.filtersPlaceholder && (
+                    <WidgetHeaderContext
+                        filterList={props.filterList}
+                        setFiltered={setFiltered}
+                        viewStateFilters={viewStateFilters.current}
+                        selectionContextValue={selectionContextValue}
+                        state={multipleFilteringState}
+                    >
+                        {props.filtersPlaceholder}
+                    </WidgetHeaderContext>
+                )
+            }
             hasMoreItems={props.datasource.hasMoreItems ?? false}
             headerWrapperRenderer={useCallback((_columnIndex: number, header: ReactElement) => header, [])}
-            gridHeaderWidgets={useMemo(
-                () => (
-                    <FilterContext.Provider
-                        value={{
-                            filterDispatcher: prev => {
-                                if (prev.filterType) {
-                                    const [, filterDispatcher] = multipleFilteringState[prev.filterType];
-                                    filterDispatcher(prev);
-                                    setFiltered(true);
-                                }
-                                return prev;
-                            },
-                            multipleAttributes: filterList,
-                            multipleInitialFilters
-                        }}
-                    >
-                        <SelectionContext.Provider value={selectionContextValue}>
-                            {props.filtersPlaceholder}
-                        </SelectionContext.Provider>
-                    </FilterContext.Provider>
-                ),
-                [FilterContext, filterList, multipleInitialFilters, props.filtersPlaceholder, multipleFilteringState]
-            )}
-            gridHeaderTitle={props.filterSectionTitle?.value}
             id={id.current}
             numberOfItems={props.datasource.totalCount}
+            onExportCancel={abort}
             page={currentPage}
             pageSize={props.pageSize}
-            paging={props.pagination === "buttons"}
+            paging={useShowPagination({
+                pagination: props.pagination,
+                showPagingButtons: props.showPagingButtons,
+                totalCount: props.datasource.totalCount,
+                limit: props.datasource.limit
+            })}
             pagingPosition={props.pagingPosition}
-            rowClass={useCallback(value => props.rowClass?.get(value)?.value ?? "", [props.rowClass])}
+            rowClass={useCallback((value: any) => props.rowClass?.get(value)?.value ?? "", [props.rowClass])}
             setPage={setPage}
             setSortParameters={setSortParameters}
+            setOrder={setOrder}
+            setHidden={setHidden}
             settings={props.configurationAttribute}
             styles={props.style}
             valueForSort={useCallback(
@@ -221,17 +234,14 @@ export default function Datagrid(props: DatagridContainerProps): ReactElement {
                 },
                 [props.columns]
             )}
-            onSelect={selectActionProps.onSelect}
-            onSelectAll={selectActionProps.onSelectAll}
-            isSelected={selectActionProps.isSelected}
+            rowAction={props.onClick}
+            selectionProps={selectionProps}
+            selectionStatus={selectionHelper?.type === "Multi" ? selectionHelper.selectionStatus : "unknown"}
+            exporting={exporting}
+            processedRows={processedRows}
+            exportDialogLabel={props.exportDialogLabel?.value}
+            cancelExportLabel={props.cancelExportLabel?.value}
+            selectRowLabel={props.selectRowLabel?.value}
         />
     );
-}
-
-function transformColumnProps(props: ColumnsType[]): TableColumn[] {
-    return props.map(prop => ({
-        ...prop,
-        header: prop.header && isAvailable(prop.header) ? prop.header.value ?? "" : "",
-        sortable: isSortable(prop)
-    }));
 }

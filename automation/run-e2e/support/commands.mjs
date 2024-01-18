@@ -1,11 +1,13 @@
 import compareSnapshotCommand from "cypress-image-diff-js";
 import installLogsCollector from "cypress-terminal-report/src/installLogsCollector";
+import "cypress-axe";
 
 console.log("support/commands loaded");
 installLogsCollector();
 compareSnapshotCommand();
 
 /*eslint-disable cypress/no-unnecessary-waiting*/
+/*eslint-disable cypress/unsafe-to-chain-command*/
 Cypress.Commands.add("dragAndDrop", (subject, target, dragIndex, dropIndex) => {
     cy.get(subject).should("be.visible", { timeout: 20000 });
     Cypress.log({
@@ -54,6 +56,7 @@ Cypress.Commands.add("dragAndDrop", (subject, target, dragIndex, dropIndex) => {
         });
 });
 /*eslint-disable cypress/no-unnecessary-waiting*/
+/*eslint-disable cypress/unsafe-to-chain-command*/
 
 const logCommand = ({ options, originalOptions }) => {
     if (options.log) {
@@ -140,3 +143,21 @@ const waitUntil = (subject, checkFunction, originalOptions = {}) => {
 };
 
 Cypress.Commands.add("waitUntil", { prevSubject: "optional" }, waitUntil);
+
+Cypress.Commands.add("terminalLog", violations => {
+    cy.task(
+        "log",
+        `${violations.length} accessibility violation${violations.length === 1 ? "" : "s"} ${
+            violations.length === 1 ? "was" : "were"
+        } detected`
+    );
+    // pluck specific keys to keep the table readable
+    const violationData = violations.map(({ id, impact, description, nodes }) => ({
+        id,
+        impact,
+        description,
+        nodes: nodes.length
+    }));
+
+    cy.task("table", violationData);
+});

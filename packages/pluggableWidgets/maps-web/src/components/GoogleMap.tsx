@@ -10,8 +10,8 @@ import { Marker, SharedProps } from "../../typings/shared";
 import { getGoogleMapsStyles } from "../utils/google";
 import { translateZoom } from "../utils/zoom";
 import { Option } from "../utils/data";
-import { Alert } from "@mendix/pluggable-widgets-commons/components/web";
-import { getDimensions } from "@mendix/pluggable-widgets-commons";
+import { Alert } from "@mendix/widget-plugin-component-kit/Alert";
+import { getDimensions } from "@mendix/widget-plugin-platform/utils/get-dimensions";
 
 export interface GoogleMapsProps extends SharedProps {
     mapStyles?: string;
@@ -84,6 +84,7 @@ export function GoogleMap(props: GoogleMapsProps): ReactElement {
             {error && <Alert bootstrapStyle="danger">{error}</Alert>}
             <div className="widget-google-maps-wrapper">
                 {isLoaded ? (
+                    // @ts-ignore
                     <GoogleMapComponent
                         mapContainerClassName="widget-google-maps"
                         options={{
@@ -141,6 +142,7 @@ function GoogleMapsMarker({
 }): ReactElement {
     const markerRef = useRef<google.maps.MVCObject>();
     return (
+        // @ts-ignore
         <MarkerComponent
             position={{
                 lat: marker.latitude,
@@ -157,6 +159,7 @@ function GoogleMapsMarker({
             icon={marker.url}
         >
             {selectedMarker === marker && markerRef.current && (
+                // @ts-ignore
                 <InfoWindow
                     anchor={markerRef.current}
                     onCloseClick={() => setSelectedMarker(prev => (prev === marker ? undefined : prev))}

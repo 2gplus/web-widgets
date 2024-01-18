@@ -1,4 +1,4 @@
-import { debounce } from "@mendix/pluggable-widgets-commons";
+import { debounce } from "@mendix/widget-plugin-platform/utils/debounce";
 import { CKEditorEventPayload, CKEditorHookProps, CKEditorInstance } from "ckeditor4-react";
 import { Component, createElement } from "react";
 import { RichTextContainerProps } from "../../typings/RichTextProps";
@@ -35,6 +35,7 @@ export class Editor extends Component<EditorProps> {
     element: HTMLElement;
     lastSentValue: string | undefined;
     applyChangesDebounce: () => void;
+    setDataDebounce: (data: string | undefined) => void;
     cancelRAF: (() => void) | undefined;
     hasFocus: boolean;
 
@@ -46,7 +47,8 @@ export class Editor extends Component<EditorProps> {
         this.editorKey = this.getNewKey();
         this.editorHookProps = this.getNewEditorHookProps();
         this.onChange = this.onChange.bind(this);
-        this.applyChangesDebounce = debounce(this.applyChangesImmediately.bind(this), 500);
+        this.applyChangesDebounce = debounce(this.applyChangesImmediately.bind(this), 500)[0];
+        this.setDataDebounce = debounce(data => this.editor?.setData(data, () => this.addListeners()), 50)[0];
         this.onKeyPress = this.onKeyPress.bind(this);
         this.onPasteContent = this.onPasteContent.bind(this);
         this.onDropContent = this.onDropContent.bind(this);
@@ -228,7 +230,7 @@ export class Editor extends Component<EditorProps> {
         // call addListeners immediately.
         // https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_editor.html#method-setData
         if ("data" in args) {
-            this.editor?.setData(args.data, () => this.addListeners());
+            this.setDataDebounce(args.data);
         } else {
             this.addListeners();
         }

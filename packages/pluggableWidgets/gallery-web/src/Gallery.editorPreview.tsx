@@ -1,24 +1,32 @@
-import { createElement, ReactElement, useCallback } from "react";
+import { GUID, ObjectItem } from "mendix";
+import { createElement, ReactElement, ReactNode, useCallback } from "react";
 import { GalleryPreviewProps } from "../typings/GalleryProps";
 import { Gallery as GalleryComponent } from "./components/Gallery";
-import { ObjectItem, GUID } from "mendix";
+import { useItemPreviewHelper } from "./helpers/ItemPreviewHelper";
+import { useListOptionSelectionProps } from "@mendix/widget-plugin-grid/selection/useListOptionSelectionProps";
 
 function Preview(props: GalleryPreviewProps): ReactElement {
+    const { emptyPlaceholder } = props;
     const items: ObjectItem[] = Array.from({ length: props.pageSize ?? 5 }).map((_, index) => ({
         id: String(index) as GUID
     }));
+
+    const selectionProps = useListOptionSelectionProps({
+        selection: props.itemSelection,
+        helper: undefined
+    });
 
     return (
         <GalleryComponent
             className={props.class}
             desktopItems={props.desktopItems!}
             emptyPlaceholderRenderer={useCallback(
-                renderWrapper => (
-                    <props.emptyPlaceholder.renderer caption="Empty list message: Place widgets here">
+                (renderWrapper: (children: ReactNode) => ReactElement) => (
+                    <emptyPlaceholder.renderer caption="Empty list message: Place widgets here">
                         {renderWrapper(null)}
-                    </props.emptyPlaceholder.renderer>
+                    </emptyPlaceholder.renderer>
                 ),
-                [props.emptyPlaceholder]
+                [emptyPlaceholder]
             )}
             header={
                 <props.filtersPlaceholder.renderer caption="Place widgets like filter widget(s) and action button(s) here">
@@ -28,22 +36,19 @@ function Preview(props: GalleryPreviewProps): ReactElement {
             showHeader
             hasMoreItems={false}
             items={items}
-            itemRenderer={useCallback(
-                renderWrapper => (
-                    <props.content.renderer caption="Gallery item: Place widgets here">
-                        {renderWrapper(false, null, "")}
-                    </props.content.renderer>
-                ),
-                [props.content]
-            )}
+            itemHelper={useItemPreviewHelper({
+                contentValue: props.content,
+                hasOnClick: props.onClick !== null
+            })}
             numberOfItems={items.length}
             page={0}
             pageSize={props.pageSize ?? 5}
             paging={props.pagination === "buttons"}
             paginationPosition={props.pagingPosition}
-            preview
+            showEmptyStatePreview={props.showEmptyPlaceholder === "custom"}
             phoneItems={props.phoneItems!}
             tabletItems={props.tabletItems!}
+            selectionProps={selectionProps}
         />
     );
 }

@@ -6,6 +6,182 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.2.4] Charts - 2023-11-30
+
+### Fixed
+
+-   We fixed chart's custom configuration not properly merged for arrays.
+
+## [4.2.3] Charts - 2023-11-21
+
+### [3.1.3] AreaChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "line color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "line color" expression editor. With this fix, entity attributes are accessible in the expression editor again for all "line color", "marker color", and "fill color" settings.
+
+### [3.1.3] BarChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "bar color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "bar color" expression editor. With this fix, entity attributes are accessible in the expression editor again for "bar color" setting.
+
+### [3.1.3] BubbleChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "marker color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "marker color" expression editor. With this fix, entity attributes are accessible in the expression editor again for "marker color" settings.
+
+### [3.1.3] ColumnChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "column color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "column color" expression editor. With this fix, entity attributes are accessible in the expression editor again for "column color" setting.
+
+### [3.1.2] PieChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "slice color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "slice color" expression editor. With this fix, entity attributes are accessible in the expression editor again for "slice color" setting.
+
+## [4.2.2] Charts - 2023-10-27
+
+### Fixed
+
+-   We fixed an error that was happening when the data source with the aggregation function had an "on click" action. Note: If a data point is aggregated (a single data point on the chart represents multiple entities), only the last entity is passed as a parameter to the associated microflow or nanoflow.
+
+## [4.2.1] Charts - 2023-09-27
+
+### [3.1.2] AreaChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.2] BarChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.2] BubbleChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.2] ColumnChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.1] HeatMap
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.2] LineChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.1] PieChart
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+### [3.1.2] TimeSeries
+
+#### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [4.2.0] Charts - 2023-08-16
+
+### Fixed
+
+-   We fixed an issue where, in 4.0, parameters related to on-click actions were missing. In versions of the widget before 4.0, when you added an on click action to the widget, additional parameters were passed. These parameters are now being passed again.
+
+### Breaking changes
+
+-   After updating the widget(s) to this version, a few properties will lose their configured values. The following properties should be reconfigured manually (if they were configured before): `Line color` (Line chart), `Marker color` (Line chart), `On click action` (all widgets except Pie chart and Heat map).
+
+### [3.1.1] LineChart
+
+#### Fixed
+
+-   We fixed an issue where it was not possible to select entity attributes in the "line color" expression editor. In versions of the widget before 4.0, after configuring the data source, entity attributes were available in the "line color" expression editor. With this fix, entity attributes are accessible in the expression editor again for both "line color" and "marker color" settings.
+
+## [4.1.0] Charts - 2023-06-06
+
+### [3.1.0] AreaChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] BarChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] BubbleChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] ColumnChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] HeatMap
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] LineChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] PieChart
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
+### [3.1.0] TimeSeries
+
+#### Changed
+
+-   We updated page explorer's caption to display datasource.
+
+-   We updated the light and dark icons and tiles for the widget.
+
 ## [4.0.4] Charts - 2023-04-13
 
 ### Changed

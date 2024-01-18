@@ -28,6 +28,7 @@ export interface ColumnsType {
     filterAssociation?: ListReferenceValue | ListReferenceSetValue;
     filterAssociationOptions?: ListValue;
     filterAssociationOptionLabel?: ListExpressionValue<string>;
+    visible?: DynamicValue<boolean>;
     sortable: boolean;
     resizable: boolean;
     draggable: boolean;
@@ -43,6 +44,8 @@ export type PaginationEnum = "buttons" | "virtualScrolling";
 
 export type PagingPositionEnum = "bottom" | "top" | "both";
 
+export type ShowPagingButtonsEnum = "always" | "auto";
+
 export type ShowEmptyPlaceholderEnum = "none" | "custom";
 
 export interface FilterListType {
@@ -52,14 +55,15 @@ export interface FilterListType {
 export interface ColumnsPreviewType {
     showContentAs: ShowContentAsEnum;
     attribute: string;
-    content: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    content: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     dynamicText: string;
     header: string;
     tooltip: string;
-    filter: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    filter: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     filterAssociation: string;
-    filterAssociationOptions: {} | { type: string } | null;
+    filterAssociationOptions: {} | { caption: string } | { type: string } | null;
     filterAssociationOptionLabel: string;
+    visible: string;
     sortable: boolean;
     resizable: boolean;
     draggable: boolean;
@@ -91,6 +95,7 @@ export interface DatagridContainerProps {
     pageSize: number;
     pagination: PaginationEnum;
     pagingPosition: PagingPositionEnum;
+    showPagingButtons: ShowPagingButtonsEnum;
     showEmptyPlaceholder: ShowEmptyPlaceholderEnum;
     emptyPlaceholder?: ReactNode;
     rowClass?: ListExpressionValue<string>;
@@ -104,6 +109,9 @@ export interface DatagridContainerProps {
     filterList: FilterListType[];
     filtersPlaceholder?: ReactNode;
     filterSectionTitle?: DynamicValue<string>;
+    exportDialogLabel?: DynamicValue<string>;
+    cancelExportLabel?: DynamicValue<string>;
+    selectRowLabel?: DynamicValue<string>;
 }
 
 export interface DatagridPreviewProps {
@@ -116,7 +124,7 @@ export interface DatagridPreviewProps {
     styleObject?: CSSProperties;
     readOnly: boolean;
     advanced: boolean;
-    datasource: {} | { type: string } | null;
+    datasource: {} | { caption: string } | { type: string } | null;
     refreshInterval: number | null;
     itemSelection: "None" | "Single" | "Multi";
     itemSelectionMethod: ItemSelectionMethodEnum;
@@ -126,8 +134,9 @@ export interface DatagridPreviewProps {
     pageSize: number | null;
     pagination: PaginationEnum;
     pagingPosition: PagingPositionEnum;
+    showPagingButtons: ShowPagingButtonsEnum;
     showEmptyPlaceholder: ShowEmptyPlaceholderEnum;
-    emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     rowClass: string;
     onClick: {} | null;
     onSelectionChange: {} | null;
@@ -138,6 +147,9 @@ export interface DatagridPreviewProps {
     configurationAttribute: string;
     onConfigurationChange: {} | null;
     filterList: FilterListPreviewType[];
-    filtersPlaceholder: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    filtersPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     filterSectionTitle: string;
+    exportDialogLabel: string;
+    cancelExportLabel: string;
+    selectRowLabel: string;
 }

@@ -1,22 +1,25 @@
 import {
-    ConditionDispatch,
+    DispatchFilterUpdate,
     FilterContextValue,
-    FilterType
-} from "@mendix/pluggable-widgets-commons/dist/components/web";
-import { error, value, ValueMeta } from "@mendix/pluggable-widgets-commons/dist/utils/valueStatus";
+    FilterType,
+    error,
+    value,
+    Result
+} from "@mendix/widget-plugin-filtering";
 import { ListAttributeValue, ValueStatus } from "mendix";
 import { FilterCondition } from "mendix/filters";
 import { attribute, equals, literal, or } from "mendix/filters/builders";
 import { DatagridDropdownFilterContainerProps, FilterOptionsType } from "../../typings/DatagridDropdownFilterProps";
-import { FilterComponentProps, FilterOption, FilterValueChangeCallback } from "../components/FilterComponent";
+import { FilterComponentProps } from "../components/FilterComponent";
 import { attributeNotFound, invalidOptionValue, requiredAttributesNotFound } from "./configurationErrors";
 import { AttributeTypeError, ConfigurationError } from "./errors";
+import { Option } from "../utils/types";
 
 type EnumFilterError = ConfigurationError | AttributeTypeError;
 
 type AttrsArray = ListAttributeValue[];
 
-type AttrsMeta = ValueMeta<AttrsArray, EnumFilterError>;
+type ContextReadResult = Result<AttrsArray, EnumFilterError>;
 
 function isEnumType(type: string): boolean {
     return /Enum|Boolean/.test(type);
@@ -31,7 +34,7 @@ function findAttributesByType(multipleAttributes?: { [key: string]: ListAttribut
         .filter(attr => isEnumType(attr.type));
 }
 
-function attributeToOptions(attribute: ListAttributeValue): FilterOption[] {
+function attributeToOptions(attribute: ListAttributeValue): Option[] {
     if (!attribute.universe) {
         return [];
     }
@@ -56,10 +59,7 @@ function isNotAllowedValue(attr: ListAttributeValue, value: string): boolean {
     return !universe.includes(universeValue(attr.type, value));
 }
 
-function validateCustomOptions(
-    attributes: ListAttributeValue[],
-    options: FilterOption[]
-): ConfigurationError | undefined {
+function validateCustomOptions(attributes: ListAttributeValue[], options: Option[]): ConfigurationError | undefined {
     const invalidOption = options.find(option => attributes.every(attr => isNotAllowedValue(attr, option.value)));
 
     if (invalidOption) {
@@ -69,7 +69,7 @@ function validateCustomOptions(
 
 function getFilterCondition(
     listAttribute: ListAttributeValue | undefined,
-    values: FilterOption[]
+    values: Option[]
 ): FilterCondition | undefined {
     if (!listAttribute || !listAttribute.filterable || values.length === 0) {
         return undefined;
@@ -90,7 +90,7 @@ function getFilterCondition(
     return filterValue;
 }
 
-function getSingleAttr(context: FilterContextValue): AttrsMeta {
+function getSingleAttr(context: FilterContextValue): ContextReadResult {
     const { singleAttribute } = context;
 
     if (singleAttribute === undefined) {
@@ -104,7 +104,7 @@ function getSingleAttr(context: FilterContextValue): AttrsMeta {
     return value([singleAttribute]);
 }
 
-function getMultiAttr(context: FilterContextValue): AttrsMeta {
+function getMultiAttr(context: FilterContextValue): ContextReadResult {
     const { multipleAttributes } = context;
     const attributes = findAttributesByType(multipleAttributes) ?? [];
 
@@ -115,7 +115,7 @@ function getMultiAttr(context: FilterContextValue): AttrsMeta {
     return value(attributes);
 }
 
-export function getEnumAttributes(context: FilterContextValue): AttrsMeta {
+export function getEnumAttributes(context: FilterContextValue): ContextReadResult {
     const isMultiAttrMode = !!context.multipleAttributes;
 
     if (isMultiAttrMode) {
@@ -147,7 +147,7 @@ type GetOptionsParams = {
     customOptions: FilterOptionsType[];
 };
 
-export function getOptions(params: GetOptionsParams): ValueMeta<FilterOption[], EnumFilterError> {
+export function getOptions(params: GetOptionsParams): Result<Option[], EnumFilterError> {
     const { autoOptions, attributes, customOptions } = params;
 
     if (autoOptions) {
@@ -171,11 +171,11 @@ export function getOptions(params: GetOptionsParams): ValueMeta<FilterOption[], 
 }
 
 export function getOnChange(
-    dispatch: ConditionDispatch,
+    dispatch: DispatchFilterUpdate,
     attributes: AttrsArray,
     widgetProps: DatagridDropdownFilterContainerProps
-): FilterValueChangeCallback {
-    return (values: FilterOption[]): void => {
+): (values: Option[]) => void {
+    return (values: Option[]): void => {
         const valuesString = values.map(v => v.value).join(",");
         const attributeCurrentValue = widgetProps.valueAttribute?.value || "";
         if (valuesString !== attributeCurrentValue) {
@@ -192,7 +192,7 @@ export function getOnChange(
     };
 }
 
-type FilterProps = ValueMeta<FilterComponentProps, EnumFilterError>;
+type FilterProps = Result<FilterComponentProps, EnumFilterError>;
 export function getFilterProps(
     context: FilterContextValue,
     widgetProps: DatagridDropdownFilterContainerProps
@@ -231,7 +231,7 @@ export function getFilterProps(
     return value({
         updateFilters: onChange,
         options: options.value,
-        defaultValue,
+        initialSelected: defaultValue,
         ariaLabel: ariaLabel?.value,
         className: classProp,
         emptyOptionCaption: emptyOptionCaption?.value,

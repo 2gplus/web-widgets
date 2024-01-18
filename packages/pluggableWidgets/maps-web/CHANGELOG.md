@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.2.2] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [3.2.1] - 2023-08-11
+
+### Fixed
+
+-   We fixed an issue where the marker was not at the center of the map after you zoom in to the marker. Now after you zoom in to a marker, the map will be centered around the marker.
+
+## [3.2.0] - 2023-06-05
+
 ### Changed
 
 -   We updated the light and dark icons and tiles for the widget.

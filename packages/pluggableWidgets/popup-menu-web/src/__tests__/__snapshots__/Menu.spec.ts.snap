@@ -2,37 +2,37 @@
 
 exports[`Popup menu renders popup menu 1`] = `
 <Portal
-  containerInfo={<body />}
+  containerInfo={<div />}
 >
   <div
     className="widget-popupmenu-root"
   >
-    <div
+    <ul
       className="popupmenu-menu popupmenu-position-bottom popup-portal mx-popup-menu"
       style={
-        Object {
+        {
           "bottom": "initial",
           "display": "flex",
-          "left": 30,
-          "position": "fixed",
-          "top": 11,
+          "left": 0,
+          "position": "absolute",
+          "top": 1,
           "transform": "none",
-          "zIndex": 0,
+          "zIndex": 1,
         }
       }
     >
-      <div
+      <li
         className="popupmenu-basic-item"
         key="0"
         onClick={[Function]}
       >
         Caption
-      </div>
-      <div
+      </li>
+      <li
         className="popupmenu-basic-divider"
         key="1"
       />
-    </div>
+    </ul>
   </div>
 </Portal>
 `;

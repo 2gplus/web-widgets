@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { DynamicValue, ListValue, ListActionValue, ListAttributeValue, ListExpressionValue } from "mendix";
 import { Big } from "big.js";
 
 export type DataSetEnum = "static" | "dynamic";
@@ -25,8 +25,10 @@ export interface SeriesType {
     aggregationType: AggregationTypeEnum;
     staticTooltipHoverText?: ListExpressionValue<string>;
     dynamicTooltipHoverText?: ListExpressionValue<string>;
-    barColor?: DynamicValue<string>;
-    onClickAction?: ActionValue;
+    staticBarColor?: ListExpressionValue<string>;
+    dynamicBarColor?: ListExpressionValue<string>;
+    staticOnClickAction?: ListActionValue;
+    dynamicOnClickAction?: ListActionValue;
     customSeriesOptions: string;
 }
 
@@ -40,8 +42,8 @@ export type HeightUnitEnum = "percentageOfWidth" | "pixels" | "percentageOfParen
 
 export interface SeriesPreviewType {
     dataSet: DataSetEnum;
-    staticDataSource: {} | { type: string } | null;
-    dynamicDataSource: {} | { type: string } | null;
+    staticDataSource: {} | { caption: string } | { type: string } | null;
+    dynamicDataSource: {} | { caption: string } | { type: string } | null;
     groupByAttribute: string;
     staticName: string;
     dynamicName: string;
@@ -52,8 +54,10 @@ export interface SeriesPreviewType {
     aggregationType: AggregationTypeEnum;
     staticTooltipHoverText: string;
     dynamicTooltipHoverText: string;
-    barColor: string;
-    onClickAction: {} | null;
+    staticBarColor: string;
+    dynamicBarColor: string;
+    staticOnClickAction: {} | null;
+    dynamicOnClickAction: {} | null;
     customSeriesOptions: string;
 }
 

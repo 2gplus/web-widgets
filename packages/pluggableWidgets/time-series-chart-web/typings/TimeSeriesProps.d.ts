@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { DynamicValue, ListValue, ListActionValue, ListAttributeValue, ListExpressionValue } from "mendix";
 import { Big } from "big.js";
 
 export type DataSetEnum = "static" | "dynamic";
@@ -35,7 +35,8 @@ export interface LinesType {
     markerColor?: DynamicValue<string>;
     enableFillArea: boolean;
     fillColor?: DynamicValue<string>;
-    onClickAction?: ActionValue;
+    staticOnClickAction?: ListActionValue;
+    dynamicOnClickAction?: ListActionValue;
     customSeriesOptions: string;
 }
 
@@ -49,8 +50,8 @@ export type YAxisRangeModeEnum = "normal" | "tozero" | "nonnegative";
 
 export interface LinesPreviewType {
     dataSet: DataSetEnum;
-    staticDataSource: {} | { type: string } | null;
-    dynamicDataSource: {} | { type: string } | null;
+    staticDataSource: {} | { caption: string } | { type: string } | null;
+    dynamicDataSource: {} | { caption: string } | { type: string } | null;
     staticName: string;
     dynamicName: string;
     groupByAttribute: string;
@@ -67,7 +68,8 @@ export interface LinesPreviewType {
     markerColor: string;
     enableFillArea: boolean;
     fillColor: string;
-    onClickAction: {} | null;
+    staticOnClickAction: {} | null;
+    dynamicOnClickAction: {} | null;
     customSeriesOptions: string;
 }
 

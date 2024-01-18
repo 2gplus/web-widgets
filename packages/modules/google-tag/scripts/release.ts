@@ -3,14 +3,14 @@
 import {
     addWidgetsToMpk,
     cloneTestProject,
-    copyJSActions,
+    copyActionsFiles,
     copyWidgetsToProject,
     createModuleMpk,
     moveModuleToDist,
     removeDist,
     runModuleSteps,
     writeVersionAndLicenseToJSActions
-} from "@mendix-internal/automation-utils/steps";
+} from "@mendix/automation-utils/steps";
 
 async function main(): Promise<void> {
     await runModuleSteps({
@@ -19,7 +19,7 @@ async function main(): Promise<void> {
             removeDist,
             cloneTestProject,
             copyWidgetsToProject,
-            copyJSActions,
+            copyActionsFiles(["GoogleTagActions.js"]),
             writeVersionAndLicenseToJSActions,
             createModuleMpk,
             addWidgetsToMpk,

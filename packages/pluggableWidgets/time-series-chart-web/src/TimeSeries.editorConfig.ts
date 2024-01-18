@@ -1,4 +1,9 @@
-import { StructurePreviewProps, ImageProps, ContainerProps, datasource } from "@mendix/pluggable-widgets-commons";
+import {
+    StructurePreviewProps,
+    ImageProps,
+    ContainerProps,
+    datasource
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import {
     hideNestedPropertiesIn,
     hidePropertiesIn,
@@ -118,9 +123,38 @@ export function getPreview(values: TimeSeriesPreviewProps, isDarkMode: boolean):
     };
 }
 
-export function check(_values: TimeSeriesPreviewProps): Problem[] {
+export function check(values: TimeSeriesPreviewProps): Problem[] {
     const errors: Problem[] = [];
-
+    values.lines.forEach((line, index) => {
+        if (line.dataSet === "static" && line.staticDataSource) {
+            if (!line.staticXAttribute) {
+                errors.push({
+                    property: `lines/${index + 1}/staticXAttribute`,
+                    message: `Setting a X axis attribute is required.`
+                });
+            }
+            if (!line.staticYAttribute) {
+                errors.push({
+                    property: `lines/${index + 1}/staticYAttribute`,
+                    message: `Setting a Y axis attribute is required.`
+                });
+            }
+        }
+        if (line.dataSet === "dynamic" && line.dynamicDataSource) {
+            if (!line.dynamicXAttribute) {
+                errors.push({
+                    property: `lines/${index + 1}/dynamicXAttribute`,
+                    message: `Setting a X axis attribute is required.`
+                });
+            }
+            if (!line.dynamicYAttribute) {
+                errors.push({
+                    property: `lines/${index + 1}/dynamicYAttribute`,
+                    message: `Setting a Y axis attribute is required.`
+                });
+            }
+        }
+    });
     return errors;
 }
 

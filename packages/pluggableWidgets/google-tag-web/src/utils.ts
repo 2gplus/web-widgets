@@ -15,6 +15,10 @@ function prepareValue(p: ParametersType): string | boolean {
         return getPredefinedValue(p.predefinedValue);
     }
 
+    if (!p.customValue || !p.customValue?.value) {
+        throw new Error("no custom value");
+    }
+
     const value = p.customValue.value;
 
     return value === "false" ? false : value === "true" ? true : replaceFullPathToken(value);
@@ -59,9 +63,8 @@ export function executeCommand(
 ): void {
     switch (command) {
         case "config": {
-            if (commonGtag!.ensureGtagIncluded(tagId)) {
-                commonGtag!.getGtag()(command, tagId, params);
-            }
+            commonGtag!.ensureGtagIncluded(tagId);
+            commonGtag!.getGtag()(command, tagId, params);
             break;
         }
         case "event": {

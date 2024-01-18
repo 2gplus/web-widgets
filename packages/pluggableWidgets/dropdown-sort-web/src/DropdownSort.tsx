@@ -1,21 +1,15 @@
 import { Context, createElement, ReactElement, useCallback, useContext, useMemo, useRef } from "react";
 import { ListAttributeValue } from "mendix";
-import {
-    Alert,
-    generateUUID,
-    getSortDispatcher,
-    SortContextValue,
-    SortDirection,
-    SortInstruction
-} from "@mendix/pluggable-widgets-commons/components/web";
-
+import { Alert } from "@mendix/widget-plugin-component-kit/Alert";
+import { generateUUID } from "@mendix/widget-plugin-platform/framework/generate-uuid";
+import { SortContextValue, SortDirection, SortInstruction, getSortDispatcher } from "@mendix/widget-plugin-sorting";
 import { DropdownSortContainerProps } from "../typings/DropdownSortProps";
 import { SortComponent, SortOption } from "./components/SortComponent";
 
 export function DropdownSort(props: DropdownSortContainerProps): ReactElement {
     const id = useRef(`DropdownSort${generateUUID()}`);
 
-    const SortContext = getSortDispatcher() ?? ({} as Context<SortContextValue>);
+    const SortContext = (getSortDispatcher() ?? {}) as Context<SortContextValue>;
     const alertMessage = (
         <Alert bootstrapStyle="danger">
             The Drop-down sort widget must be placed inside the header of the Gallery widget.

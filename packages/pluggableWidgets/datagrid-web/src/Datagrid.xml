@@ -108,6 +108,11 @@
                                 <description />
                                 <returnType type="String" />
                             </property>
+                            <property key="visible" type="expression" required="false" defaultValue="true">
+                                <caption>Visible</caption>
+                                <description />
+                                <returnType type="Boolean" />
+                            </property>
                         </propertyGroup>
                         <propertyGroup caption="Column capabilities">
                             <property key="sortable" type="boolean" defaultValue="true">
@@ -194,6 +199,14 @@
                         <enumerationValue key="both">Both</enumerationValue>
                     </enumerationValues>
                 </property>
+                <property key="showPagingButtons" type="enumeration" defaultValue="always">
+                    <caption>Show paging buttons</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="always">Always</enumerationValue>
+                        <enumerationValue key="auto">Auto</enumerationValue>
+                    </enumerationValues>
+                </property>
                 <property key="showEmptyPlaceholder" type="enumeration" defaultValue="none">
                     <caption>Empty list message</caption>
                     <description />
@@ -250,7 +263,7 @@
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="onConfigurationChange" type="action">
+                <property key="onConfigurationChange" type="action" required="false">
                     <caption>On change</caption>
                     <description />
                 </property>
@@ -287,10 +300,31 @@
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Accessibility">
-            <propertyGroup caption="Accessibility">
+            <propertyGroup caption="Aria labels">
                 <property key="filterSectionTitle" type="textTemplate" required="false">
-                    <caption>Filter section title</caption>
+                    <caption>Filter section</caption>
                     <description>Assistive technology will read this upon reaching a filtering or sorting section.</description>
+                </property>
+                <property key="exportDialogLabel" type="textTemplate" required="false">
+                    <caption>Export progress</caption>
+                    <description>Assistive technology will read this upon reaching a export dialog.</description>
+                    <translations>
+                        <translation lang="en_US">Export progress</translation>
+                    </translations>
+                </property>
+                <property key="cancelExportLabel" type="textTemplate" required="false">
+                    <caption>Cancel data export</caption>
+                    <description>Assistive technology will read this upon reaching a cancel button.</description>
+                    <translations>
+                        <translation lang="en_US">Cancel data export</translation>
+                    </translations>
+                </property>
+                <property key="selectRowLabel" type="textTemplate" required="false">
+                    <caption>Select row</caption>
+                    <description>If selection is enabled, assistive technology will read this upon reaching a checkbox.</description>
+                    <translations>
+                        <translation lang="en_US">Select row</translation>
+                    </translations>
                 </property>
             </propertyGroup>
         </propertyGroup>

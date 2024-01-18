@@ -3,7 +3,7 @@ import {
     RowLayoutProps,
     StructurePreviewProps,
     structurePreviewPalette
-} from "@mendix/pluggable-widgets-commons";
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import {
     hidePropertiesIn,
     hidePropertyIn,
@@ -80,7 +80,7 @@ export function getProperties(
         hidePropertyIn(defaultProperties, values, "width");
     }
 
-    if (values.datasource === "icon" && values.imageIcon?.type === "glyph") {
+    if (values.datasource === "icon" && (values.imageIcon?.type === "glyph" || values.imageIcon?.type === "icon")) {
         hidePropertiesIn(defaultProperties, values, ["widthUnit", "width", "heightUnit", "height"]);
     } else {
         hidePropertyIn(defaultProperties, values, "iconSize");
@@ -101,10 +101,15 @@ export function getProperties(
     return defaultProperties;
 }
 
-export function getPreview(values: ImagePreviewProps, isDarkMode: boolean): StructurePreviewProps | null {
+export function getPreview(
+    values: ImagePreviewProps,
+    isDarkMode: boolean,
+    version: number[]
+): StructurePreviewProps | null {
     const palette = structurePreviewPalette[isDarkMode ? "dark" : "light"];
 
     if (!values.isBackgroundImage) {
+        const [width, height, property] = getImageWithDimensions();
         return {
             type: "Image",
             document: decodeURIComponent(
@@ -113,8 +118,9 @@ export function getPreview(values: ImagePreviewProps, isDarkMode: boolean): Stru
                     ""
                 )
             ),
-            height: 100,
-            width: 100
+            property,
+            width,
+            height
         };
     }
 
@@ -160,6 +166,35 @@ export function getPreview(values: ImagePreviewProps, isDarkMode: boolean): Stru
             } as RowLayoutProps
         ]
     };
+
+    function getImageWithDimensions(): [
+        width?: number,
+        height?: number,
+        previewImage?: { type: "static"; imageUrl: string }
+    ] {
+        const imageObject =
+            values.imageObject?.type === "static"
+                ? values.imageObject // static image
+                : values.defaultImageDynamic; // default image for dynamic image
+        const previewImage = imageObject?.type === "static" && !!imageObject.imageUrl ? imageObject : undefined;
+
+        let width: number | undefined;
+        let height: number | undefined;
+        if (values.widthUnit === "pixels" && values.width) {
+            width = values.width;
+        }
+        if (values.heightUnit === "pixels" && values.height) {
+            height = values.height;
+        }
+        if (width || height) {
+            return [width, height, previewImage];
+        }
+
+        const supportsDynamicImageSize = (version?.[0] === 10 && version?.[1] >= 2) || version?.[0] > 10; // Mx 10.2 supports images to set their own size by default
+        return supportsDynamicImageSize && !!previewImage
+            ? [undefined, undefined, previewImage]
+            : [100, 100, previewImage];
+    }
 }
 
 export function check(values: ImagePreviewProps): Problem[] {
@@ -187,6 +222,14 @@ export function check(values: ImagePreviewProps): Problem[] {
     return errors;
 }
 
-export function getCustomCaption(values: any): string {
-    return values.datasource || "Image";
+export function getCustomCaption(props: ImagePreviewProps): string {
+    let caption: string;
+    if (props.imageObject) {
+        caption = props.imageObject.type === "static" ? props.imageObject.imageUrl : props.imageObject.entity;
+    } else if (props.imageIcon) {
+        caption = props.imageIcon.type === "image" ? props.imageIcon.imageUrl : props.imageIcon.iconClass; // until we have a better alternative
+    } else {
+        caption = props.imageUrl;
+    }
+    return caption === "" ? "(none)" : caption;
 }

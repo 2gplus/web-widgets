@@ -56,6 +56,7 @@ export interface GalleryContainerProps {
     sortList: SortListType[];
     filterSectionTitle?: DynamicValue<string>;
     emptyMessageTitle?: DynamicValue<string>;
+    ariaLabelListBox?: DynamicValue<string>;
 }
 
 export interface GalleryPreviewProps {
@@ -68,9 +69,9 @@ export interface GalleryPreviewProps {
     styleObject?: CSSProperties;
     readOnly: boolean;
     advanced: boolean;
-    datasource: {} | { type: string } | null;
+    datasource: {} | { caption: string } | { type: string } | null;
     itemSelection: "None" | "Single" | "Multi";
-    content: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    content: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     desktopItems: number | null;
     tabletItems: number | null;
     phoneItems: number | null;
@@ -78,13 +79,14 @@ export interface GalleryPreviewProps {
     pagination: PaginationEnum;
     pagingPosition: PagingPositionEnum;
     showEmptyPlaceholder: ShowEmptyPlaceholderEnum;
-    emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     itemClass: string;
     onClick: {} | null;
     onSelectionChange: {} | null;
     filterList: FilterListPreviewType[];
-    filtersPlaceholder: { widgetCount: number; renderer: ComponentType<{ caption?: string }> };
+    filtersPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     sortList: SortListPreviewType[];
     filterSectionTitle: string;
     emptyMessageTitle: string;
+    ariaLabelListBox: string;
 }

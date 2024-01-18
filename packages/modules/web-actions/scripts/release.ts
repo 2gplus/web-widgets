@@ -1,12 +1,12 @@
 import {
     cloneTestProject,
-    copyJSActions,
+    copyActionsFiles,
     createModuleMpk,
     moveModuleToDist,
     removeDist,
     runModuleSteps,
     writeVersionAndLicenseToJSActions
-} from "@mendix-internal/automation-utils/steps";
+} from "@mendix/automation-utils/steps";
 
 async function main(): Promise<void> {
     await runModuleSteps({
@@ -14,7 +14,17 @@ async function main(): Promise<void> {
         steps: [
             removeDist,
             cloneTestProject,
-            copyJSActions,
+            copyActionsFiles([
+                "FocusHelper.js",
+                "FocusNext.js",
+                "FocusPrevious.js",
+                "ReadCookie.js",
+                "ScrollTo.js",
+                "SetCookie.js",
+                "SetFavicon.js",
+                "SetFocus.js",
+                "TakePicture.js"
+            ]),
             writeVersionAndLicenseToJSActions,
             createModuleMpk,
             moveModuleToDist

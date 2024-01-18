@@ -1,13 +1,12 @@
 import { DatagridDropdownFilterPreviewProps } from "../typings/DatagridDropdownFilterProps";
+import { chevronDownIcon, chevronDownIconDark } from "@mendix/widget-plugin-filter-selector/editor-preview-icons";
 import {
-    chevronDownIcon,
-    chevronDownIconDark,
     ContainerProps,
     ImageProps,
     StructurePreviewProps,
     text,
     structurePreviewPalette
-} from "@mendix/pluggable-widgets-commons";
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import { hidePropertiesIn, hidePropertyIn, Problem, Properties } from "@mendix/pluggable-widgets-tools";
 
 export function getProperties(

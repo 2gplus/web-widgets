@@ -22,6 +22,10 @@ exports[`Date Filter with single instance with multiple attributes renders corre
         </button>
       </div>
     </div>
+    <div
+      class="date-filter-container"
+      id="datepicker_0.123456789"
+    />
     <span
       class="sr-only"
       id="DateFilter1-label"
@@ -30,7 +34,7 @@ exports[`Date Filter with single instance with multiple attributes renders corre
       class="react-datepicker-wrapper"
     >
       <div
-        class="react-datepicker__input-container"
+        class="react-datepicker__input-container "
       >
         <span
           aria-live="polite"
@@ -89,6 +93,10 @@ exports[`Date Filter with single instance with single attribute renders correctl
         </button>
       </div>
     </div>
+    <div
+      class="date-filter-container"
+      id="datepicker_0.123456789"
+    />
     <span
       class="sr-only"
       id="DateFilter1-label"
@@ -97,7 +105,7 @@ exports[`Date Filter with single instance with single attribute renders correctl
       class="react-datepicker-wrapper"
     >
       <div
-        class="react-datepicker__input-container"
+        class="react-datepicker__input-container "
       >
         <span
           aria-live="polite"

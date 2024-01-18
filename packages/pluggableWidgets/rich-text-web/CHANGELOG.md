@@ -6,9 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.2.4] - 2023-11-29
+
+### Fixed
+
+-   We fix an issue with toolbars content incorrect display on mouse hover.
+
+## [2.2.3] - 2023-10-27
+
+### Fixed
+
+-   We fix an issue with Editor intermittenly not displaying data.
+
+## [2.2.2] - 2023-10-12
+
+### Breaking changes
+
+-   Added Insert toolbar group as an option for custom toolbar
+
+## [2.2.1] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [2.2.0] - 2023-06-06
+
 ### Changed
 
 -   We updated page explorer's caption to display datasource.
+
 -   We updated the light and dark icons and tiles for the widget.
 
 ## [2.1.6] - 2023-04-18

@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.6.2] - 2023-10-13
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [2.6.1] - 2023-08-30
+
+### Fixed
+
+-   We fixed the issue where date filter does not fully visible when datagrid pagination option is set to virtual scrolling.
+
+## [2.6.0] - 2023-08-10
+
+### Changed
+
+-   We changed the DOM Structure for date filter to appear inline with the container in order to make the component more accessible.
+
+## [2.5.2] - 2023-06-21
+
+### Fixed
+
+-   We fixed issue with initial filter condition.
+
 ## [2.5.1] - 2023-05-26
 
 ### Changed

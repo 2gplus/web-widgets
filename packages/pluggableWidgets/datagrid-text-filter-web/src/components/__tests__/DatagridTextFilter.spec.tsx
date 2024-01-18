@@ -1,16 +1,17 @@
 import "@testing-library/jest-dom";
-import { Alert, FilterContextValue } from "@mendix/pluggable-widgets-commons/components/web";
+import { Alert } from "@mendix/widget-plugin-component-kit/Alert";
+import { FilterContextValue } from "@mendix/widget-plugin-filtering";
 import {
     actionValue,
     dynamicValue,
     EditableValueBuilder,
     ListAttributeValueBuilder
-} from "@mendix/pluggable-widgets-commons";
-import { render, fireEvent, screen } from "@testing-library/react";
+} from "@mendix/widget-plugin-test-utils";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { mount } from "enzyme";
 import { createContext, createElement } from "react";
 import DatagridTextFilter from "../../DatagridTextFilter";
-import { act } from "react-dom/test-utils";
 
 const commonProps = {
     class: "filter-custom-class",
@@ -89,16 +90,15 @@ describe("Text Filter", () => {
                 expect(asFragment()).toMatchSnapshot();
             });
 
-            it("triggers attribute and onchange action on change filter value", () => {
+            it("triggers attribute and onchange action on change filter value", async () => {
                 const action = actionValue();
                 const attribute = new EditableValueBuilder<string>().build();
                 render(<DatagridTextFilter {...commonProps} onChange={action} valueAttribute={attribute} />);
 
-                fireEvent.change(screen.getByRole("textbox"), { target: { value: "B" } });
+                const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+                await user.type(screen.getByRole("textbox"), "B");
 
-                act(() => {
-                    jest.advanceTimersByTime(1000);
-                });
+                jest.runOnlyPendingTimers();
             });
 
             afterAll(() => {

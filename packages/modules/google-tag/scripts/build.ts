@@ -1,14 +1,14 @@
 import {
-    copyJSActions,
+    copyActionsFiles,
     writeVersionAndLicenseToJSActions,
     runModuleSteps,
     copyWidgetsToProject
-} from "@mendix-internal/automation-utils/steps";
+} from "@mendix/automation-utils/steps";
 
 async function main(): Promise<void> {
     await runModuleSteps({
         packagePath: process.cwd(),
-        steps: [copyJSActions, writeVersionAndLicenseToJSActions, copyWidgetsToProject]
+        steps: [copyActionsFiles(["GoogleTagActions.js"]), writeVersionAndLicenseToJSActions, copyWidgetsToProject]
     });
 }
 

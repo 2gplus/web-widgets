@@ -6,6 +6,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.4.3] - 2023-10-05
+
+### Fixed
+
+-   We improved the structure mode preview for static and dynamic images
+
+-   We improved the captions in the page explorer
+
+-   We fixed an issue where the size of icons from the new icon collections was not configurable
+
+-   We fixed an issue where the image would take too much space when placed outside of containers
+
+## [1.4.2] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [1.4.1] - 2023-07-11
+
+### Fixed
+
+-   We fixed an issue with tabIndex being ignored.
+
+## [1.4.0] - 2023-06-05
+
 ### Changed
 
 -   We updated page explorer's caption to display datasource.

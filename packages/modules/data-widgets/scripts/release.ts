@@ -11,7 +11,9 @@ import {
     removeDist,
     runModuleSteps,
     writeModuleVersion
-} from "@mendix-internal/automation-utils/steps";
+} from "@mendix/automation-utils/steps";
+
+import { bundleExportToExcelAction } from "./steps/bundle-export-to-excel";
 
 async function main(): Promise<void> {
     await runModuleSteps({
@@ -21,6 +23,7 @@ async function main(): Promise<void> {
             cloneTestProject,
             copyWidgetsToProject,
             copyThemesourceToProject,
+            bundleExportToExcelAction,
             writeModuleVersion,
             copyModuleLicense,
             createModuleMpk,

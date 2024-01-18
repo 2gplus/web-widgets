@@ -3,13 +3,14 @@ import { createElement, ReactElement, ReactNode } from "react";
 import { HTMLAttributes, mount, ReactWrapper, render as renderEnzyme } from "enzyme";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { UserEvent } from "@testing-library/user-event/setup/setup";
 import "@testing-library/jest-dom";
 import { TreeNode, TreeNodeProps } from "../TreeNode";
 
 const items: TreeNodeProps["items"] = [
-    { id: "11" as GUID, value: "First header", content: <div>First content</div> },
-    { id: "22" as GUID, value: "Second header", content: <div>Second content</div> },
-    { id: "33" as GUID, value: "Third header", content: <div>Third content</div> }
+    { id: "11" as GUID, headerContent: "First header", bodyContent: <div>First content</div> },
+    { id: "22" as GUID, headerContent: "Second header", bodyContent: <div>Second content</div> },
+    { id: "33" as GUID, headerContent: "Third header", bodyContent: <div>Third content</div> }
 ];
 
 const defaultProps: TreeNodeProps = {
@@ -19,11 +20,14 @@ const defaultProps: TreeNodeProps = {
     startExpanded: false,
     showCustomIcon: false,
     iconPlacement: "right",
-    expandedIcon: null,
-    collapsedIcon: null,
+    expandedIcon: undefined,
+    collapsedIcon: undefined,
     animateIcon: false,
-    animateTreeNodeContent: false
+    animateTreeNodeContent: false,
+    openNodeOn: "headerClick"
 };
+
+jest.useFakeTimers();
 
 describe("TreeNode", () => {
     it("preserves the DOM structure when collapsed", () => {
@@ -73,7 +77,11 @@ describe("TreeNode", () => {
     it("handles tree headers properly even if they are composed with widgets", () => {
         const newItems = [
             ...items,
-            { id: "44" as GUID, value: <div>This is the 44 header</div>, content: <div>Fourth content</div> }
+            {
+                id: "44" as GUID,
+                headerContent: <div>This is the 44 header</div>,
+                bodyContent: <div>Fourth content</div>
+            }
         ];
         const treeNode = mount(
             <TreeNode {...defaultProps} class="" items={newItems} isUserDefinedLeafNode={false} startExpanded />
@@ -100,11 +108,11 @@ describe("TreeNode", () => {
 
         expect(treeNodeHeaders).toHaveLength(items.length);
         items.forEach(item => {
-            expect(treeNode.text()).toContain(item.value);
+            expect(treeNode.text()).toContain(item.headerContent);
         });
     });
 
-    it("correctly collapses and expands the tree node branch content when clicking on the header", () => {
+    it("correctly collapses and expands the tree node branch content when clicking on the header", async () => {
         render(
             <TreeNode {...defaultProps} class="" items={items} isUserDefinedLeafNode={false} startExpanded={false} />
         );
@@ -115,19 +123,20 @@ describe("TreeNode", () => {
         expect(screen.queryByText("Second content")).not.toBeInTheDocument();
 
         const secondTreeNode = treeNodeItems[1];
+        const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
         // expand
-        userEvent.click(secondTreeNode);
+        await user.click(secondTreeNode.children[0]!);
         expect(screen.queryByText("Second content")).toBeInTheDocument();
 
         // collapse
-        userEvent.click(secondTreeNode);
+        await user.click(secondTreeNode);
         expect(secondTreeNode).toHaveAttribute("aria-expanded", "false");
     });
 
     const customIconProps: Partial<TreeNodeProps> = {
         showCustomIcon: true,
         expandedIcon: { type: "glyph", iconClass: "expanded-icon" },
-        collapsedIcon: { type: "image", iconUrl: "collapsed-image" }
+        collapsedIcon: { type: "image", iconUrl: "image.png" }
     };
 
     function getExpandedIconFromBranchHeader(header: ReactWrapper<any>): ReactWrapper<any> {
@@ -137,7 +146,7 @@ describe("TreeNode", () => {
     }
 
     function getCollapsedImageFromBranchHeader(header: ReactWrapper<any>): ReactWrapper<any> {
-        return header.findWhere(node => node.type() === "img" && node.prop("src") === "collapsed-image");
+        return header.findWhere(node => node.type() === "img" && node.prop("src") === "image.png");
     }
 
     it("shows custom expanded icon accordingly", () => {
@@ -188,8 +197,8 @@ describe("TreeNode", () => {
         const nestedItems: TreeNodeProps["items"] = [
             {
                 id: "11" as GUID,
-                value: "Parent treeview with a nested treeview that is empty",
-                content: (
+                headerContent: "Parent treeview with a nested treeview that is empty",
+                bodyContent: (
                     <TreeNode
                         {...defaultProps}
                         class=""
@@ -227,8 +236,8 @@ describe("TreeNode", () => {
         const nestedItems: TreeNodeProps["items"] = [
             {
                 id: "11" as GUID,
-                value: "Parent treeview with a nested treeview that is filled",
-                content: (
+                headerContent: "Parent treeview with a nested treeview that is filled",
+                bodyContent: (
                     <TreeNode
                         {...defaultProps}
                         class=""
@@ -270,8 +279,9 @@ describe("TreeNode", () => {
         const nestedItems: TreeNodeProps["items"] = [
             {
                 id: "11" as GUID,
-                value: "Parent treeview with a nested treeview that is empty and wrapped with a random other widget",
-                content: (
+                headerContent:
+                    "Parent treeview with a nested treeview that is empty and wrapped with a random other widget",
+                bodyContent: (
                     <RandomOtherWidget>
                         <TreeNode
                             {...defaultProps}
@@ -316,7 +326,7 @@ describe("TreeNode", () => {
                 {...defaultProps}
                 {...customIconProps}
                 class=""
-                items={[{ id: "11" as GUID, value: "First header", content: undefined }]}
+                items={[{ id: "11" as GUID, headerContent: "First header", bodyContent: undefined }]}
                 isUserDefinedLeafNode={false}
                 startExpanded
             />
@@ -357,8 +367,8 @@ describe("TreeNode", () => {
         const itemsWithNestedTreeNode: TreeNodeProps["items"] = [
             {
                 id: "11" as GUID,
-                value: "Parent treeview with a nested treeview that is filled",
-                content: (
+                headerContent: "Parent treeview with a nested treeview that is filled",
+                bodyContent: (
                     <TreeNode
                         {...defaultProps}
                         class=""
@@ -385,7 +395,7 @@ describe("TreeNode", () => {
             expect(treeNodeBranches).toHaveLength(1);
             expect(treeNode.text()).not.toContain("First header");
 
-            treeNodeBranches.simulate("click");
+            treeNodeBranches.find(".widget-tree-node-branch-header").simulate("click");
             expect(treeNode.text()).toContain("First header");
         });
 
@@ -404,10 +414,10 @@ describe("TreeNode", () => {
             expect(treeNodeBranches).toHaveLength(1);
             expect(treeNode.text()).not.toContain("First header");
 
-            treeNodeBranches.simulate("click");
+            treeNodeBranches.find(".widget-tree-node-branch-header").simulate("click");
             expect(treeNode.text()).toContain("First header");
 
-            treeNodeBranches.simulate("click");
+            treeNodeBranches.find(".widget-tree-node-branch-header").simulate("click");
             expect(treeNode.text()).toContain("First header");
             expect(treeNode.find(".widget-tree-node-body").hasClass("widget-tree-node-branch-hidden")).toBe(true);
         });
@@ -434,7 +444,7 @@ describe("TreeNode", () => {
             expect(getExpandedIconFromBranchHeader(firstTreeNodeBranch)).toHaveLength(0);
             expect(getCollapsedImageFromBranchHeader(firstTreeNodeBranch)).toHaveLength(1);
 
-            firstTreeNodeBranch.simulate("click");
+            firstTreeNodeBranch.find(".widget-tree-node-branch-header").simulate("click");
 
             const updatedFirstTreeNodeBranch = findTreeNodeItems(treeNode).at(0);
             expect(getExpandedIconFromBranchHeader(updatedFirstTreeNodeBranch)).toHaveLength(0);
@@ -461,7 +471,7 @@ describe("TreeNode", () => {
             expect(getExpandedIconFromBranchHeader(firstTreeViewBranch)).toHaveLength(0);
             expect(getCollapsedImageFromBranchHeader(firstTreeViewBranch)).toHaveLength(1);
 
-            firstTreeViewBranch.simulate("click");
+            firstTreeViewBranch.find(".widget-tree-node-branch-header").simulate("click");
 
             const updatedFirstTreeViewBranch = findTreeNodeItems(treeNode).at(0);
             expect(getExpandedIconFromBranchHeader(updatedFirstTreeViewBranch)).toHaveLength(1);
@@ -471,31 +481,33 @@ describe("TreeNode", () => {
     });
 
     describe("when interacting through the keyboard", () => {
+        let user: UserEvent;
         beforeEach(() => {
+            user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
             const treeNodeItems = [
-                { id: "1" as GUID, value: "First header", content: <div>First content</div> },
+                { id: "1" as GUID, headerContent: "First header", bodyContent: <div>First content</div> },
                 {
                     id: "2" as GUID,
-                    value: "Second header",
-                    content: (
+                    headerContent: "Second header",
+                    bodyContent: (
                         <TreeNode
                             {...defaultProps}
                             class=""
                             items={[
                                 {
                                     id: "21" as GUID,
-                                    value: "Second First header",
-                                    content: <div>Second First content</div>
+                                    headerContent: "Second First header",
+                                    bodyContent: <div>Second First content</div>
                                 },
                                 {
                                     id: "22" as GUID,
-                                    value: "Second Second header",
-                                    content: <div>Second Second content</div>
+                                    headerContent: "Second Second header",
+                                    bodyContent: <div>Second Second content</div>
                                 },
                                 {
                                     id: "23" as GUID,
-                                    value: "Second Third header",
-                                    content: <div>Second Third content</div>
+                                    headerContent: "Second Third header",
+                                    bodyContent: <div>Second Third content</div>
                                 }
                             ]}
                             isUserDefinedLeafNode={false}
@@ -505,8 +517,8 @@ describe("TreeNode", () => {
                 },
                 {
                     id: "3" as GUID,
-                    value: "Third header",
-                    content: (
+                    headerContent: "Third header",
+                    bodyContent: (
                         <TreeNode
                             {...defaultProps}
                             class=""
@@ -518,8 +530,8 @@ describe("TreeNode", () => {
                 },
                 {
                     id: "4" as GUID,
-                    value: "Fourth header",
-                    content: <div>Fourth content</div>
+                    headerContent: "Fourth header",
+                    bodyContent: <div>Fourth content</div>
                 }
             ];
             render(
@@ -541,9 +553,9 @@ describe("TreeNode", () => {
             return screen.getAllByRole("treeitem").filter(element => element.tagName === "LI");
         }
 
-        function focusFirstTreeViewElement(): void {
+        async function focusFirstTreeViewElement(): Promise<void> {
             expect(document.body).toHaveFocus();
-            userEvent.tab();
+            await user.tab();
         }
 
         it("collapses and expands the content when pressing Space and Enter keys", async () => {
@@ -555,24 +567,24 @@ describe("TreeNode", () => {
                 expect(treeNode).toHaveAttribute("aria-expanded", "false");
             });
 
-            focusFirstTreeViewElement();
+            await focusFirstTreeViewElement();
 
-            userEvent.tab();
+            await user.tab();
 
             // expand
-            userEvent.keyboard("{Enter}");
+            await user.keyboard("{Enter}");
 
             await screen.findByText("Second First header");
             expect(screen.queryByText("Second First header")).toBeInTheDocument();
             expect(treeNodes[1]).toHaveAttribute("aria-expanded", "true");
 
             // collapse
-            userEvent.keyboard(" ");
+            await user.keyboard(" ");
 
             expect(treeNodes[1]).toHaveAttribute("aria-expanded", "false");
         });
 
-        it("the Home key jumps focus to the first tree node", () => {
+        it("the Home key jumps focus to the first tree node", async () => {
             const treeNodeHeaders = getClickableTreeViewHeaders();
             const treeNodes = getTreeViewItems();
             expect(treeNodes).toHaveLength(4);
@@ -580,19 +592,19 @@ describe("TreeNode", () => {
                 expect(treeNode).toHaveAttribute("aria-expanded", "false");
             });
 
-            focusFirstTreeViewElement();
+            await focusFirstTreeViewElement();
 
-            userEvent.tab();
-            userEvent.tab();
+            await user.tab();
+            await user.tab();
 
             expect(treeNodeHeaders[2]).toHaveFocus();
 
-            userEvent.keyboard("{Home}");
+            await user.keyboard("{Home}");
 
             expect(treeNodeHeaders[0]).toHaveFocus();
         });
 
-        it("the End key jumps focus to the last tree node", () => {
+        it("the End key jumps focus to the last tree node", async () => {
             const treeViewHeaders = getClickableTreeViewHeaders();
             const treeViews = getTreeViewItems();
             expect(treeViews).toHaveLength(4);
@@ -600,17 +612,17 @@ describe("TreeNode", () => {
                 expect(treeView).toHaveAttribute("aria-expanded", "false");
             });
 
-            focusFirstTreeViewElement();
+            await focusFirstTreeViewElement();
 
             expect(treeViewHeaders[0]).toHaveFocus();
 
-            userEvent.keyboard("{End}");
+            await user.keyboard("{End}");
 
             expect(treeViewHeaders[3]).toHaveFocus();
         });
 
         describe("the ArrowDown key", () => {
-            it("goes to the next tree node element if the current one is collapsed", () => {
+            it("goes to the next tree node element if the current one is collapsed", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -618,16 +630,16 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
                 expect(treeViewHeaders[0]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowDown}");
+                await user.keyboard("{ArrowDown}");
 
                 expect(treeViewHeaders[1]).toHaveFocus();
             });
 
-            it("does not circularly target the first tree node element if the current one is the last", () => {
+            it("does not circularly target the first tree node element if the current one is the last", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -635,21 +647,21 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
-                userEvent.tab();
-                userEvent.tab();
+                await user.tab();
+                await user.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[3]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowDown}");
+                await user.keyboard("{ArrowDown}");
 
                 expect(treeViewHeaders[0]).not.toHaveFocus();
                 expect(treeViewHeaders[3]).toHaveFocus();
             });
 
-            it("goes to the next nested tree node element if the current one is expanded", () => {
+            it("goes to the next nested tree node element if the current one is expanded", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -657,12 +669,12 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{Enter}");
+                await user.keyboard("{Enter}");
 
                 expect(screen.getByText("Second First header")).toBeInTheDocument();
                 expect(screen.getByText("Second Second header")).toBeInTheDocument();
@@ -671,7 +683,7 @@ describe("TreeNode", () => {
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "true");
 
                 expect(treeViewHeaders[1]).toHaveFocus();
-                userEvent.keyboard("{ArrowDown}");
+                await user.keyboard("{ArrowDown}");
 
                 expect(treeViewHeaders[2]).not.toHaveFocus();
                 expect(getClickableTreeViewHeaders()[2]).toHaveFocus();
@@ -679,7 +691,7 @@ describe("TreeNode", () => {
         });
 
         describe("the ArrowUp key", () => {
-            it("goes to the previous tree node element if the current one is collapsed", () => {
+            it("goes to the previous tree node element if the current one is collapsed", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -687,18 +699,18 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowUp}");
+                await user.keyboard("{ArrowUp}");
 
                 expect(treeViewHeaders[0]).toHaveFocus();
             });
 
-            it("does not circularly target the last tree node element if the current one is the first", () => {
+            it("does not circularly target the last tree node element if the current one is the first", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -706,17 +718,17 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
                 expect(treeViewHeaders[0]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowUp}");
+                await user.keyboard("{ArrowUp}");
 
                 expect(treeViewHeaders[2]).not.toHaveFocus();
                 expect(treeViewHeaders[0]).toHaveFocus();
             });
 
-            it("goes to the previous nested tree node element if there are nested elements inbetween", () => {
+            it("goes to the previous nested tree node element if there are nested elements inbetween", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -724,13 +736,13 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{Enter}");
+                await user.keyboard("{Enter}");
 
                 expect(screen.getByText("Second First header")).toBeInTheDocument();
                 expect(screen.getByText("Second Second header")).toBeInTheDocument();
@@ -740,14 +752,14 @@ describe("TreeNode", () => {
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.tab();
-                userEvent.tab();
-                userEvent.tab();
-                userEvent.tab();
+                await user.tab();
+                await user.tab();
+                await user.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[2]).toHaveFocus();
 
-                userEvent.keyboard("{Up}");
+                await user.keyboard("{Up}");
 
                 expect(treeViewHeaders[1]).not.toHaveFocus();
                 expect(getClickableTreeViewHeaders()[4]).toHaveFocus();
@@ -755,7 +767,7 @@ describe("TreeNode", () => {
         });
 
         describe("the ArrowRight key", () => {
-            it("stays at the current tree node if it turns out to be empty", () => {
+            it("stays at the current tree node if it turns out to be empty", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -763,21 +775,21 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
-                userEvent.tab();
+                await user.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[2]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViews[2]).toHaveAttribute("aria-expanded", "true");
 
                 expect(treeViewHeaders[2]).toHaveFocus();
             });
 
-            it("expands a tree node element if possible", () => {
+            it("expands a tree node element if possible", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -785,19 +797,19 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "true");
                 expect(getClickableTreeViewHeaders()).not.toHaveLength(4);
             });
 
-            it("targets the first child tree node element if the current one is already expanded", () => {
+            it("targets the first child tree node element if the current one is already expanded", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -805,17 +817,17 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "true");
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViewHeaders[2]).not.toHaveFocus();
                 expect(getClickableTreeViewHeaders()[2]).toHaveFocus();
@@ -823,7 +835,7 @@ describe("TreeNode", () => {
         });
 
         describe("the ArrowLeft key", () => {
-            it("does nothing if the current one is top level and collapsed", () => {
+            it("does nothing if the current one is top level and collapsed", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -831,19 +843,19 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
-                userEvent.tab();
+                await user.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[2]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowLeft}");
+                await user.keyboard("{ArrowLeft}");
 
                 expect(treeViewHeaders[2]).toHaveFocus();
             });
 
-            it("collapses a tree node element if possible", () => {
+            it("collapses a tree node element if possible", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -851,23 +863,23 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "true");
                 expect(getClickableTreeViewHeaders()).not.toHaveLength(4);
 
-                userEvent.keyboard("{ArrowLeft}");
+                await user.keyboard("{ArrowLeft}");
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "false");
                 expect(getClickableTreeViewHeaders()).toHaveLength(4);
             });
 
-            it("goes to the parent tree node element if the current one is not top level and is collapsed", () => {
+            it("goes to the parent tree node element if the current one is not top level and is collapsed", async () => {
                 const treeViewHeaders = getClickableTreeViewHeaders();
                 const treeViews = getTreeViewItems();
                 expect(treeViews).toHaveLength(4);
@@ -875,24 +887,24 @@ describe("TreeNode", () => {
                     expect(treeView).toHaveAttribute("aria-expanded", "false");
                 });
 
-                focusFirstTreeViewElement();
+                await focusFirstTreeViewElement();
 
-                userEvent.tab();
+                await user.tab();
 
                 expect(treeViewHeaders[1]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViews[1]).toHaveAttribute("aria-expanded", "true");
 
-                userEvent.keyboard("{ArrowRight}");
+                await user.keyboard("{ArrowRight}");
 
                 expect(treeViewHeaders[2]).not.toHaveFocus();
 
-                userEvent.keyboard("{ArrowDown}");
+                await user.keyboard("{ArrowDown}");
                 expect(getClickableTreeViewHeaders()[3]).toHaveFocus();
 
-                userEvent.keyboard("{ArrowLeft}");
+                await user.keyboard("{ArrowLeft}");
 
                 expect(treeViewHeaders[1]).toHaveFocus();
             });

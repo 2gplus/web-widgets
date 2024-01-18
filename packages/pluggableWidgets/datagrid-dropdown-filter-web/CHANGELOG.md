@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.5.2] - 2023-12-06
+
+### Fixed
+
+-   We fixed lazy loading in dropdown filter not working issue (Ticket #200943).
+
+## [2.5.1] - 2023-10-13
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [2.5.0] - 2023-08-10
+
+### Changed
+
+-   We changed the DOM Structure for dropdown filter to appear inline with the container in order to make the component more accessible.
+
+## [2.4.3] - 2023-06-21
+
+### Fixed
+
+-   We fixed issue with initial filter condition.
+
+## [2.4.2] - 2023-06-09
+
+### Changed
+
+-   We fixed visilibity issue when dropdown filter is used with layers of modals/popups.
+
 ## [2.4.1] - 2023-05-26
 
 ### Changed

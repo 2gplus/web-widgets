@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.2.1] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [2.2.0] - 2023-06-29
+
+### Changed
+
+-   We updated swiper package version to 9.4
+
+-   DOM changes from <div> wrapper to <ul> and <li>
+
+### Fixed
+
+-   We fixed accessibility issue with carousel
+
+## [2.1.0] - 2023-06-05
+
 ### Changed
 
 -   We updated the light and dark icons and tiles for the widget.

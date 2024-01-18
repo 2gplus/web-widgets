@@ -1,14 +1,16 @@
 import "@testing-library/jest-dom";
-import { Alert, FilterContextValue } from "@mendix/pluggable-widgets-commons/components/web";
+import { Alert } from "@mendix/widget-plugin-component-kit/Alert";
+import { FilterContextValue } from "@mendix/widget-plugin-filtering";
 import {
     actionValue,
     dynamicValue,
     EditableValueBuilder,
     ListAttributeValueBuilder
-} from "@mendix/pluggable-widgets-commons";
+} from "@mendix/widget-plugin-test-utils";
 import { createContext, createElement } from "react";
 import DatagridDropdownFilter from "../../DatagridDropdownFilter";
-import { render, fireEvent, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { render, screen, waitFor } from "@testing-library/react";
 import { mount } from "enzyme";
 import { FilterComponent } from "../FilterComponent";
 
@@ -73,7 +75,7 @@ describe("Dropdown Filter", () => {
                 });
             });
 
-            it("triggers attribute and onchange action on change filter value", () => {
+            it("triggers attribute and onchange action on change filter value", async () => {
                 const action = actionValue();
                 const attribute = new EditableValueBuilder<string>().build();
                 render(
@@ -87,8 +89,8 @@ describe("Dropdown Filter", () => {
                     />
                 );
 
-                fireEvent.click(screen.getByRole("textbox"));
-                fireEvent.click(screen.getAllByRole("menuitem")[2]);
+                await userEvent.click(screen.getByRole("textbox"));
+                await userEvent.click(screen.getAllByRole("menuitem")[2]);
 
                 expect(action.execute).toBeCalledTimes(1);
                 expect(attribute.setValue).toBeCalledWith("enum_value_2");

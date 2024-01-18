@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { DynamicValue, ListValue, ListActionValue, ListAttributeValue, ListExpressionValue } from "mendix";
 import { Big } from "big.js";
 
 export type DataSetEnum = "static" | "dynamic";
@@ -29,8 +29,10 @@ export interface LinesType {
     sizeref: number;
     staticTooltipHoverText?: ListExpressionValue<string>;
     dynamicTooltipHoverText?: ListExpressionValue<string>;
-    markerColor?: DynamicValue<string>;
-    onClickAction?: ActionValue;
+    staticMarkerColor?: ListExpressionValue<string>;
+    dynamicMarkerColor?: ListExpressionValue<string>;
+    staticOnClickAction?: ListActionValue;
+    dynamicOnClickAction?: ListActionValue;
     customSeriesOptions: string;
 }
 
@@ -42,8 +44,8 @@ export type HeightUnitEnum = "percentageOfWidth" | "pixels" | "percentageOfParen
 
 export interface LinesPreviewType {
     dataSet: DataSetEnum;
-    staticDataSource: {} | { type: string } | null;
-    dynamicDataSource: {} | { type: string } | null;
+    staticDataSource: {} | { caption: string } | { type: string } | null;
+    dynamicDataSource: {} | { caption: string } | { type: string } | null;
     groupByAttribute: string;
     staticName: string;
     dynamicName: string;
@@ -58,8 +60,10 @@ export interface LinesPreviewType {
     sizeref: number | null;
     staticTooltipHoverText: string;
     dynamicTooltipHoverText: string;
-    markerColor: string;
-    onClickAction: {} | null;
+    staticMarkerColor: string;
+    dynamicMarkerColor: string;
+    staticOnClickAction: {} | null;
+    dynamicOnClickAction: {} | null;
     customSeriesOptions: string;
 }
 

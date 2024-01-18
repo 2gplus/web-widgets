@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.3_7
+FROM adoptopenjdk/openjdk11:jdk-11.0.19_7-slim
 
 ARG MENDIX_VERSION
 
@@ -13,7 +13,7 @@ RUN apt-get update -qqy && \
     apt-get install -qqy git wget && \
     # Install m2ee + dependencies
     # https://github.com/mendix/m2ee-tools
-    git clone https://github.com/mendix/m2ee-tools.git /tmp/m2ee && \
+    git clone https://github.com/mendix/m2ee-tools.git --branch v7.2.3 --single-branch /tmp/m2ee && \
     mkdir -p /var/log /var/opt/m2ee && \
     mv /tmp/m2ee/src/* /var/opt/m2ee && \
     chmod a=rwx /var/log/ /var/run/ && \

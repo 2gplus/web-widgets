@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [3.5.2] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [3.5.1] - 2023-08-18
+
+### Fixed
+
+-   We fixed a small performance issue. No visual or behavioral changes.
+
+## [3.5.0] - 2023-06-28
+
+### Changed
+
+-   We changed the DOM Structure to from `div` to `ul` - `li` for accessibility purposes.
+
+### Fixed
+
+-   We have addressed an issue that was causing the popup menu to appear behind other elements, such as modal popups. This fix involved modifying the DOM structure by moving the `popupmenu-menu` element to the same level as the trigger button. As a result, custom styling that targets the popup menu may have been affected.
+
+## [3.4.0] - 2023-06-05
+
 ### Changed
 
 -   We updated the light and dark icons and tiles for the widget.

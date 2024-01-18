@@ -1,4 +1,9 @@
-import { StructurePreviewProps, ImageProps, ContainerProps, datasource } from "@mendix/pluggable-widgets-commons";
+import {
+    StructurePreviewProps,
+    ImageProps,
+    ContainerProps,
+    datasource
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import {
     hidePropertiesIn,
     hidePropertyIn,
@@ -51,7 +56,7 @@ export function getPreview(values: PieChartPreviewProps, isDarkMode: boolean): S
         }
     };
 
-    const getImage = (viewMode: "pie" | "doughnut", type: "structure" | "legend") => {
+    const getImage = (viewMode: "pie" | "doughnut", type: "structure" | "legend"): string => {
         const colorMode = isDarkMode ? "dark" : "light";
         return items[viewMode][colorMode][type];
     };

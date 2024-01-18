@@ -1,26 +1,15 @@
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import p from "node:path";
 import { fileURLToPath } from "node:url";
 import fetch from "node-fetch";
 import c from "ansi-colors";
+import sh from "shelljs";
 
+const { cat } = sh;
 const REGISTRY = "ghcr.io/mendix/web-widgets";
 
 export function getFullImageName(name, mendixVersion) {
     return `${REGISTRY}/${name}:${mendixVersion}`;
-}
-
-export function checkRegistry(image) {
-    try {
-        execSync(`docker manifest inspect ${image}`, { stdio: "pipe", encoding: "utf-8" });
-        return { exists: true };
-    } catch (error) {
-        if (error.status === 1 && error.stderr === "manifest unknown\n") {
-            return { exists: false };
-        }
-
-        throw error;
-    }
 }
 
 export async function buildImage(name, mendixVersion) {
@@ -51,16 +40,6 @@ export async function prepareImage(name, mendixVersion) {
     if (imageId) {
         console.log(`Found ${prettyName} locally.`);
         return image;
-    }
-
-    if (!process.env.SKIP_DOCKER_PULL) {
-        console.log(`Checking ${prettyName} docker image in Github Container Registry...`);
-        const { exists } = checkRegistry(image);
-        if (exists) {
-            console.log(`Success, pull ${prettyName} from registry.`);
-            execSync(`docker pull ${image}`, { stdio: "inherit" });
-            return image;
-        }
     }
 
     console.log(`Image not found, creating new ${prettyName} docker image...`);
@@ -100,25 +79,39 @@ export async function startRuntime(mxruntimeImage, mendixVersion, ip, freePort) 
     console.log(`Start mxruntime image`);
 
     const dockerDir = fileURLToPath(new URL("../docker", import.meta.url));
+    const labelPrefix = "e2e.mxruntime";
+    const labelValue = Math.round(Math.random() * (999 - 100)) + 100;
+    const containerLabel = `${labelPrefix}=${labelValue}`;
     const args = [
+        `run`,
         `--tty`,
-        // Spin mxruntime in background, we will kill it later.
-        `--detach`,
-        `--rm`,
-        `--workdir /source`,
-        `--publish ${freePort}:8080`,
-        `--env MENDIX_VERSION=${mendixVersion}`,
-        `--entrypoint /bin/bash`,
-        `--volume ${process.cwd()}:/source`,
+        [`--workdir`, `/source`],
+        [`--publish`, `${freePort}:8080`],
+        [`--env`, `MENDIX_VERSION=${mendixVersion}`],
+        [`--entrypoint`, `/bin/bash`],
+        [`--volume`, `${process.cwd()}:/source`],
         // shared dir should contain two files:
         // runtime.sh
         // m2ee.yaml
-        `--volume ${dockerDir}:/shared:ro`,
+        [`--volume`, `${dockerDir}:/shared:ro`],
+        [`--label`, `${containerLabel}`],
         mxruntimeImage,
         `/shared/runtime.sh`
     ];
-    const command = [`docker run`, ...args].join(" ");
-    const runtimeContainerId = execSync(command, { encoding: "utf-8" }).trim();
+
+    spawn("docker", args.flat(), { stdio: "inherit" });
+
+    let runtimeContainerId = "";
+    for (let attempts = 100; attempts > 0; --attempts) {
+        runtimeContainerId = getContainerId(containerLabel);
+        if (runtimeContainerId) {
+            break;
+        }
+    }
+
+    if (runtimeContainerId === "") {
+        throw new Error("Failed to get runtime container id. Probably container didn't started.");
+    }
 
     let attempts = 60;
     for (; attempts > 0; --attempts) {
@@ -134,6 +127,9 @@ export async function startRuntime(mxruntimeImage, mendixVersion, ip, freePort) 
     }
 
     if (attempts === 0) {
+        console.log("Runtime didn't start");
+        console.log("Print runtime.log...");
+        console.log(cat("results/runtime.log").toString());
         throw new Error("Runtime didn't start in time, exiting now...");
     }
 
@@ -158,14 +154,18 @@ export function startCypress(ip, freePort) {
         // container name
         `--name cypress`,
         // image to run, the entrypoint set to `cypress run` by default
-        `cypress/included:12.9.0`,
+        `cypress/included:13.6.0`,
         // cypress options
         `--browser ${browserCypress} ${headedMode}`.trim(),
         `--e2e`,
         `--config-file cypress.config.cjs`,
-        `--config baseUrl=http://${ip}:${freePort},video=true,videoUploadOnPasses=false,viewportWidth=1280,viewportHeight=1080,testIsolation=false,chromeWebSecurity=false`
+        `--config baseUrl=http://${ip}:${freePort},video=true,viewportWidth=1280,viewportHeight=1080,testIsolation=false,chromeWebSecurity=false`
     ];
     const command = [`docker run`, ...args].join(" ");
 
     execSync(command, { stdio: "inherit" });
+}
+
+export function getContainerId(containerLabel) {
+    return execSync(`docker ps --quiet --filter 'label=${containerLabel}'`, { encoding: "utf-8" }).trim();
 }

@@ -1,4 +1,9 @@
-import { ContainerProps, ImageProps, StructurePreviewProps, datasource } from "@mendix/pluggable-widgets-commons";
+import {
+    ContainerProps,
+    ImageProps,
+    StructurePreviewProps,
+    datasource
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import {
     hideNestedPropertiesIn,
     hidePropertiesIn,
@@ -30,7 +35,8 @@ export function getProperties(
                 "dynamicSizeAttribute",
                 "dynamicName",
                 "dynamicTooltipHoverText",
-                "groupByAttribute"
+                "groupByAttribute",
+                "dynamicMarkerColor"
             ]);
         } else {
             hideNestedPropertiesIn(defaultProperties, values, "lines", index, [
@@ -39,7 +45,8 @@ export function getProperties(
                 "staticYAttribute",
                 "staticSizeAttribute",
                 "staticName",
-                "staticTooltipHoverText"
+                "staticTooltipHoverText",
+                "staticMarkerColor"
             ]);
         }
         if (!values.enableAdvancedOptions && platform === "web") {
@@ -73,7 +80,7 @@ export function getPreview(values: BubbleChartPreviewProps, isDarkMode: boolean)
         light: { structure: BubbleChartLightSvg, legend: BubbleChartLegendLightSvg }
     };
 
-    const getImage = (type: "structure" | "legend") => {
+    const getImage = (type: "structure" | "legend"): string => {
         const colorMode = isDarkMode ? "dark" : "light";
         return items[colorMode][type];
     };

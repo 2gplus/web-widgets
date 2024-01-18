@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.3.3] - 2023-09-27
+
+### Fixed
+
+-   We removed redundant code to improve widget load time in the browser.
+
+## [1.3.2] - 2023-08-10
+
+### Fixed
+
+-   We fixed an issue where Tooltip not closing on escape key press.
+
+## [1.3.1] - 2023-08-03
+
+### Fixed
+
+-   We fixed an issue with Tooltip widget not displaying correctly when close to a datagrid table header.
+
+-   We fixed an issue with Tooltip widget triggering unexpectedly due to width of trigger element.
+
+-   We fixed an issue with Tooltip widget hover event not closing tooltip when attached to a disabled input
+
+## [1.3.0] - 2023-06-06
+
 ### Changed
 
 -   We updated the light and dark icons and tiles for the widget.
