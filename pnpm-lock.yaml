@@ -425,7 +425,7 @@ importers:
         version: link:../../pluggableWidgets/datagrid-text-filter-web
       '@mendix/datagrid-web':
         specifier: workspace:*
-        version: link:../../pluggableWidgets/datagrid-web
+        version: link:../../pluggableWidgets/datagrid-web-2g
       '@mendix/dropdown-sort-web':
         specifier: workspace:*
         version: link:../../pluggableWidgets/dropdown-sort-web
@@ -1094,6 +1094,49 @@ importers:
         version: link:../../shared/widget-plugin-test-utils
 
   packages/pluggableWidgets/datagrid-web:
+    dependencies:
+      '@mendix/widget-plugin-filtering':
+        specifier: workspace:*
+        version: link:../../shared/widget-plugin-filtering
+      '@radix-ui/react-progress':
+        specifier: ^1.0.3
+        version: 1.0.3(react-dom@18.2.0)(react@18.2.0)
+      classnames:
+        specifier: ^2.3.2
+        version: 2.3.2
+      deep-equal:
+        specifier: ^2.2.2
+        version: 2.2.2
+    devDependencies:
+      '@mendix/automation-utils':
+        specifier: workspace:*
+        version: link:../../../automation/utils
+      '@mendix/eslint-config-web-widgets':
+        specifier: workspace:*
+        version: link:../../shared/eslint-config-web-widgets
+      '@mendix/pluggable-widgets-tools':
+        specifier: ^10.0.1
+        version: 10.0.1(@types/node@20.8.10)
+      '@mendix/prettier-config-web-widgets':
+        specifier: workspace:*
+        version: link:../../shared/prettier-config-web-widgets
+      '@mendix/run-e2e':
+        specifier: workspace:*
+        version: link:../../../automation/run-e2e
+      '@mendix/widget-plugin-grid':
+        specifier: workspace:*
+        version: link:../../shared/widget-plugin-grid
+      '@mendix/widget-plugin-hooks':
+        specifier: workspace:*
+        version: link:../../shared/widget-plugin-hooks
+      '@mendix/widget-plugin-platform':
+        specifier: workspace:*
+        version: link:../../shared/widget-plugin-platform
+      '@mendix/widget-plugin-test-utils':
+        specifier: workspace:*
+        version: link:../../shared/widget-plugin-test-utils
+
+  packages/pluggableWidgets/datagrid-web-2g:
     dependencies:
       '@mendix/widget-plugin-filtering':
         specifier: workspace:*
@@ -14249,6 +14292,7 @@ packages:
       object-assign: 4.1.1
       prop-types: 15.8.1
     dev: true
+    bundledDependencies: false
 
   /react@18.2.0:
     resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}

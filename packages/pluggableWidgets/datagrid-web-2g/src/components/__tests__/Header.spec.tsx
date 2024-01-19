@@ -2,6 +2,7 @@ import { render, shallow } from "enzyme";
 import { createElement } from "react";
 import { Header, HeaderProps } from "../Header";
 import { ColumnResizer } from "../ColumnResizer";
+import { GridColumn } from "../../typings/GridColumn";
 
 describe("Header", () => {
     it("renders the structure correctly", () => {
@@ -51,7 +52,7 @@ describe("Header", () => {
 
     it("renders the structure correctly when filterable with custom filter", () => {
         const props = mockHeaderProps();
-        props.column.customFilter = (
+        const filterWidget = (
             <div>
                 <label>Date picker filter</label>
                 <input type="date" />
@@ -59,14 +60,15 @@ describe("Header", () => {
         );
         props.filterable = true;
 
-        const component = render(<Header {...props} />);
+        const component = render(<Header {...props} filterWidget={filterWidget} />);
 
         expect(component).toMatchSnapshot();
     });
 
     it("calls setSortBy store function with correct parameters when sortable", () => {
         const column = {
-            id: "sortable",
+            columnId: "0",
+            columnNumber: 0,
             header: "My sortable column",
             canSort: true
         } as any;
@@ -80,7 +82,7 @@ describe("Header", () => {
         expect(clickableRegion).toHaveLength(1);
 
         clickableRegion.simulate("click");
-        expect(mockedFunction).toBeCalledWith([{ id: "sortable", desc: false }]);
+        expect(mockedFunction).toHaveBeenLastCalledWith("0");
     });
 
     it("renders the structure correctly when filterable with custom classes", () => {
@@ -94,7 +96,7 @@ describe("Header", () => {
 
     it("renders the structure correctly when is hidden and preview", () => {
         const props = mockHeaderProps();
-        props.column.hidden = true;
+        props.column.initiallyHidden = true;
         props.hidable = true;
         props.preview = true;
 
@@ -115,21 +117,25 @@ describe("Header", () => {
 
 function mockHeaderProps(): HeaderProps {
     return {
+        gridId: "dg1",
         column: {
+            columnId: "dg1-column0",
+            columnNumber: 0,
             header: "Test"
-        } as any,
+        } as GridColumn,
         draggable: false,
-        dragOver: "",
+        dragOver: undefined,
         filterable: false,
+        filterWidget: undefined,
         hidable: false,
         resizable: false,
         resizer: <ColumnResizer setColumnWidth={jest.fn()} />,
         sortable: false,
-        setColumnOrder: jest.fn(),
+        swapColumns: jest.fn(),
         setDragOver: jest.fn(),
         visibleColumns: [],
         setSortBy: jest.fn(),
         setIsDragging: jest.fn(),
-        sortBy: []
+        sortRule: undefined
     };
 }

@@ -1,26 +1,25 @@
-import { createElement, Dispatch, ReactElement, SetStateAction, useCallback, useMemo, useRef, useState } from "react";
+import { createElement, ReactElement, useCallback, useMemo, useRef, useState } from "react";
 import { FaEye } from "./icons/FaEye";
-import { useOnClickOutside, usePositionObserver } from "@mendix/pluggable-widgets-commons/components/web";
-import { ColumnProperty } from "./Table";
-import { createPortal } from "react-dom";
+import { useOnClickOutside } from "@mendix/widget-plugin-hooks/useOnClickOutside";
+import { usePositionObserver } from "@mendix/widget-plugin-hooks/usePositionObserver";
 import { useIsElementInViewport } from "../utils/useIsElementInViewport";
+import * as Grid from "../typings/GridModel";
 
 export interface ColumnSelectorProps {
-    columns: ColumnProperty[];
-    hiddenColumns: string[];
+    columns: Grid.Columns;
+    hiddenColumns: Grid.Hidden;
     id?: string;
-    setHiddenColumns: Dispatch<SetStateAction<string[]>>;
+    toggleHidden: Grid.Actions["toggleHidden"];
     label?: string;
+    visibleLength: number;
 }
 
 export function ColumnSelector(props: ColumnSelectorProps): ReactElement {
-    const { setHiddenColumns } = props;
+    const { toggleHidden, visibleLength } = props;
     const [show, setShow] = useState(false);
     const optionsRef = useRef<HTMLUListElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
     const position = usePositionObserver(buttonRef.current, show);
-    const visibleCount = props.columns.length - props.hiddenColumns.length;
-    const isOnlyOneColumnVisible = visibleCount === 1;
 
     useOnClickOutside([buttonRef, optionsRef], () => setShow(false));
 
@@ -28,26 +27,10 @@ export function ColumnSelector(props: ColumnSelectorProps): ReactElement {
 
     const isInViewport = useIsElementInViewport(optionsRef);
 
-    const onClick = useCallback(
-        (isVisible: boolean, id: string) => {
-            const isLastVisibleColumn = isVisible && isOnlyOneColumnVisible;
-            if (!isLastVisibleColumn) {
-                setHiddenColumns(prev => {
-                    if (!isVisible) {
-                        return prev.filter(v => v !== id);
-                    } else {
-                        return [...prev, id];
-                    }
-                });
-            }
-        },
-        [setHiddenColumns, isOnlyOneColumnVisible]
-    );
-
     const firstHidableColumnIndex = useMemo(() => props.columns.findIndex(c => c.canHide), [props.columns]);
     const lastHidableColumnIndex = useMemo(() => props.columns.map(c => c.canHide).lastIndexOf(true), [props.columns]);
 
-    const optionsComponent = createPortal(
+    const optionsComponent = (
         <ul
             ref={optionsRef}
             id={`${props.id}-column-selectors`}
@@ -60,22 +43,27 @@ export function ColumnSelector(props: ColumnSelectorProps): ReactElement {
                 right: position?.right !== undefined ? document.body.clientWidth - position.right : undefined
             }}
         >
-            {props.columns.map((column: ColumnProperty, index: number) => {
-                const isVisible = !props.hiddenColumns.includes(column.id);
-                const isLastVisibleColumn = isVisible && isOnlyOneColumnVisible;
+            {props.columns.map((column, index) => {
+                const isVisible = !props.hiddenColumns.has(column.columnId);
+                const isLastVisibleColumn = isVisible && visibleLength === 1;
+                const onClick = (): void => {
+                    if (!isLastVisibleColumn) {
+                        toggleHidden(column.columnId);
+                    }
+                };
                 return column.canHide ? (
                     <li
-                        key={index}
+                        key={column.columnNumber}
                         onClick={e => {
                             e.preventDefault();
                             e.stopPropagation();
-                            onClick(isVisible, column.id);
+                            onClick();
                         }}
                         onKeyDown={e => {
                             if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                onClick(isVisible, column.id);
+                                onClick();
                             } else if (
                                 (e.key === "Tab" &&
                                     (index === lastHidableColumnIndex ||
@@ -105,8 +93,7 @@ export function ColumnSelector(props: ColumnSelectorProps): ReactElement {
                     </li>
                 ) : null;
             })}
-        </ul>,
-        document.body
+        </ul>
     );
 
     const containerClick = useCallback(() => {

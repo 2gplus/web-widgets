@@ -99,10 +99,7 @@
                             </property>
                             <property key="filterAssociation" type="association" selectableObjects="filterAssociationOptions" required="false" dataSource="../datasource">
                                 <caption>Reference</caption>
-                                <description>
-                                    Set the reference to enable filtering over association with the Drop-down
-                                    filter widget.
-                                </description>
+                                <description>Set the reference to enable filtering over association with the Drop-down filter widget.</description>
                                 <associationTypes>
                                     <associationType name="Reference" />
                                     <associationType name="ReferenceSet" />
@@ -120,6 +117,11 @@
                             <property key="sortProperty" type="string" required="false">
                                 <caption>Sort property</caption>
                                 <description />
+                            </property>
+                            <property key="visible" type="expression" required="false" defaultValue="true">
+                                <caption>Visible</caption>
+                                <description />
+                                <returnType type="Boolean" />
                             </property>
                         </propertyGroup>
                         <propertyGroup caption="Column capabilities">
@@ -206,6 +208,14 @@
                         <enumerationValue key="bottom">Below grid</enumerationValue>
                         <enumerationValue key="top">Above grid</enumerationValue>
                         <enumerationValue key="both">Both</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="showPagingButtons" type="enumeration" defaultValue="always">
+                    <caption>Show paging buttons</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="always">Always</enumerationValue>
+                        <enumerationValue key="auto">Auto</enumerationValue>
                     </enumerationValues>
                 </property>
                 <property key="showEmptyPlaceholder" type="enumeration" defaultValue="none">
@@ -465,15 +475,12 @@
             <propertyGroup caption="Configuration">
                 <property key="configurationAttribute" type="attribute" required="false" onChange="onConfigurationChange">
                     <caption>Attribute</caption>
-                    <description>
-                        Attribute containing the personalized configuration of the capabilities. This
-                        configuration is automatically stored and loaded. The attribute requires Unlimited String.
-                    </description>
+                    <description>Attribute containing the personalized configuration of the capabilities. This configuration is automatically stored and loaded. The attribute requires Unlimited String.</description>
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="onConfigurationChange" type="action">
+                <property key="onConfigurationChange" type="action" required="false">
                     <caption>On change</caption>
                     <description />
                 </property>
@@ -483,11 +490,7 @@
             <propertyGroup caption="Grid wide filtering">
                 <property key="filterList" type="object" isList="true" required="false">
                     <caption>Filters</caption>
-                    <description>
-                        The list of attributes is used by the filter widgets that are placed in the placeholder
-                        above the data grid. This enables filtering across multiple attributes or columns instead of
-                        limiting to a single column.
-                    </description>
+                    <description>The list of attributes is used by the filter widgets that are placed in the placeholder above the data grid. This enables filtering across multiple attributes or columns instead of limiting to a single column.</description>
                     <properties>
                         <propertyGroup caption="General">
                             <property key="filter" type="attribute" dataSource="../datasource">
@@ -514,10 +517,31 @@
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Accessibility">
-            <propertyGroup caption="Accessibility">
+            <propertyGroup caption="Aria labels">
                 <property key="filterSectionTitle" type="textTemplate" required="false">
-                    <caption>Filter section title</caption>
+                    <caption>Filter section</caption>
                     <description>Assistive technology will read this upon reaching a filtering or sorting section.</description>
+                </property>
+                <property key="exportDialogLabel" type="textTemplate" required="false">
+                    <caption>Export progress</caption>
+                    <description>Assistive technology will read this upon reaching a export dialog.</description>
+                    <translations>
+                        <translation lang="en_US">Export progress</translation>
+                    </translations>
+                </property>
+                <property key="cancelExportLabel" type="textTemplate" required="false">
+                    <caption>Cancel data export</caption>
+                    <description>Assistive technology will read this upon reaching a cancel button.</description>
+                    <translations>
+                        <translation lang="en_US">Cancel data export</translation>
+                    </translations>
+                </property>
+                <property key="selectRowLabel" type="textTemplate" required="false">
+                    <caption>Select row</caption>
+                    <description>If selection is enabled, assistive technology will read this upon reaching a checkbox.</description>
+                    <translations>
+                        <translation lang="en_US">Select row</translation>
+                    </translations>
                 </property>
             </propertyGroup>
         </propertyGroup>

@@ -7,7 +7,7 @@ import {
     StructurePreviewProps,
     text,
     structurePreviewPalette
-} from "@mendix/pluggable-widgets-commons";
+} from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 import {
     changePropertyIn,
     hideNestedPropertiesIn,
@@ -172,8 +172,8 @@ export const getPreview = (
     isDarkMode: boolean,
     spVersion: number[] = [0, 0, 0]
 ): StructurePreviewProps => {
-    const [x, y] = spVersion;
-    const canHideDataSourceHeader = x >= 9 && y >= 20;
+    const [major, minor] = spVersion;
+    const canHideDataSourceHeader = major > 9 || (major === 9 && minor >= 20);
     const palette = structurePreviewPalette[isDarkMode ? "dark" : "light"];
 
     const modeColor = (colorDark: string, colorLight: string): string => (isDarkMode ? colorDark : colorLight);
@@ -183,26 +183,27 @@ export const getPreview = (
         ? values.columns
         : [
               {
-                  header: "Column",
-                  tooltip: "",
+                  alignment: "left",
                   attribute: "",
-                  width: "autoFit",
                   columnClass: "",
+                  content: { widgetCount: 0, renderer: () => null },
+                  draggable: false,
+                  dynamicText: "Dynamic text",
                   filter: { widgetCount: 0, renderer: () => null },
+                  filterAssociation: "",
+                  filterAssociationOptionLabel: "",
+                  filterAssociationOptions: {},
+                  header: "Column",
+                  hidable: "no",
                   resizable: false,
                   showContentAs: "attribute",
-                  content: { widgetCount: 0, renderer: () => null },
-                  dynamicText: "Dynamic text",
-                  draggable: false,
-                  hidable: "no",
                   size: 1,
                   sortable: false,
-                  alignment: "left",
+                  tooltip: "",
+                  visible: "true",
+                  width: "autoFit",
                   wrapText: false,
-                  filterAssociation: "",
-                  filterAssociationOptions: {},
-                  filterAssociationOptionLabel: "",
-                  sortProperty: ""
+                  sortProperty: "sort"
               }
           ];
     const columns = rowLayout({
@@ -286,27 +287,44 @@ export const getPreview = (
                         : undefined,
                 backgroundColor: isColumnHidden ? modeColor("#4F4F4F", "#DCDCDC") : palette.background.topbarStandard
             })(
-                container({
-                    padding: 8
+                rowLayout({
+                    columnSize: "grow"
                 })(
-                    text({
-                        bold: true,
-                        fontSize: 10,
-                        fontColor: column.header
-                            ? undefined
-                            : isColumnHidden
-                            ? modeColor("#4F4F4F", "#DCDCDC")
-                            : palette.text.secondary
-                    })(column.header ? column.header : "Header")
-                ),
-                ...(hasColumns && values.columnsFilterable
-                    ? [
-                          dropzone(
-                              dropzone.placeholder("Place filter widget here"),
-                              dropzone.hideDataSourceHeaderIf(canHideDataSourceHeader)
-                          )(column.filter)
-                      ]
-                    : [])
+                    container({
+                        grow: 0,
+                        backgroundColor: "#AEEdAA"
+                    })(
+                        container({
+                            padding: column.visible.trim() === "" || column.visible.trim() === "true" ? 0 : 3
+                        })()
+                    ),
+                    container({
+                        padding: 8
+                    })(
+                        container({
+                            grow: 1,
+                            padding: 8
+                        })(
+                            text({
+                                bold: true,
+                                fontSize: 10,
+                                fontColor: column.header
+                                    ? undefined
+                                    : isColumnHidden
+                                    ? modeColor("#4F4F4F", "#DCDCDC")
+                                    : palette.text.secondary
+                            })(column.header ? column.header : "Header")
+                        ),
+                        ...(hasColumns && values.columnsFilterable
+                            ? [
+                                  dropzone(
+                                      dropzone.placeholder("Place filter widget here"),
+                                      dropzone.hideDataSourceHeaderIf(canHideDataSourceHeader)
+                                  )(column.filter)
+                              ]
+                            : [])
+                    )
+                )
             );
             return values.columns.length > 0
                 ? selectable(column, { grow: column.width === "manual" && column.size ? column.size : 1 })(
@@ -342,6 +360,8 @@ export const getPreview = (
 
 const columnPropPath = (prop: string, index: number): string => `columns/${index + 1}/${prop}`;
 
+// const buttonsPropPath = (prop: string, index: number): string => `rowClickEvents/${index + 1}/${prop}`;
+
 const checkAssociationSettings = (
     values: DatagridPreviewProps,
     column: ColumnsPreviewType,
@@ -358,7 +378,7 @@ const checkAssociationSettings = (
     if (!column.filterAssociationOptionLabel) {
         return {
             property: columnPropPath("filterAssociationOptionLabel", index),
-            message: `A Caption is required when using associations. Please set 'Caption' property for column (${column.header})`
+            message: `A caption is required when using associations. Please set 'Option caption' property for column (${column.header})`
         };
     }
 };
@@ -465,6 +485,16 @@ export function check(values: DatagridPreviewProps): Problem[] {
             });
         }
     }
+    if (
+        values.pagingPosition !== "bottom" &&
+        (values.filtersPlaceholder.widgetCount > 0 || values.tableLabel.length > 0)
+    ) {
+        errors.push({
+            property: `pagingPosition`,
+            message:
+                "Paging position can only be bottom when widgets are placed in the header or the header text is set."
+        });
+    }
 
     // TODO Re-enable when migrating to 2G version
     if (values.onClick) {
@@ -489,6 +519,19 @@ export function check(values: DatagridPreviewProps): Problem[] {
             message: `Pagination set as ${values.pagination} but Paging page size or page number are still set, please select set remote as pagination or remove the attributes from remote pagination`
         });
     }
+    //On rowclick selection we cannot add a rowClickevent on single click
+    if (values.itemSelectionMethod === "rowClick") {
+        values.rowClickevents.forEach(x => {
+            if (x.defaultTrigger === "singleClick") {
+                errors.push({
+                    property: "rowClickevents",
+                    message:
+                        "Button is single click execution but the item selection is set to row click, this action will never be executed."
+                });
+            }
+        });
+    }
+
     values.columns.forEach((column: ColumnsPreviewType, index) => {
         for (const check of columnChecks) {
             const error = check(values, column, index);

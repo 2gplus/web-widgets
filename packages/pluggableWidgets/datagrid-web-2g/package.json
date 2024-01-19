@@ -1,5 +1,5 @@
 {
-  "name": "@mendix/datagrid-web",
+  "name": "2g-datagrid-web",
   "widgetName": "Datagrid",
   "version": "2.12.0",
   "description": "",
@@ -14,17 +14,17 @@
   "mxpackage": {
     "name": "Datagrid",
     "type": "widget",
-    "mpkName": "com.mendix.widget.web.Datagrid.mpk"
+    "mpkName": "com.2gplus.widget.web.Datagrid.mpk"
   },
   "marketplace": {
     "minimumMXVersion": "9.24.0.2965",
-    "appName": "Data Grid 2"
+    "appName": "Data Grid 2G"
   },
   "testProject": {
     "githubUrl": "https://github.com/mendix/testProjects",
     "branchName": "datagrid-web-next"
   },
-  "packagePath": "com.mendix.widget.web",
+  "packagePath": "com.2gplus.widget.web",
   "scripts": {
     "start": "pluggable-widgets-tools start:server",
     "dev": "pluggable-widgets-tools start:ts",

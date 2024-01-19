@@ -1,117 +1,115 @@
-// Disable warning that hooks can be used only in components
+/* Disable warning that hooks can be used only in components */
 /* eslint-disable react-hooks/rules-of-hooks */
-import { createElement, ReactElement, useCallback } from "react";
-import { ColumnsPreviewType, DatagridPreviewProps } from "../typings/DatagridProps";
 
-import { Table, TableColumn } from "./components/Table";
-import { parseStyle } from "@mendix/pluggable-widgets-commons";
+import { useGridSelectionProps } from "@mendix/widget-plugin-grid/selection/useGridSelectionProps";
+import { parseStyle } from "@mendix/widget-plugin-platform/preview/parse-style";
+import { GUID, ObjectItem } from "mendix";
 import { Selectable } from "mendix/preview/Selectable";
-import { ObjectItem, GUID } from "mendix";
-import classNames from "classnames";
-import { isSortable } from "./features/column";
-import { selectionSettings, useOnSelectProps } from "./features/selection";
+import { ReactElement, ReactNode, createElement, useCallback, useMemo } from "react";
+import { ColumnsPreviewType, DatagridPreviewProps } from "typings/DatagridProps";
+import { Cell } from "./components/Cell";
+import { Widget } from "./components/Widget";
+import { ColumnPreview } from "./helpers/ColumnPreview";
+import { ColumnId } from "./typings/GridColumn";
+import * as Grid from "./typings/GridModel";
 
-const dummyColumns: ColumnsPreviewType[] = [
+// Fix type definition for Selectable
+// TODO: Open PR to fix in appdev.
+declare module "mendix/preview/Selectable" {
+    interface SelectableProps<T> {
+        object: T;
+        caption?: string;
+        children: ReactNode;
+    }
+}
+
+const initColumns: ColumnsPreviewType[] = [
     {
-        header: "Column",
-        tooltip: "",
-        attribute: "[No attribute selected]",
-        width: "autoFill",
+        alignment: "left",
+        attribute: "No attribute selected",
         columnClass: "",
+        content: { renderer: () => <div />, widgetCount: 0 },
+        draggable: false,
+        dynamicText: "Dynamic Text",
         filter: { renderer: () => <div />, widgetCount: 0 },
+        filterAssociation: "",
+        filterAssociationOptionLabel: "",
+        filterAssociationOptions: {},
+        header: "Column",
+        hidable: "no",
         resizable: false,
         showContentAs: "attribute",
-        content: { renderer: () => <div />, widgetCount: 0 },
-        dynamicText: "Dynamic Text",
-        draggable: false,
-        hidable: "no",
         size: 1,
         sortable: false,
-        alignment: "left",
+        tooltip: "",
+        visible: "false",
+        width: "autoFill",
         wrapText: false,
-        filterAssociation: "",
-        filterAssociationOptions: {},
-        filterAssociationOptionLabel: "",
-        sortProperty: ""
+        sortProperty: "sorting"
     }
 ];
 
 export function preview(props: DatagridPreviewProps): ReactElement {
+    const EmptyPlaceholder = props.emptyPlaceholder.renderer;
+    const selectionProps = useGridSelectionProps({
+        selection: props.itemSelection,
+        helper: undefined,
+        selectionMethod: props.itemSelectionMethod,
+        showSelectAllToggle: props.showSelectAllToggle
+    });
     const data: ObjectItem[] = Array.from({ length: props.pageSize ?? 5 }).map((_, index) => ({
         id: String(index) as GUID
     }));
-    const columns: ColumnsPreviewType[] = props.columns.length > 0 ? props.columns : dummyColumns;
+    const gridId = useMemo(() => Date.now().toString(), []);
+    const previewColumns: ColumnsPreviewType[] = props.columns.length > 0 ? props.columns : initColumns;
+    const columns = previewColumns.map((col, index) => new ColumnPreview(col, index));
+    const state: Grid.State = {
+        availableColumns: [],
+        allColumns: columns,
+        filter: undefined,
+        hidden: new Set<ColumnId>(),
+        columnOrder: [] as ColumnId[],
+        size: {},
+        sortOrder: [],
+        visibleColumns: [],
+        executingRemoteSort: false
+    };
+    const noop = (..._: unknown[]): void => {
+        //
+    };
 
-    const selectableWrapperRenderer = useCallback(
-        (columnIndex: number, header: ReactElement) => {
-            const column = columns[columnIndex];
-            return (
-                <Selectable
-                    key={`selectable_column_${columnIndex}`}
-                    caption={column.header.trim().length > 0 ? column.header : "[Empty caption]"}
-                    object={column}
-                >
-                    {header}
-                </Selectable>
-            );
-        },
-        [columns]
-    );
-
-    const EmptyPlaceholder = props.emptyPlaceholder.renderer;
-    const selectActionProps = useOnSelectProps(undefined);
-    const { selectionStatus, selectionMethod } = selectionSettings(props, undefined);
     return (
-        <Table
-            cellRenderer={useCallback(
-                (renderWrapper, _, columnIndex) => {
-                    const column = columns[columnIndex];
-                    const className = classNames(`align-column-${column.alignment}`, { "wrap-text": column.wrapText });
-                    let content;
-                    switch (column.showContentAs) {
-                        case "attribute":
-                            content = renderWrapper(
-                                <span className="td-text">
-                                    {"["}
-                                    {column.attribute.length > 0 ? column.attribute : "No attribute selected"}
-                                    {"]"}
-                                </span>,
-                                className
-                            );
-                            break;
-                        case "dynamicText":
-                            content = renderWrapper(<span className="td-text">{column.dynamicText}</span>, className);
-                            break;
-                        case "customContent":
-                            content = (
-                                <column.content.renderer>{renderWrapper(null, className)}</column.content.renderer>
-                            );
-                    }
-
-                    return selectableWrapperRenderer(columnIndex, content);
-                },
-                [columns, selectableWrapperRenderer]
-            )}
-            className={props.className}
-            columns={transformColumnProps(columns)}
+        <Widget
+            CellComponent={Cell}
+            className={props.class}
             columnsDraggable={props.columnsDraggable}
             columnsFilterable={props.columnsFilterable}
             columnsHidable={props.columnsHidable}
             columnsResizable={props.columnsResizable}
             columnsSortable={props.columnsSortable}
+            state={state}
+            actions={{
+                toggleHidden: noop,
+                resize: noop,
+                setFilter: noop,
+                sortBy: noop,
+                swap: noop,
+                setRemoteExecuting: noop
+            }}
             data={data}
             emptyPlaceholderRenderer={useCallback(
-                renderWrapper => (
+                (renderWrapper: (children: ReactNode) => ReactElement) => (
                     <EmptyPlaceholder caption="Empty list message: Place widgets here">
                         {renderWrapper(null)}
                     </EmptyPlaceholder>
                 ),
                 [EmptyPlaceholder]
             )}
+            exporting={false}
             filterRenderer={useCallback(
                 (renderWrapper, columnIndex) => {
-                    const column = columns[columnIndex];
-                    return column.filter ? (
+                    const column = props.columns.at(columnIndex);
+                    return column?.filter ? (
                         <column.filter.renderer caption="Place filter widget here">
                             {renderWrapper(null)}
                         </column.filter.renderer>
@@ -119,45 +117,52 @@ export function preview(props: DatagridPreviewProps): ReactElement {
                         renderWrapper(null)
                     );
                 },
-                [columns]
+                [props.columns]
             )}
-            hasMoreItems={false}
-            gridHeaderWidgets={
+            headerContent={
                 <props.filtersPlaceholder.renderer caption="Place widgets like filter widget(s) and action button(s) here">
                     <div />
                 </props.filtersPlaceholder.renderer>
             }
-            headerWrapperRenderer={selectableWrapperRenderer}
+            hasMoreItems={false}
+            headerWrapperRenderer={selectableWrapperRenderer(previewColumns)}
             numberOfItems={5}
             page={0}
             pageSize={props.pageSize ?? 5}
             paging={props.pagination === "buttons"}
             pagingPosition={props.pagingPosition}
             preview
+            processedRows={0}
             styles={parseStyle(props.style)}
             valueForSort={useCallback(() => undefined, [])}
-            onSelect={selectActionProps.onSelect}
-            onSelectAll={selectActionProps.onSelectAll}
-            isSelected={selectActionProps.isSelected}
-            selectionStatus={selectionStatus}
-            selectionMethod={selectionMethod}
-            onIsStarted={() => undefined}
-            updateRemoteSortConfig={() => undefined}
-            remoteSortConfig={{ ascending: true, property: "" }}
+            selectionProps={selectionProps}
+            selectionStatus={"none"}
+            id={gridId}
         />
     );
 }
 
+const selectableWrapperRenderer =
+    (columns: ColumnsPreviewType[]) =>
+    (columnIndex: number, header: ReactElement): ReactElement => {
+        const column = columns.at(columnIndex);
+
+        // We can't use Selectable when there no columns configured yet, so, just show header.
+        if (columns === initColumns || column === undefined) {
+            return header;
+        }
+
+        return (
+            <Selectable
+                key={column.header || column.attribute}
+                caption={column.header.trim().length > 0 ? column.header : "[Empty caption]"}
+                object={column}
+            >
+                {header}
+            </Selectable>
+        );
+    };
+
 export function getPreviewCss(): string {
     return require("./ui/DatagridPreview.scss");
-}
-
-function transformColumnProps(props: ColumnsPreviewType[]): TableColumn[] {
-    return props.map(prop => ({
-        ...prop,
-        header: (prop.header?.trim().length ?? 0) === 0 ? "[Empty caption]" : prop.header,
-        sortable: isSortable(prop),
-        draggable: false,
-        resizable: false
-    }));
 }
