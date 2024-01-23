@@ -202,13 +202,20 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
             >
                 {showTopBar && (
                     <WidgetTopBar>
-                        {props.headerText !== undefined && hasHeaderText ? (
+                        {hasHeaderText ? (
                             <div className={"table-label"}>
                                 <h4>{props.headerText?.value}</h4>
                             </div>
                         ) : null}
                         {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
-                        {showHeader && <WidgetHeader headerTitle={headerTitle}>{headerContent}</WidgetHeader>}
+                        {showHeader && (
+                            <WidgetHeader
+                                className={hasHeaderText ? "widgets-align-right" : ""}
+                                headerTitle={headerTitle}
+                            >
+                                {headerContent}
+                            </WidgetHeader>
+                        )}
                         {hasHeaderText ? <hr className={"table-header-line"} /> : null}
                     </WidgetTopBar>
                 )}

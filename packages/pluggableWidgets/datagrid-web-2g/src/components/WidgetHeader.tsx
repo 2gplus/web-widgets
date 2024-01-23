@@ -12,7 +12,11 @@ export function WidgetHeader(props: WidgetHeaderProps): ReactElement | null {
     }
 
     return (
-        <div {...rest} className="widget-datagrid-header header-filters" aria-label={headerTitle || undefined}>
+        <div
+            {...rest}
+            className={`widget-datagrid-header header-filters ${props.className ?? ""} `}
+            aria-label={headerTitle || undefined}
+        >
             {children}
         </div>
     );
