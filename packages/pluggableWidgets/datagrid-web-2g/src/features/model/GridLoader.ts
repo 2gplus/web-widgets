@@ -66,7 +66,7 @@ export class GridLoader {
         }
 
         // Set initial limit
-        datasource.setLimit(pageSize);
+        if (paginationType !== "remote") datasource.setLimit(pageSize);
 
         // Prevent multiple requests options source
         columns.forEach(col => col.setInitParams());

@@ -487,12 +487,13 @@ export function check(values: DatagridPreviewProps): Problem[] {
     }
     if (
         values.pagingPosition !== "bottom" &&
-        (values.filtersPlaceholder.widgetCount > 0 || values.tableLabel.length > 0)
+        values.filtersPlaceholder.widgetCount > 0 &&
+        values.tableLabel.length > 0
     ) {
         errors.push({
             property: `pagingPosition`,
             message:
-                "Paging position can only be bottom when widgets are placed in the header or the header text is set."
+                "Paging position can only be bottom when widgets are placed in the header and the header text is set."
         });
     }
 

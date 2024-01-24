@@ -207,7 +207,6 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                                 <h4>{props.headerText?.value}</h4>
                             </div>
                         ) : null}
-                        {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
                         {showHeader && (
                             <WidgetHeader
                                 className={hasHeaderText ? "widgets-align-right" : ""}
@@ -216,6 +215,7 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                                 {headerContent}
                             </WidgetHeader>
                         )}
+                        {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
                         {hasHeaderText ? <hr className={"table-header-line"} /> : null}
                     </WidgetTopBar>
                 )}

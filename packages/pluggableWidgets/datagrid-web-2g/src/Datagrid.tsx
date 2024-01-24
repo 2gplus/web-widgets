@@ -40,11 +40,18 @@ export interface RemoteSortConfig {
 
 function Container(props: Props): ReactElement {
     const isInfiniteLoad = props.pagination === "virtualScrolling";
+    const pageSize =
+        props.pagination !== "remote"
+            ? props.pageSize
+            : props.pageSizeAttribute && props.pageSizeAttribute.value
+            ? props.pageSizeAttribute.value.toNumber()
+            : 0;
+    console.log(pageSize);
     const currentPage =
         props.pagination !== "remote"
             ? isInfiniteLoad
-                ? props.datasource.limit / props.pageSize
-                : props.datasource.offset / props.pageSize
+                ? props.datasource.limit / pageSize
+                : props.datasource.offset / pageSize
             : props.pageNumber && props.pageNumber.value
             ? props.pageNumber.value.toNumber()
             : 0;
@@ -79,12 +86,7 @@ function Container(props: Props): ReactElement {
             [props.datasource]
         )
     });
-    const pageSize =
-        props.pagination !== "remote"
-            ? props.pageSize
-            : props.pageSizeAttribute && props.pageSizeAttribute.value
-            ? props.pageSizeAttribute.value.toNumber()
-            : 0;
+
     const [hasMoreItems, setHasMoreItems] = useState<boolean>(false);
     const [totalCount, setTotalCount] = useState<number>();
     // const [sortParameters, setSortParameters] = useState<{ columnIndex: number; desc: boolean } | undefined>(undefined);
@@ -160,7 +162,7 @@ function Container(props: Props): ReactElement {
                     setHasMoreItems(props.datasource.hasMoreItems ?? false);
                 }
                 if (props.datasource.limit === Number.POSITIVE_INFINITY) {
-                    props.datasource.setLimit(props.pageSize);
+                    props.datasource.setLimit(pageSize);
                 }
                 break;
             case "remote":
@@ -179,9 +181,9 @@ function Container(props: Props): ReactElement {
         (computePage: (prevPage: number) => number) => {
             const newPage = computePage(currentPage);
             if (isInfiniteLoad) {
-                props.datasource.setLimit(newPage * props.pageSize);
+                props.datasource.setLimit(newPage * pageSize);
             } else if (props.pagination === "buttons") {
-                props.datasource.setOffset(newPage * props.pageSize);
+                props.datasource.setOffset(newPage * pageSize);
             } else if (
                 props.pagination === "remote" &&
                 props.pageNumber &&
@@ -195,7 +197,7 @@ function Container(props: Props): ReactElement {
                 setHasMoreItems(newPage + 1 < Math.ceil(pageSize / totalCount));
             }
         },
-        [props.datasource, props.pageSize, isInfiniteLoad, currentPage]
+        [props.datasource, pageSize, isInfiniteLoad, currentPage]
     );
 
     // TODO: Rewrite this logic with single useReducer (or write
@@ -232,7 +234,7 @@ function Container(props: Props): ReactElement {
         props.itemSelection,
         props.datasource,
         props.onSelectionChange,
-        props.pageSize
+        pageSize
     );
     const selectionContextValue = useCreateSelectionContextValue(selectionHelper);
     const selectionProps = useGridSelectionProps({
@@ -308,7 +310,7 @@ function Container(props: Props): ReactElement {
             numberOfItems={totalCount}
             onExportCancel={abort}
             page={currentPage}
-            pageSize={props.pageSize}
+            pageSize={pageSize}
             paging={useShowPagination({
                 pagination: props.pagination,
                 showPagingButtons: props.showPagingButtons,
