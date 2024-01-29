@@ -37,8 +37,8 @@ export function Pagination(props: PaginationProps): ReactElement | null {
         return null;
     }
 
-    const pagingStatus = `${initialItem} to ${lastItem} ${
-        hasLastPage ? `of ${props.numberOfItems ?? (numberOfPages ?? 1) * props.pageSize}` : ""
+    const pagingStatus = `${initialItem} - ${lastItem} ${
+        hasLastPage ? `/ ${props.numberOfItems ?? (numberOfPages ?? 1) * props.pageSize}` : ""
     }`;
 
     return (
