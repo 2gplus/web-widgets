@@ -14,6 +14,7 @@ export interface CellComponentProps<C extends GridColumn> {
     onKeyDown?: DOMAttributes<HTMLDivElement>["onKeyDown"];
     clickable?: boolean;
     preview?: boolean;
+    minWidth: number;
 }
 
 export type CellComponent<C extends GridColumn> = (props: CellComponentProps<C>) => ReactElement;

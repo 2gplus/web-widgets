@@ -125,10 +125,6 @@ function Container(props: Props): ReactElement {
                     }
                 }
             }
-            // Custom implementation of the selection on row click
-            if (props.itemSelectionMethod === "rowClick" && !dblClick) {
-                // selectActionProps.onSelect(value); TODO re-implement select action when row is clicked;
-            }
         }, waitTime);
     };
     /**

@@ -12,6 +12,7 @@ export class ColumnPreview extends BaseColumn implements GridColumn {
 
     constructor(props: ColumnsPreviewType, columnNumber: number) {
         super(props);
+        this.minWidth = 100;
         this.sortProperty = "";
         this.props = props;
         this.columnNumber = columnNumber;
@@ -49,4 +50,6 @@ export class ColumnPreview extends BaseColumn implements GridColumn {
                 return <span>Unknown content type: ${this.props.showContentAs}</span>;
         }
     }
+
+    minWidth: number;
 }

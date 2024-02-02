@@ -48,6 +48,7 @@ export function Row<C extends GridColumn>(props: RowProps<C>): ReactElement {
         >
             {selectionProps.showCheckboxColumn && (
                 <CheckboxCell
+                    minWidth={50}
                     key="checkbox_cell"
                     borderTop={rowIndex === 0}
                     clickable={cellClickableClass}
@@ -69,6 +70,7 @@ export function Row<C extends GridColumn>(props: RowProps<C>): ReactElement {
                         item={props.item}
                         clickable={cellClickableClass}
                         preview={preview}
+                        minWidth={column.minWidth}
                     />
                 );
 
@@ -76,6 +78,7 @@ export function Row<C extends GridColumn>(props: RowProps<C>): ReactElement {
             })}
             {props.showSelectorCell && (
                 <SelectorCell
+                    minWidth={50}
                     key="column_selector_cell"
                     borderTop={rowIndex === 0}
                     clickable={cellClickableClass}

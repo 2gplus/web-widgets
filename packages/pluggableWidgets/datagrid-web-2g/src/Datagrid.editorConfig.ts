@@ -203,7 +203,8 @@ export const getPreview = (
                   visible: "true",
                   width: "autoFit",
                   wrapText: false,
-                  sortProperty: "sort"
+                  sortProperty: "sort",
+                  minWidth: 100
               }
           ];
     const columns = rowLayout({

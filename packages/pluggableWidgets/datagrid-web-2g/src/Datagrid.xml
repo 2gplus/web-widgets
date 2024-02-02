@@ -93,6 +93,10 @@
                                 <caption>Tooltip</caption>
                                 <description />
                             </property>
+                            <property key="minWidth" type="integer" required="true" defaultValue="100">
+                                <caption>Min width</caption>
+                                <description>Minimal resizable width of the column</description>
+                            </property>
                             <property key="filter" type="widgets" required="false">
                                 <caption>Filter</caption>
                                 <description />

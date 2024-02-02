@@ -10,9 +10,11 @@ export class Column extends BaseColumn implements GridColumn {
     columnNumber: number;
     visible: boolean;
     sortProperty: string;
+    minWidth: number;
 
     constructor(props: ColumnsType, columnNumber: number) {
         super(props);
+        this.minWidth = props.minWidth;
         this.props = props;
         this.columnNumber = columnNumber;
         this.visible = props.visible?.value ?? false;

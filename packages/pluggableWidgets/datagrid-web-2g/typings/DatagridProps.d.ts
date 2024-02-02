@@ -24,6 +24,7 @@ export interface ColumnsType {
     dynamicText?: ListExpressionValue<string>;
     header?: DynamicValue<string>;
     tooltip?: ListExpressionValue<string>;
+    minWidth: number;
     filter?: ReactNode;
     filterAssociation?: ListReferenceValue | ListReferenceSetValue;
     filterAssociationOptions?: ListValue;
@@ -98,6 +99,7 @@ export interface ColumnsPreviewType {
     dynamicText: string;
     header: string;
     tooltip: string;
+    minWidth: number | null;
     filter: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     filterAssociation: string;
     filterAssociationOptions: {} | { caption: string } | { type: string } | null;

@@ -14,12 +14,23 @@ export type CellElementProps = {
     wrapText?: boolean;
     ["aria-hidden"]?: boolean;
     tabIndex?: number;
+    minWidth: number;
 } & Omit<JSX.IntrinsicElements["div"], "ref">;
 
 const component = memo(
     // eslint-disable-next-line prefer-arrow-callback
     forwardRef<HTMLDivElement>(function CellElement(
-        { className, borderTop, clickable, previewAsHidden, wrapText, alignment, tabIndex, ...rest }: CellElementProps,
+        {
+            className,
+            borderTop,
+            clickable,
+            previewAsHidden,
+            wrapText,
+            alignment,
+            tabIndex,
+            minWidth,
+            ...rest
+        }: CellElementProps,
         ref
     ): ReactElement {
         return (
@@ -35,6 +46,7 @@ const component = memo(
                     },
                     className
                 )}
+                style={{ minWidth: minWidth }}
                 role="gridcell"
                 tabIndex={tabIndex ?? (clickable ? 0 : undefined)}
                 ref={ref}

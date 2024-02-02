@@ -16,6 +16,7 @@ const component = memo(function Cell(props: CellComponentProps<GridColumn>): Rea
             wrapText={props.column.wrapText}
             clickable={props.clickable}
             previewAsHidden={props.preview && (props.column.initiallyHidden || !props.column.visible)}
+            minWidth={props.minWidth}
             {...keyNavProps}
         >
             {props.column.renderCellContent(props.item)}

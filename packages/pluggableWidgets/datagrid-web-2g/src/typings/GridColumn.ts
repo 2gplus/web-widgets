@@ -24,4 +24,5 @@ export interface GridColumn {
     width: WidthEnum;
     wrapText: boolean;
     sortProperty: string;
+    minWidth: number;
 }

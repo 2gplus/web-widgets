@@ -146,7 +146,6 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
             previousPage={() => setPage && setPage(prev => prev - 1)}
         />
     ) : null;
-    // const [sortBy, setSortBy] = useState<SortingRule[]>([]);
     const cssGridStyles = useMemo(
         () =>
             gridStyle(columnsToShow, props.state.size, {
@@ -156,41 +155,7 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
         [props.state.size, columnsToShow, columnsHidable, selectionProps.showCheckboxColumn]
     );
     const selectionEnabled = props.selectionProps.selectionType !== "None";
-
-    /**
-     * 2G remote sort config
-     */
-
-    // useEffect(() => {
-    //     if (props.remoteSortConfig && props.remoteSortConfig.property) {
-    //         const column = state.allColumns.find(c => c.sortProperty === props.remoteSortConfig?.property);
-    //         if (column) {
-    //             const index = state.allColumns.indexOf(column).toString();
-    //             const desc = !(props.remoteSortConfig.ascending ?? false);
-    //             if (!(sortBy.length === 1 && sortBy[0].desc === desc && sortBy[0].id === index)) {
-    //                 setSortBy([{ id: index, desc }]);
-    //             }
-    //         }
-    //     }
-    // }, [props.remoteSortConfig]);
-    //
-    // useEffect(() => {
-    //     console.log("[datagrid2g] called updateRemoteSortConfig effect");
-    //     if (props.updateRemoteSortConfig) {
-    //         if (sortBy.length > 0) {
-    //             props.updateRemoteSortConfig({
-    //                 ascending: !sortBy[0].desc,
-    //                 property: state.allColumns[Number.parseInt(sortBy[0].id, 10)].sortProperty
-    //             });
-    //         } else {
-    //             props.updateRemoteSortConfig({});
-    //         }
-    //     }
-    // }, [sortBy, props.updateRemoteSortConfig]);
-    /**
-     * End 2G remote sort config
-     */
-
+    const useHeaderFilters = true;
     return (
         <WidgetPropsProvider value={props}>
             <WidgetRoot
@@ -200,6 +165,10 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                 style={styles}
                 exporting={exporting}
             >
+                <div className={"header-filters"}>
+                    {useHeaderFilters ??
+                        state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))}
+                </div>
                 {showTopBar && (
                     <WidgetTopBar>
                         {hasHeaderText ? (
@@ -237,13 +206,17 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                                             draggable={columnsDraggable}
                                             dragOver={dragOver}
                                             filterable={columnsFilterable}
-                                            filterWidget={filterRendererProp(renderFilterWrapper, column.columnNumber)}
+                                            filterWidget={
+                                                !useHeaderFilters ??
+                                                filterRendererProp(renderFilterWrapper, column.columnNumber)
+                                            }
                                             hidable={columnsHidable}
                                             isDragging={isDragging}
                                             preview={preview}
                                             resizable={columnsResizable}
                                             resizer={
                                                 <ColumnResizer
+                                                    minWidth={column.minWidth}
                                                     setColumnWidth={(width: number) =>
                                                         actions.resize([column.columnId, width])
                                                     }
