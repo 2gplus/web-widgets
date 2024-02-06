@@ -161,6 +161,7 @@ export interface DatagridContainerProps {
     showSelectAllToggle: boolean;
     columns: ColumnsType[];
     columnsFilterable: boolean;
+    filtersAboveTable: boolean;
     pageSize: number;
     pagination: PaginationEnum;
     pagingPosition: PagingPositionEnum;
@@ -214,6 +215,7 @@ export interface DatagridPreviewProps {
     showSelectAllToggle: boolean;
     columns: ColumnsPreviewType[];
     columnsFilterable: boolean;
+    filtersAboveTable: boolean;
     pageSize: number | null;
     pagination: PaginationEnum;
     pagingPosition: PagingPositionEnum;

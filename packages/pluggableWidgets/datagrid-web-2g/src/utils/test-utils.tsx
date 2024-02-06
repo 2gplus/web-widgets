@@ -102,6 +102,7 @@ export function mockWidgetProps(): WidgetProps<GridColumn, ObjectItem> {
         selectionProps,
         selectionStatus: "unknown",
         setPage: jest.fn(),
-        processedRows: 0
+        processedRows: 0,
+        filtersAboveTable: true
     };
 }

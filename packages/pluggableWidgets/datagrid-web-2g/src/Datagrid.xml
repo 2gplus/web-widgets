@@ -190,6 +190,10 @@
                     <caption>Show column filters</caption>
                     <description />
                 </property>
+                <property key="filtersAboveTable" type="boolean" defaultValue="true">
+                    <caption>Filters above table</caption>
+                    <description />
+                </property>
             </propertyGroup>
             <propertyGroup caption="Rows">
                 <property key="pageSize" type="integer" defaultValue="20">

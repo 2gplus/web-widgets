@@ -246,6 +246,7 @@ function Container(props: Props): ReactElement {
             CellComponent={Cell}
             columnsDraggable={props.columnsDraggable}
             columnsFilterable={props.columnsFilterable}
+            filtersAboveTable={props.filtersAboveTable}
             columnsHidable={props.columnsHidable}
             columnsResizable={props.columnsResizable}
             columnsSortable={props.columnsSortable}

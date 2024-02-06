@@ -139,6 +139,7 @@ export function preview(props: DatagridPreviewProps): ReactElement {
             selectionProps={selectionProps}
             selectionStatus={"none"}
             id={gridId}
+            filtersAboveTable={true}
         />
     );
 }

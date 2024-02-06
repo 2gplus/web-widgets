@@ -70,6 +70,7 @@ export interface WidgetProps<C extends GridColumn, T extends ObjectItem = Object
     rowOnClickHandler?: (e: any, isDoubleClick: boolean, value: ObjectItem) => void;
     dataAttributes?: DataObjectsType[];
     headerText?: DynamicValue<string>;
+    filtersAboveTable: boolean;
 }
 
 export interface SortingRule {
@@ -155,7 +156,7 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
         [props.state.size, columnsToShow, columnsHidable, selectionProps.showCheckboxColumn]
     );
     const selectionEnabled = props.selectionProps.selectionType !== "None";
-    const useHeaderFilters = true;
+    const useHeaderFilters = props.filtersAboveTable;
     return (
         <WidgetPropsProvider value={props}>
             <WidgetRoot
@@ -166,8 +167,9 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                 exporting={exporting}
             >
                 <div className={"header-filters"}>
-                    {useHeaderFilters ??
-                        state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))}
+                    {useHeaderFilters
+                        ? state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))
+                        : null}
                 </div>
                 {showTopBar && (
                     <WidgetTopBar>
