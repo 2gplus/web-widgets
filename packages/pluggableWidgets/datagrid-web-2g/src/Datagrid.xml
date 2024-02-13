@@ -190,7 +190,7 @@
                     <caption>Show column filters</caption>
                     <description />
                 </property>
-                <property key="filtersAboveTable" type="boolean" defaultValue="true">
+                <property key="filtersAboveTable" type="boolean" defaultValue="false">
                     <caption>Filters above table</caption>
                     <description />
                 </property>

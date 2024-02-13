@@ -166,11 +166,11 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                 style={styles}
                 exporting={exporting}
             >
-                <div className={"header-filters"}>
-                    {useHeaderFilters
-                        ? state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))
-                        : null}
-                </div>
+                {useHeaderFilters ? (
+                    <div className={"header-filters"}>
+                        {state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))}
+                    </div>
+                ) : null}
                 {showTopBar && (
                     <WidgetTopBar>
                         {hasHeaderText ? (
