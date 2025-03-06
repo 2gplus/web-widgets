@@ -1,6 +1,7 @@
-import { createElement, ReactElement, useMemo } from "react";
-import classNames from "classnames";
 import { Dimensions, getDimensions } from "@mendix/widget-plugin-platform/utils/get-dimensions";
+import classNames from "classnames";
+import { createElement, Fragment, ReactElement, useMemo } from "react";
+import { useDispatchResizeObserver } from "../hooks/useResizeObserver";
 import {
     ChartTypeEnum,
     CustomLayoutProps,
@@ -10,15 +11,13 @@ import {
     getModelerSeriesOptions,
     useThemeFolderConfigs
 } from "../utils/configs";
-import { Chart, ChartProps, ChartWithPlayground } from "./Chart";
-
-import "../ui/Chart.scss";
+import { Chart, ChartProps } from "./Chart";
 
 export interface ChartWidgetProps extends CustomLayoutProps, Dimensions, ChartProps {
     className: string;
-    showSidebarEditor: boolean;
     type: ChartTypeEnum;
     enableThemeConfig: boolean;
+    playground: React.ReactNode | null;
 }
 
 export const ChartWidget = ({
@@ -32,14 +31,14 @@ export const ChartWidget = ({
     xAxisLabel,
     yAxisLabel,
     gridLinesMode,
-    showSidebarEditor,
     customLayout,
     customConfig,
     layoutOptions,
     configOptions,
     seriesOptions,
     type,
-    enableThemeConfig
+    enableThemeConfig,
+    playground
 }: ChartWidgetProps): ReactElement => {
     const themeFolderConfigs = useThemeFolderConfigs(type, enableThemeConfig);
 
@@ -62,20 +61,28 @@ export const ChartWidget = ({
         [seriesOptions, themeFolderConfigs.series]
     );
 
-    const LineChartWrapperComponent = showSidebarEditor ? ChartWithPlayground : Chart;
+    const ref = useDispatchResizeObserver<HTMLDivElement>();
+
+    // Waiting for datasource.
+    if (data.length === 0) {
+        return <Fragment />;
+    }
 
     return (
         <div
             className={classNames("widget-chart", className)}
             style={getDimensions({ widthUnit, width, heightUnit, height })}
+            ref={ref}
         >
-            <LineChartWrapperComponent
+            <Chart
+                key={data.length}
                 data={data}
                 layoutOptions={initialLayoutOptions}
                 customLayout={customLayout}
                 configOptions={initialConfigOptions}
                 customConfig={customConfig}
                 seriesOptions={initialSeriesOptions}
+                playground={playground}
             />
         </div>
     );

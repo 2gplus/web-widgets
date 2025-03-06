@@ -51,14 +51,26 @@
                     <description />
                     <returnType type="String" />
                 </property>
+                <property key="seriesItemSelection" type="selection" dataSource="seriesDataSource">
+                    <caption>Selection type</caption>
+                    <description />
+                    <selectionTypes>
+                        <selectionType name="None" />
+                        <selectionType name="Single" />
+                    </selectionTypes>
+                </property>
             </propertyGroup>
             <propertyGroup caption="General">
                 <property key="enableAdvancedOptions" type="boolean" defaultValue="false">
                     <caption>Enable advanced options</caption>
                     <description />
                 </property>
-                <property key="enableDeveloperMode" type="boolean" defaultValue="false">
-                    <caption>Enable developer mode</caption>
+                <property key="showPlaygroundSlot" type="boolean" defaultValue="false">
+                    <caption>Show playground slot</caption>
+                    <description />
+                </property>
+                <property key="playground" type="widgets" required="false">
+                    <caption>Playground slot</caption>
                     <description />
                 </property>
                 <property key="showLegend" type="boolean" defaultValue="true">
@@ -113,7 +125,7 @@
         </propertyGroup>
         <propertyGroup caption="Events">
             <propertyGroup caption="Events">
-                <property key="onClickAction" type="action" required="false">
+                <property key="onClickAction" type="action" required="false" dataSource="seriesDataSource">
                     <caption>On click action</caption>
                     <description />
                 </property>

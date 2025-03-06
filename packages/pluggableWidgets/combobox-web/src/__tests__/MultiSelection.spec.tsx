@@ -1,17 +1,23 @@
 import {
-    buildListExpression,
-    dynamicValue,
+    dynamic,
     EditableValueBuilder,
     ListAttributeValueBuilder,
-    ListValueBuilder,
-    ReferenceSetValueBuilder
+    ReferenceSetValueBuilder,
+    listExp,
+    obj,
+    list
 } from "@mendix/widget-plugin-test-utils";
+import "./__mocks__/intersectionObserverMock";
 import "@testing-library/jest-dom";
-import { fireEvent, render, waitFor } from "@testing-library/react";
-import { ObjectItem, DynamicValue } from "mendix";
+import { fireEvent, render, RenderResult, waitFor } from "@testing-library/react";
+import { ListValue } from "mendix";
 import { createElement } from "react";
-import { ComboboxContainerProps } from "../../typings/ComboboxProps";
+import { ComboboxContainerProps, OptionsSourceAssociationCaptionTypeEnum } from "../../typings/ComboboxProps";
 import Combobox from "../Combobox";
+
+async function getInput(component: RenderResult): Promise<HTMLInputElement> {
+    return (await component.findByRole("combobox")) as HTMLInputElement;
+}
 
 describe("Combo box (Association)", () => {
     let defaultProps: ComboboxContainerProps;
@@ -19,44 +25,56 @@ describe("Combo box (Association)", () => {
         defaultProps = {
             name: "comboBox",
             id: "comboBox1",
+            source: "context",
             optionsSourceType: "association",
-            attributeAssociation: new ReferenceSetValueBuilder().withValue([{ id: "111" }] as ObjectItem[]).build(),
+            attributeAssociation: new ReferenceSetValueBuilder().withValue([obj("111")]).build(),
             attributeEnumeration: new EditableValueBuilder<string>().build(),
             attributeBoolean: new EditableValueBuilder<boolean>().build(),
-            optionsSourceAssociationDataSource: ListValueBuilder().withItems([
-                { id: "111" },
-                { id: "222" },
-                { id: "333" },
-                { id: "444" }
-            ] as ObjectItem[]),
+            optionsSourceAssociationDataSource: list([obj("111"), obj("222"), obj("333"), obj("444")]),
             optionsSourceAssociationCaptionType: "expression",
             optionsSourceAssociationCaptionAttribute: new ListAttributeValueBuilder<string>().build(),
-            optionsSourceAssociationCaptionExpression: buildListExpression("$currentObject/CountryName"),
+            optionsSourceAssociationCaptionExpression: listExp(() => "$currentObject/CountryName"),
             optionsSourceAssociationCustomContentType: "no",
             optionsSourceAssociationCustomContent: undefined,
-            emptyOptionText: dynamicValue("Select an option 111"),
+            emptyOptionText: dynamic("Select an option 111"),
             ariaRequired: true,
             clearable: true,
             filterType: "contains",
             selectedItemsStyle: "text",
-            noOptionsText: dynamicValue("no options found"),
-            clearButtonAriaLabel: dynamicValue("Clear selection"),
-            removeValueAriaLabel: dynamicValue("Remove value"),
+            readOnlyStyle: "bordered",
+            lazyLoading: false,
+            loadingType: "spinner",
+            noOptionsText: dynamic("no options found"),
+            clearButtonAriaLabel: dynamic("Clear selection"),
+            removeValueAriaLabel: dynamic("Remove value"),
             selectAllButton: true, // Causes +1 option to be added to the menu
-            selectAllButtonCaption: dynamicValue("Select All"),
+            selectAllButtonCaption: dynamic("Select All"),
             selectionMethod: "checkbox",
-            a11ySelectedValue: dynamicValue("Selected value:"),
-            a11yOptionsAvailable: dynamicValue("Options available:"),
-            a11yInstructions: dynamicValue("a11yInstructions"),
-            showFooter: false
+            a11ySelectedValue: dynamic("Selected value:"),
+            a11yOptionsAvailable: dynamic("Options available:"),
+            a11yInstructions: dynamic("a11yInstructions"),
+            showFooter: false,
+            databaseAttributeString: new EditableValueBuilder<string | Big>().build(),
+            optionsSourceDatabaseCaptionType: "attribute",
+            optionsSourceDatabaseCustomContentType: "yes",
+            staticDataSourceCustomContentType: "no",
+            staticAttribute: new EditableValueBuilder<string>().build(),
+            optionsSourceStaticDataSource: [
+                {
+                    staticDataSourceValue: dynamic("value1"),
+                    staticDataSourceCustomContent: undefined,
+                    staticDataSourceCaption: dynamic("caption1")
+                },
+                {
+                    staticDataSourceValue: dynamic("value2"),
+                    staticDataSourceCustomContent: undefined,
+                    staticDataSourceCaption: dynamic("caption2")
+                }
+            ],
+            selectedItemsSorting: "none"
         };
         if (defaultProps.optionsSourceAssociationCaptionType === "expression") {
-            defaultProps.optionsSourceAssociationCaptionExpression!.get = i => {
-                return {
-                    value: `${i.id}`,
-                    status: "available"
-                } as DynamicValue<string>;
-            };
+            defaultProps.optionsSourceAssociationCaptionExpression!.get = i => dynamic(`${i.id}`);
         }
     });
 
@@ -71,12 +89,12 @@ describe("Combo box (Association)", () => {
     });
     it("toggles combobox menu on: input CLICK(focus) / BLUR", async () => {
         const component = render(<Combobox {...defaultProps} />);
-        const toggleButton = await component.findByRole("combobox");
-        await fireEvent.click(toggleButton);
+        const input = await getInput(component);
+        await fireEvent.click(input);
         await waitFor(() => {
             expect(component.getAllByRole("option")).toHaveLength(4);
         });
-        fireEvent.blur(toggleButton);
+        fireEvent.blur(input);
         expect(component.queryAllByRole("option")).toHaveLength(0);
         expect(component.container).toMatchSnapshot();
     });
@@ -94,28 +112,28 @@ describe("Combo box (Association)", () => {
     });
     it("adds new item to inital selected item", async () => {
         const component = render(<Combobox {...defaultProps} />);
-        const input = (await component.findByRole("combobox")) as HTMLInputElement;
+        const input = await getInput(component);
 
         fireEvent.click(input);
         waitFor(() => {
             expect(component.queryAllByRole("option")).toHaveLength(4);
         });
-        const option1 = await component.findByText("222");
+        const option1 = await component.findByText("obj_222");
         fireEvent.click(option1);
         expect(defaultProps.attributeAssociation?.setValue).toHaveBeenCalled();
-        expect(defaultProps.attributeAssociation?.value).toEqual([{ id: "111" }, { id: "222" }]);
+        expect(defaultProps.attributeAssociation?.value).toEqual([{ id: "obj_111" }, { id: "obj_222" }]);
     });
     it("removes selected item", async () => {
         const component = render(<Combobox {...defaultProps} />);
-        const input = (await component.findByRole("combobox")) as HTMLInputElement;
+        const input = await getInput(component);
         fireEvent.click(input);
         await waitFor(() => {
             expect(component.queryAllByRole("option")).toHaveLength(4);
         });
-        const option1 = await component.findByText("222");
+        const option1 = await component.findByText("obj_222");
         fireEvent.click(option1);
         expect(defaultProps.attributeAssociation?.setValue).toHaveBeenCalled();
-        expect(defaultProps.attributeAssociation?.value).toEqual([{ id: "111" }, { id: "222" }]);
+        expect(defaultProps.attributeAssociation?.value).toEqual([{ id: "obj_111" }, { id: "obj_222" }]);
 
         const clearButton = await component.container.getElementsByClassName("widget-combobox-clear-button")[0];
         fireEvent.click(clearButton);
@@ -123,7 +141,7 @@ describe("Combo box (Association)", () => {
     });
     it("selects all items with the Select All button", async () => {
         const component = render(<Combobox {...defaultProps} />);
-        const input = (await component.findByRole("combobox")) as HTMLInputElement;
+        const input = await getInput(component);
         fireEvent.click(input);
         await waitFor(() => {
             expect(component.queryAllByRole("option")).toHaveLength(4);
@@ -132,5 +150,34 @@ describe("Combo box (Association)", () => {
         expect(defaultProps.attributeAssociation?.value).toHaveLength(1);
         fireEvent.click(selectAllButton);
         expect(defaultProps.attributeAssociation?.value).toHaveLength(4);
+    });
+
+    describe("with lazy loading", () => {
+        it("calls loadMore only when menu opens", async () => {
+            const setLimit = jest.fn();
+            const lazyLoadingProps = {
+                ...defaultProps,
+                lazyLoading: true,
+                optionsSourceAssociationCaptionType: "attribute" as OptionsSourceAssociationCaptionTypeEnum,
+                optionsSourceAssociationDataSource: {
+                    ...defaultProps.optionsSourceAssociationDataSource,
+                    hasMoreItems: true,
+                    limit: 0,
+                    setLimit
+                } as ListValue
+            };
+            const component = render(<Combobox {...lazyLoadingProps} />);
+
+            expect(component.queryAllByRole("option")).toHaveLength(0);
+            expect(lazyLoadingProps.optionsSourceAssociationDataSource?.limit).toEqual(0);
+
+            const input = await getInput(component);
+            fireEvent.click(input);
+
+            await waitFor(() => {
+                expect(component.queryAllByRole("option")).toHaveLength(4);
+                expect(setLimit).toHaveBeenCalledWith(100);
+            });
+        });
     });
 });

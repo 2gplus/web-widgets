@@ -13,13 +13,25 @@ exports[`Number Filter with single instance with multiple attributes renders cor
         class="filter-selector-content"
       >
         <button
-          aria-controls="NumberFilter1-filter-selectors"
+          aria-activedescendant=""
+          aria-controls="downshift-:r7:-menu"
           aria-expanded="false"
-          aria-haspopup="true"
+          aria-haspopup="listbox"
+          aria-label="Equal"
           class="btn btn-default filter-selector-button button-icon equal"
+          id="downshift-:r7:-toggle-button"
+          role="combobox"
+          tabindex="0"
         >
            
         </button>
+        <ul
+          aria-label="Select filter type"
+          class="filter-selectors hidden"
+          id="downshift-:r7:-menu"
+          role="listbox"
+          style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 0px);"
+        />
       </div>
     </div>
     <input
@@ -27,6 +39,16 @@ exports[`Number Filter with single instance with multiple attributes renders cor
       type="number"
       value=""
     />
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Number Filter with single instance with no context renders error message 1`] = `
+<DocumentFragment>
+  <div
+    class="alert alert-danger"
+  >
+    The filter widget must be placed inside the column or header of the Data grid 2.0 or inside header of the Gallery widget.
   </div>
 </DocumentFragment>
 `;
@@ -44,13 +66,25 @@ exports[`Number Filter with single instance with single attribute renders correc
         class="filter-selector-content"
       >
         <button
-          aria-controls="NumberFilter1-filter-selectors"
+          aria-activedescendant=""
+          aria-controls="downshift-:r0:-menu"
           aria-expanded="false"
-          aria-haspopup="true"
+          aria-haspopup="listbox"
+          aria-label="Equal"
           class="btn btn-default filter-selector-button button-icon equal"
+          id="downshift-:r0:-toggle-button"
+          role="combobox"
+          tabindex="0"
         >
            
         </button>
+        <ul
+          aria-label="Select filter type"
+          class="filter-selectors hidden"
+          id="downshift-:r0:-menu"
+          role="listbox"
+          style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 0px);"
+        />
       </div>
     </div>
     <input
@@ -58,6 +92,26 @@ exports[`Number Filter with single instance with single attribute renders correc
       type="number"
       value=""
     />
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Number Filter with single instance with wrong attribute's type renders error message 1`] = `
+<DocumentFragment>
+  <div
+    class="alert alert-danger"
+  >
+    Unable to get filter store. Check parent widget configuration.
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Number Filter with single instance with wrong multiple attributes' types renders error message 1`] = `
+<DocumentFragment>
+  <div
+    class="alert alert-danger"
+  >
+    Unable to get filter store. Check parent widget configuration.
   </div>
 </DocumentFragment>
 `;

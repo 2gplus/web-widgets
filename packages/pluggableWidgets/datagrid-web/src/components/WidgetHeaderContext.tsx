@@ -1,59 +1,39 @@
-import { createElement, ReactElement, memo, useMemo, useState, ReactNode } from "react";
-import { FilterCondition } from "mendix/filters";
-import { FilterListType } from "../../typings/DatagridProps";
-import { getGlobalSelectionContext } from "@mendix/widget-plugin-grid/selection";
+import { getGlobalFilterContextObject } from "@mendix/widget-plugin-filtering/context";
+import { HeaderFiltersStore } from "@mendix/widget-plugin-filtering/stores/generic/HeaderFiltersStore";
 import {
-    getGlobalFilterContextObject,
-    useMultipleFiltering,
-    readInitFilterValues
-} from "@mendix/widget-plugin-filtering";
+    getGlobalSelectionContext,
+    SelectionHelper,
+    useCreateSelectionContextValue
+} from "@mendix/widget-plugin-grid/selection";
+import { createElement, memo, ReactElement, ReactNode } from "react";
 
 interface WidgetHeaderContextProps {
-    filterList: FilterListType[];
-    selectionContextValue: { status: "all" | "some" | "none"; toggle: () => void } | undefined;
-    setFiltered: (val: boolean) => void;
-    viewStateFilters?: FilterCondition;
     children?: ReactNode;
-    state: ReturnType<typeof useMultipleFiltering>;
+    filtersStore: HeaderFiltersStore;
+    selectionHelper?: SelectionHelper;
 }
 
-const component = memo((props: WidgetHeaderContextProps) => {
-    const SelectionContext = getGlobalSelectionContext();
-    const FilterContext = getGlobalFilterContextObject();
-    const multipleFilteringState = props.state;
-    const filterList = useMemo(
-        () => props.filterList.reduce((filters, { filter }) => ({ ...filters, [filter.id]: filter }), {}),
-        [props.filterList]
-    );
-    const [multipleInitialFilters] = useState(() =>
-        props.filterList.reduce(
-            (filters, { filter }) => ({
-                ...filters,
-                [filter.id]: readInitFilterValues(filter, props.viewStateFilters)
-            }),
-            {}
-        )
-    );
+const SelectionContext = getGlobalSelectionContext();
+const FilterContext = getGlobalFilterContextObject();
 
+function FilterAPIProvider(props: { filtersStore: HeaderFiltersStore; children?: ReactNode }): ReactElement {
+    return <FilterContext.Provider value={props.filtersStore.context}>{props.children}</FilterContext.Provider>;
+}
+
+function SelectionStatusProvider(props: { selectionHelper?: SelectionHelper; children?: ReactNode }): ReactElement {
+    const value = useCreateSelectionContextValue(props.selectionHelper);
+    return <SelectionContext.Provider value={value}>{props.children}</SelectionContext.Provider>;
+}
+
+function HeaderContainer(props: WidgetHeaderContextProps): ReactElement {
     return (
-        <FilterContext.Provider
-            value={{
-                filterDispatcher: prev => {
-                    if (prev.filterType) {
-                        const [, filterDispatcher] = multipleFilteringState[prev.filterType];
-                        filterDispatcher(prev);
-                        props.setFiltered(true);
-                    }
-                    return prev;
-                },
-                multipleAttributes: filterList,
-                multipleInitialFilters
-            }}
-        >
-            <SelectionContext.Provider value={props.selectionContextValue}>{props.children}</SelectionContext.Provider>
-        </FilterContext.Provider>
+        <FilterAPIProvider filtersStore={props.filtersStore}>
+            <SelectionStatusProvider selectionHelper={props.selectionHelper}>{props.children}</SelectionStatusProvider>
+        </FilterAPIProvider>
     );
-});
+}
+
+const component = memo(HeaderContainer);
 
 component.displayName = "WidgetHeaderContext";
 

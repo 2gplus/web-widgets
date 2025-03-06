@@ -1,0 +1,240 @@
+name: Run build jobs
+# This workflow is main place for build jobs.
+# If you need add job that will run as part of github check
+# you need add it in this file.
+
+on:
+    push:
+        branches: [main]
+
+    pull_request:
+        branches: [main]
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    since_flag: ${{ github.event_name == 'pull_request' && format('--filter "...[origin/{0}]"', github.base_ref) || '' }}
+
+jobs:
+    check-sha:
+        name: Check SHA in GH Actions
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+            - uses: zgosalvez/github-actions-ensure-sha-pinned-actions@38608ef4fb69adae7f1eac6eeb88e67b7d083bfd # v3.0.16
+
+    check:
+        name: Run code quality check
+        runs-on: ubuntu-latest
+        needs: [check-sha]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+            - name: Setup pnpm
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+            - name: Setup node
+              uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: "pnpm"
+            - name: Get sha of main
+              run: echo "main_sha=$(git rev-parse origin/main)" >> $GITHUB_ENV
+            - name: Restore Turbo Cache
+              uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+              with:
+                  path: node_modules/.cache/turbo
+                  # NOTE: We create new cache record for every new commit on main
+                  # but fallback to latest entry
+                  key: turbo-cache-${{ runner.os }}-lint-test-${{ env.main_sha }}
+                  restore-keys: |
+                      turbo-cache-${{ runner.os }}-lint-test
+
+            - name: Install dependencies
+              run: pnpm install
+            - name: Lint code
+              run: pnpm run lint ${{ env.since_flag }}
+            - name: Run unit tests
+              run: pnpm run test ${{ env.since_flag }}
+
+    mxversion:
+        name: Read versions file
+        runs-on: ubuntu-latest
+        needs: [check-sha]
+        outputs:
+            mxversion: ${{ steps.readfile.outputs.mxversion }}
+            mxbuild_path: ${{ steps.readfile.outputs.mxbuild_path }}
+            mxbuild_tag: ${{ steps.readfile.outputs.mxbuild_tag }}
+            mxruntime_path: ${{ steps.readfile.outputs.mxruntime_path }}
+            mxruntime_tag: ${{ steps.readfile.outputs.mxruntime_tag }}
+            mx_tools_cache_key: mx-tools-cache:${{ steps.readfile.outputs.mxversion }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 1
+            - name: Set job outputs
+              id: readfile
+              run: |
+                  MENDIX_VERSION=$(cat automation/run-e2e/mendix-versions.json | jq -r '.latest')
+                  echo "mxversion=$MENDIX_VERSION" | tee -a "$GITHUB_OUTPUT"
+                  echo "mxbuild_path=.docker-cache/mxbuild_$MENDIX_VERSION.tar" | tee -a "$GITHUB_OUTPUT"
+                  echo "mxbuild_tag=mxbuild:$MENDIX_VERSION" | tee -a "$GITHUB_OUTPUT"
+                  echo "mxruntime_path=.docker-cache/mxruntime_$MENDIX_VERSION.tar" | tee -a "$GITHUB_OUTPUT"
+                  echo "mxruntime_tag=mxruntime:$MENDIX_VERSION" | tee -a "$GITHUB_OUTPUT"
+
+    build:
+        name: Run ${{ matrix.target }} task on ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        needs: [check-sha, check]
+
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest]
+                target: [build, release]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+            - name: Setup pnpm
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+            - name: Setup node
+              uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: "pnpm"
+            - name: Get sha of main
+              run: echo "main_sha=$(git rev-parse origin/main)" >> ${{ runner.os == 'Windows' && '$env:GITHUB_ENV' || '$GITHUB_ENV' }}
+            - name: Restore Turbo Cache
+              uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+              with:
+                  path: node_modules/.cache/turbo
+                  # NOTE: build & release tasks should have their own cache
+                  # this is why we include matrix.target param in key
+                  # NOTE: We create new cache record for every new commit on main
+                  # but fallback to latest entry
+                  key: turbo-cache-${{ runner.os }}-${{ matrix.target }}-${{ env.main_sha }}
+                  restore-keys: |
+                      turbo-cache-${{ runner.os }}-${{ matrix.target }}
+            - if: runner.os == 'Windows'
+              name: Set concurrency on Windows
+              run: echo "task_concurrency=3" >> $env:GITHUB_ENV
+            - if: runner.os == 'Linux'
+              name: Set concurrency on Linux
+              run: echo "task_concurrency=5" >> $GITHUB_ENV
+            - name: Install dependencies
+              run: pnpm install
+            - name: Run ${{ matrix.target }} task
+              run: pnpm run ${{ matrix.target }} --concurrency=${{ env.task_concurrency }} ${{ env.since_flag }}
+              env:
+                  # Limit memory to avoid out of memory issues
+                  NODE_OPTIONS: "--max-old-space-size=5120 --max_old_space_size=5120"
+
+    e2e:
+        name: Run automated end-to-end tests
+        needs:
+            - check-sha
+            - mxversion
+        # Run job only if it's push to main or PR from web-widgets, don't run for fork PRs
+        if: >-
+            ${{ github.event_name == 'push' ||
+                github.event_name == 'pull_request' && 
+                github.event.pull_request.head.repo.full_name == 'mendix/web-widgets' }}
+        runs-on: ubuntu-latest
+        permissions:
+            packages: read
+            contents: read
+        env:
+            MENDIX_VERSION: ${{needs.mxversion.outputs.mxversion}}
+            MXBUILD_PATH: ${{needs.mxversion.outputs.mxbuild_path}}
+            MXBUILD_TAG: ${{needs.mxversion.outputs.mxbuild_tag}}
+            MXRUNTIME_PATH: ${{needs.mxversion.outputs.mxruntime_path}}
+            MXRUNTIME_TAG: ${{needs.mxversion.outputs.mxruntime_tag}}
+        strategy:
+            # when one test fails, DO NOT cancel the other
+            fail-fast: false
+            matrix:
+                index: [0, 1, 2, 3]
+                include:
+                    - chunks: 4
+
+        steps:
+            - name: Download mxtools cache
+              uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+              id: cache
+              with:
+                  path: |
+                      ${{ env.MXBUILD_PATH }}
+                      ${{ env.MXRUNTIME_PATH }}
+                  key: ${{needs.mxversion.outputs.mx_tools_cache_key}}
+            - name: Load mxbuild & mxruntime images
+              # Skip if there is no cache
+              if: steps.cache.outputs.cache-hit == 'true'
+              run: |
+                  docker load --input ${{ env.MXBUILD_PATH }}
+                  docker load --input ${{ env.MXRUNTIME_PATH }}
+                  docker image ls -a
+            - name: Checkout
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+              with:
+                  fetch-depth: 0
+            - name: Setup pnpm
+              uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3.0.0
+            - name: Setup node
+              uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+              with:
+                  node-version-file: ".nvmrc"
+                  cache: "pnpm"
+            - name: Get sha of main
+              run: echo "main_sha=$(git rev-parse origin/main)" >> ${{ runner.os == 'Windows' && '$env:GITHUB_ENV' || '$GITHUB_ENV' }}
+            - name: Restore Turbo Cache
+              uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+              with:
+                  path: node_modules/.cache/turbo
+                  key: turbo-cache-${{ runner.os }}-e2e-chunk-${{ matrix.index }}-${{ env.main_sha }}
+                  restore-keys: |
+                      turbo-cache-${{ runner.os }}-e2e-chunk-${{ matrix.index }}
+            - name: Install dependencies
+              run: pnpm install
+            - name: Install Playwright Browsers
+              run: pnpm exec playwright install --with-deps chromium
+            - name: "Executing E2E tests"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: >-
+                  node ./automation/run-e2e/bin/run-e2e-in-chunks.mjs
+                  --chunks ${{ matrix.chunks }}
+                  --index ${{ matrix.index }}
+                  --event-name ${{ github.event_name }}
+            - name: Check file existence
+              id: check_files
+              uses: andstor/file-existence-action@076e0072799f4942c8bc574a82233e1e4d13e9d6 # v3.0.0
+              with:
+                  files: "./automation/run-e2e/ctrf/*.json"
+              if: always()
+            - name: "Generating Github Test Summary"
+              if: steps.check_files.outputs.files_exists == 'true'
+              run: |
+                  pnpm --filter run-e2e run report:merge
+                  pnpm dlx github-actions-ctrf custom ./automation/run-e2e/ctrf/merged-report.json ./automation/run-e2e/ctrf-custom-template/custom-summary.hbs
+            - name: "Fixing files permissions"
+              if: failure()
+              run: |
+                  sudo find ${{ github.workspace }}/packages/* -type d -exec chmod 755 {} \;
+                  sudo find ${{ github.workspace }}/packages/* -type f -exec chmod 644 {} \;
+            - name: "Archive test screenshot diff results"
+              uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+              if: failure()
+              with:
+                  name: test-screenshot-results-${{ matrix.index }}
+                  path: |
+                      ${{ github.workspace }}/packages/**/**/test-results/**/*.png
+                      ${{ github.workspace }}/packages/**/**/test-results/**/*.zip
+                  if-no-files-found: error

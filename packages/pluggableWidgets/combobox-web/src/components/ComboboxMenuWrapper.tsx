@@ -1,37 +1,49 @@
 import classNames from "classnames";
 import { UseComboboxPropGetters } from "downshift/typings";
-import { PropsWithChildren, ReactElement, ReactNode, createElement, MouseEvent } from "react";
+import { createElement, MouseEvent, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { useMenuStyle } from "../hooks/useMenuStyle";
 import { NoOptionsPlaceholder } from "./Placeholder";
 
 interface ComboboxMenuWrapperProps extends PropsWithChildren, Partial<UseComboboxPropGetters<string>> {
-    isOpen: boolean;
-    isEmpty: boolean;
-    noOptionsText?: string;
     alwaysOpen?: boolean;
     highlightedIndex?: number | null;
-    menuHeaderContent?: ReactNode;
+    isEmpty: boolean;
+    isLoading: boolean;
+    isOpen: boolean;
+    lazyLoading: boolean;
+    loader: JSX.Element;
     menuFooterContent?: ReactNode;
+    menuHeaderContent?: ReactNode;
+    noOptionsText?: string;
     onOptionClick?: (e: MouseEvent) => void;
+    onScroll?: (e: any) => void;
 }
 
-function PreventMenuCloseEventHandler(e: React.MouseEvent) {
+function PreventMenuCloseEventHandler(e: React.MouseEvent): void {
+    e.stopPropagation();
+}
+
+function ForcePreventMenuCloseEventHandler(e: React.MouseEvent): void {
     e.preventDefault();
     e.stopPropagation();
 }
 
 export function ComboboxMenuWrapper(props: ComboboxMenuWrapperProps): ReactElement {
     const {
-        children,
-        isOpen,
-        isEmpty,
-        noOptionsText,
         alwaysOpen,
+        children,
         getMenuProps,
-        menuHeaderContent,
-        menuFooterContent,
         highlightedIndex,
-        onOptionClick
+        isEmpty,
+        isLoading,
+        isOpen,
+        lazyLoading,
+        loader,
+        menuFooterContent,
+        menuHeaderContent,
+        noOptionsText,
+        onOptionClick,
+        onScroll
     } = props;
 
     const [ref, style] = useMenuStyle<HTMLDivElement>(isOpen);
@@ -54,25 +66,36 @@ export function ComboboxMenuWrapper(props: ComboboxMenuWrapperProps): ReactEleme
                 <div
                     className="widget-combobox-menu-header widget-combobox-item"
                     onMouseDown={PreventMenuCloseEventHandler}
+                    tabIndex={0}
                 >
                     {menuHeaderContent}
                 </div>
             )}
             <ul
                 className={classNames("widget-combobox-menu-list", {
-                    "widget-combobox-menu-highlighted": (highlightedIndex ?? -1) >= 0
+                    "widget-combobox-menu-highlighted": (highlightedIndex ?? -1) >= 0,
+                    "widget-combobox-menu-lazy-scroll": lazyLoading && !isEmpty
                 })}
                 {...getMenuProps?.(
                     {
-                        onClick: onOptionClick
+                        onClick: onOptionClick,
+                        onMouseDown: ForcePreventMenuCloseEventHandler,
+                        onScroll
                     },
                     { suppressRefError: true }
                 )}
             >
-                {isOpen ? isEmpty ? <NoOptionsPlaceholder>{noOptionsText}</NoOptionsPlaceholder> : children : null}
+                {isOpen ? (
+                    isEmpty && !isLoading ? (
+                        <NoOptionsPlaceholder>{noOptionsText}</NoOptionsPlaceholder>
+                    ) : (
+                        children
+                    )
+                ) : null}
+                {loader}
             </ul>
             {menuFooterContent && (
-                <div className="widget-combobox-menu-footer" onMouseDown={PreventMenuCloseEventHandler}>
+                <div tabIndex={0} className="widget-combobox-menu-footer" onMouseDown={PreventMenuCloseEventHandler}>
                     {menuFooterContent}
                 </div>
             )}

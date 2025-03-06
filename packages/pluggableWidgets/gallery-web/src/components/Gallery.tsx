@@ -1,5 +1,7 @@
 import { Pagination } from "@mendix/widget-plugin-grid/components/Pagination";
-import { ListOptionSelectionProps } from "@mendix/widget-plugin-grid/selection/useListOptionSelectionProps";
+import { KeyNavProvider } from "@mendix/widget-plugin-grid/keyboard-navigation/context";
+import { FocusTargetController } from "@mendix/widget-plugin-grid/keyboard-navigation/FocusTargetController";
+import { PositionInGrid, SelectActionHandler } from "@mendix/widget-plugin-grid/selection";
 import { ObjectItem } from "mendix";
 import { createElement, ReactElement, ReactNode } from "react";
 import { GalleryItemHelper } from "../typings/GalleryItem";
@@ -11,6 +13,8 @@ import { GalleryHeader } from "./GalleryHeader";
 import { GalleryRoot } from "./GalleryRoot";
 import { GalleryTopBar } from "./GalleryTopBar";
 
+import { ItemEventsController } from "../typings/ItemEventsController";
+
 export interface GalleryProps<T extends ObjectItem> {
     className?: string;
     desktopItems: number;
@@ -21,7 +25,6 @@ export interface GalleryProps<T extends ObjectItem> {
     showHeader: boolean;
     hasMoreItems: boolean;
     items: T[];
-    itemHelper: GalleryItemHelper;
     numberOfItems?: number;
     paging: boolean;
     page: number;
@@ -30,10 +33,18 @@ export interface GalleryProps<T extends ObjectItem> {
     showEmptyStatePreview?: boolean;
     phoneItems: number;
     setPage?: (computePage: (prevPage: number) => number) => void;
+    style?: React.CSSProperties;
     tabletItems: number;
     tabIndex?: number;
-    selectionProps: ListOptionSelectionProps;
     ariaLabelListBox?: string;
+    preview?: boolean;
+
+    // Helpers
+    focusController: FocusTargetController;
+    itemEventsController: ItemEventsController;
+    itemHelper: GalleryItemHelper;
+    selectHelper: SelectActionHandler;
+    getPosition: (index: number) => PositionInGrid;
 }
 
 export function Gallery<T extends ObjectItem>(props: GalleryProps<T>): ReactElement {
@@ -48,6 +59,7 @@ export function Gallery<T extends ObjectItem>(props: GalleryProps<T>): ReactElem
                 page={props.page}
                 pageSize={props.pageSize}
                 previousPage={() => props.setPage && props.setPage(prev => prev - 1)}
+                pagination={props.paging ? "buttons" : "virtualScrolling"}
             />
         </div>
     ) : null;
@@ -56,7 +68,12 @@ export function Gallery<T extends ObjectItem>(props: GalleryProps<T>): ReactElem
     const showFooter = props.paging && props.paginationPosition === "below";
 
     return (
-        <GalleryRoot className={props.className} selectable={false} data-focusindex={props.tabIndex || 0}>
+        <GalleryRoot
+            className={props.className}
+            style={props.style}
+            selectable={false}
+            data-focusindex={props.tabIndex || 0}
+        >
             {showTopBar && <GalleryTopBar>{pagination}</GalleryTopBar>}
             {props.showHeader && <GalleryHeader aria-label={props.headerTitle}>{props.header}</GalleryHeader>}
             <GalleryContent hasMoreItems={props.hasMoreItems} setPage={props.setPage} isInfinite={!props.paging}>
@@ -65,17 +82,23 @@ export function Gallery<T extends ObjectItem>(props: GalleryProps<T>): ReactElem
                         lg={props.desktopItems}
                         md={props.tabletItems}
                         sm={props.phoneItems}
-                        selectionType={props.selectionProps.selectionType}
+                        selectionType={props.selectHelper.selectionType}
                         aria-label={props.ariaLabelListBox}
                     >
-                        {props.items.map(item => (
-                            <ListItem
-                                key={`item_${item.id}`}
-                                helper={props.itemHelper}
-                                item={item}
-                                selectionProps={props.selectionProps}
-                            />
-                        ))}
+                        <KeyNavProvider focusController={props.focusController}>
+                            {props.items.map((item, index) => (
+                                <ListItem
+                                    preview={props.preview}
+                                    key={`item_${item.id}`}
+                                    helper={props.itemHelper}
+                                    item={item}
+                                    selectHelper={props.selectHelper}
+                                    eventsController={props.itemEventsController}
+                                    getPosition={props.getPosition}
+                                    itemIndex={index}
+                                />
+                            ))}
+                        </KeyNavProvider>
                     </ListBox>
                 )}
             </GalleryContent>

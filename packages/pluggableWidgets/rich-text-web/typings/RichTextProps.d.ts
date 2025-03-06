@@ -5,34 +5,34 @@
  */
 import { ActionValue, EditableValue } from "mendix";
 
-export type EditorTypeEnum = "classic" | "inline";
-
 export type PresetEnum = "basic" | "standard" | "full" | "custom";
 
-export type ReadOnlyStyleEnum = "text" | "bordered" | "borderedToolbar";
+export type ToolbarLocationEnum = "auto" | "top" | "bottom" | "hide";
 
-export type WidthUnitEnum = "percentage" | "pixels";
+export type ReadOnlyStyleEnum = "text" | "bordered" | "readPanel";
 
-export type HeightUnitEnum = "percentageOfWidth" | "pixels" | "percentageOfParent";
+export type WidthUnitEnum = "pixels" | "percentage";
+
+export type HeightUnitEnum = "percentageOfWidth" | "pixels" | "percentageOfParent" | "percentageOfView";
+
+export type MinHeightUnitEnum = "none" | "pixels" | "percentageOfParent" | "percentageOfView";
+
+export type MaxHeightUnitEnum = "none" | "pixels" | "percentageOfParent" | "percentageOfView";
+
+export type OverflowYEnum = "auto" | "scroll" | "hidden";
+
+export type OnChangeTypeEnum = "onLeave" | "onDataChange";
 
 export type ToolbarConfigEnum = "basic" | "advanced";
 
-export type CtItemTypeEnum = "seperator" | "About" | "Anchor" | "BGColor" | "Blockquote" | "Bold" | "BulletedList" | "Button" | "Checkbox" | "CodeSnippet" | "Copy" | "CreateDiv" | "Cut" | "Find" | "Flash" | "Font" | "FontSize" | "Form" | "Format" | "HiddenField" | "HorizontalRule" | "Iframe" | "Image" | "ImageButton" | "Indent" | "Italic" | "JustifyBlock" | "JustifyCenter" | "JustifyLeft" | "JustifyRight" | "Language" | "Link" | "Maximize" | "mendixlink" | "NewPage" | "NumberedList" | "Outdent" | "PageBreak" | "Paste" | "PasteFromWord" | "PasteText" | "Preview" | "Print" | "Radio" | "Redo" | "RemoveFormat" | "Replace" | "Scayt" | "Select" | "SelectAll" | "ShowBlocks" | "Smiley" | "Source" | "SpecialChar" | "Strike" | "Styles" | "Subscript" | "Superscript" | "Table" | "Templates" | "BidiLtr" | "BidiRtl" | "TextColor" | "TextField" | "Textarea" | "Underline" | "Undo" | "Unlink";
+export type CtItemTypeEnum = "separator" | "undo" | "redo" | "bold" | "italic" | "underline" | "strike" | "superScript" | "subScript" | "orderedList" | "bulletList" | "lowerAlphaList" | "checkList" | "minIndent" | "plusIndent" | "direction" | "link" | "image" | "video" | "formula" | "blockquote" | "codeBlock" | "viewCode" | "align" | "centerAlign" | "rightAlign" | "font" | "color" | "background" | "header" | "clean";
 
 export interface AdvancedConfigType {
     ctItemType: CtItemTypeEnum;
-    ctItemToolbar: string;
 }
-
-export type EnterModeEnum = "paragraph" | "breakLines" | "blocks";
-
-export type ShiftEnterModeEnum = "paragraph" | "breakLines" | "blocks";
-
-export type AdvancedContentFilterEnum = "auto" | "custom";
 
 export interface AdvancedConfigPreviewType {
     ctItemType: CtItemTypeEnum;
-    ctItemToolbar: string;
 }
 
 export interface RichTextContainerProps {
@@ -40,77 +40,74 @@ export interface RichTextContainerProps {
     tabIndex?: number;
     id: string;
     stringAttribute: EditableValue<string>;
-    sanitizeContent: boolean;
-    advancedMode: boolean;
-    editorType: EditorTypeEnum;
+    enableStatusBar: boolean;
     preset: PresetEnum;
+    toolbarLocation: ToolbarLocationEnum;
     readOnlyStyle: ReadOnlyStyleEnum;
     widthUnit: WidthUnitEnum;
     width: number;
     heightUnit: HeightUnitEnum;
     height: number;
-    toolbarConfig: ToolbarConfigEnum;
-    documentGroup: boolean;
-    clipboardGroup: boolean;
-    editingGroup: boolean;
-    formsGroup: boolean;
-    separatorGroup: boolean;
-    basicStylesGroup: boolean;
-    paragraphGroup: boolean;
-    linksGroup: boolean;
-    separator2Group: boolean;
-    stylesGroup: boolean;
-    colorsGroup: boolean;
-    toolsGroup: boolean;
-    insertGroup: boolean;
-    othersGroup: boolean;
-    advancedConfig: AdvancedConfigType[];
-    onKeyPress?: ActionValue;
+    minHeightUnit: MinHeightUnitEnum;
+    minHeight: number;
+    maxHeightUnit: MaxHeightUnitEnum;
+    maxHeight: number;
+    OverflowY: OverflowYEnum;
     onChange?: ActionValue;
-    enterMode: EnterModeEnum;
-    shiftEnterMode: ShiftEnterModeEnum;
-    spellChecker: boolean;
-    codeHighlight: boolean;
-    advancedContentFilter: AdvancedContentFilterEnum;
-    allowedContent: string;
-    disallowedContent: string;
+    onFocus?: ActionValue;
+    onBlur?: ActionValue;
+    onLoad?: ActionValue;
+    onChangeType: OnChangeTypeEnum;
+    spellCheck: boolean;
+    toolbarConfig: ToolbarConfigEnum;
+    history: boolean;
+    fontStyle: boolean;
+    fontScript: boolean;
+    list: boolean;
+    indent: boolean;
+    embed: boolean;
+    align: boolean;
+    code: boolean;
+    fontColor: boolean;
+    header: boolean;
+    remove: boolean;
+    advancedConfig: AdvancedConfigType[];
 }
 
 export interface RichTextPreviewProps {
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     stringAttribute: string;
-    sanitizeContent: boolean;
-    advancedMode: boolean;
-    editorType: EditorTypeEnum;
+    enableStatusBar: boolean;
     preset: PresetEnum;
+    toolbarLocation: ToolbarLocationEnum;
     readOnlyStyle: ReadOnlyStyleEnum;
     widthUnit: WidthUnitEnum;
     width: number | null;
     heightUnit: HeightUnitEnum;
     height: number | null;
-    toolbarConfig: ToolbarConfigEnum;
-    documentGroup: boolean;
-    clipboardGroup: boolean;
-    editingGroup: boolean;
-    formsGroup: boolean;
-    separatorGroup: boolean;
-    basicStylesGroup: boolean;
-    paragraphGroup: boolean;
-    linksGroup: boolean;
-    separator2Group: boolean;
-    stylesGroup: boolean;
-    colorsGroup: boolean;
-    toolsGroup: boolean;
-    insertGroup: boolean;
-    othersGroup: boolean;
-    advancedConfig: AdvancedConfigPreviewType[];
-    onKeyPress: {} | null;
+    minHeightUnit: MinHeightUnitEnum;
+    minHeight: number | null;
+    maxHeightUnit: MaxHeightUnitEnum;
+    maxHeight: number | null;
+    OverflowY: OverflowYEnum;
     onChange: {} | null;
-    enterMode: EnterModeEnum;
-    shiftEnterMode: ShiftEnterModeEnum;
-    spellChecker: boolean;
-    codeHighlight: boolean;
-    advancedContentFilter: AdvancedContentFilterEnum;
-    allowedContent: string;
-    disallowedContent: string;
+    onFocus: {} | null;
+    onBlur: {} | null;
+    onLoad: {} | null;
+    onChangeType: OnChangeTypeEnum;
+    spellCheck: boolean;
+    toolbarConfig: ToolbarConfigEnum;
+    history: boolean;
+    fontStyle: boolean;
+    fontScript: boolean;
+    list: boolean;
+    indent: boolean;
+    embed: boolean;
+    align: boolean;
+    code: boolean;
+    fontColor: boolean;
+    header: boolean;
+    remove: boolean;
+    advancedConfig: AdvancedConfigPreviewType[];
 }

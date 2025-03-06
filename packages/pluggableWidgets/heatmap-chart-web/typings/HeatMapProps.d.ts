@@ -3,7 +3,7 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
+import { ComponentType, CSSProperties, ReactNode } from "react";
 import { ActionValue, DynamicValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
 import { Big } from "big.js";
 
@@ -41,7 +41,8 @@ export interface HeatMapContainerProps {
     verticalSortAttribute?: ListAttributeValue<Big | string | Date>;
     verticalSortOrder: VerticalSortOrderEnum;
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground?: ReactNode;
     xAxisLabel?: DynamicValue<string>;
     yAxisLabel?: DynamicValue<string>;
     showScale: boolean;
@@ -71,6 +72,7 @@ export interface HeatMapPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     seriesDataSource: {} | { caption: string } | { type: string } | null;
     seriesValueAttribute: string;
     horizontalAxisAttribute: string;
@@ -80,7 +82,8 @@ export interface HeatMapPreviewProps {
     verticalSortAttribute: string;
     verticalSortOrder: VerticalSortOrderEnum;
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     xAxisLabel: string;
     yAxisLabel: string;
     showScale: boolean;

@@ -1,9 +1,10 @@
 import classNames from "classnames";
-import { Fragment, KeyboardEvent, ReactElement, createElement, useRef } from "react";
+import { Fragment, KeyboardEvent, ReactElement, createElement, useMemo, useRef } from "react";
 import { ClearButton } from "../../assets/icons";
 import { MultiSelector, SelectionBaseProps } from "../../helpers/types";
 import { getSelectedCaptionsPlaceholder } from "../../helpers/utils";
 import { useDownshiftMultiSelectProps } from "../../hooks/useDownshiftMultiSelectProps";
+import { useLazyLoading } from "../../hooks/useLazyLoading";
 import { ComboboxWrapper } from "../ComboboxWrapper";
 import { InputPlaceholder } from "../Placeholder";
 import { MultiSelectionMenu } from "./MultiSelectionMenu";
@@ -14,6 +15,7 @@ export function MultiSelection({
     tabIndex,
     a11yConfig,
     menuFooterContent,
+    ariaRequired,
     ...options
 }: SelectionBaseProps<MultiSelector>): ReactElement {
     const {
@@ -35,13 +37,34 @@ export function MultiSelection({
     const inputRef = useRef<HTMLInputElement>(null);
     const isSelectedItemsBoxStyle = selector.selectedItemsStyle === "boxes";
     const isOptionsSelected = selector.isOptionsSelected();
+
+    const memoizedselectedCaptions = useMemo(
+        () => getSelectedCaptionsPlaceholder(selector, selectedItems),
+        [selector, selectedItems]
+    );
+
+    const lazyLoading = selector.lazyLoading ?? false;
+    const { onScroll } = useLazyLoading({
+        hasMoreItems: selector.options.hasMore ?? false,
+        isInfinite: lazyLoading,
+        isOpen,
+        loadMore: () => {
+            if (selector.options.loadMore) {
+                selector.options.loadMore();
+            }
+        },
+        readOnly: selector.readOnly
+    });
+
     return (
         <Fragment>
             <ComboboxWrapper
                 isOpen={isOpen}
                 readOnly={selector.readOnly}
+                readOnlyStyle={options.readOnlyStyle}
                 getToggleButtonProps={getToggleButtonProps}
                 validation={selector.validation}
+                isLoading={lazyLoading && selector.options.isLoading}
             >
                 <div
                     className={classNames(
@@ -109,18 +132,17 @@ export function MultiSelection({
                                 }
                             },
                             disabled: selector.readOnly,
-                            readOnly: selector.options.filterType === "none"
+                            readOnly: selector.options.filterType === "none",
+                            "aria-required": ariaRequired
                         })}
                     />
-                    <InputPlaceholder isEmpty={selectedItems.length <= 0}>
-                        {getSelectedCaptionsPlaceholder(selector, selectedItems)}
-                    </InputPlaceholder>
+                    <InputPlaceholder isEmpty={selectedItems.length <= 0}>{memoizedselectedCaptions}</InputPlaceholder>
                 </div>
 
                 {!selector.readOnly &&
                     selector.clearable &&
-                    selector.currentValue !== null &&
-                    selector.currentValue.length > 0 && (
+                    selector.currentId !== null &&
+                    selector.currentId.length > 0 && (
                         <button
                             tabIndex={tabIndex}
                             className="widget-combobox-clear-button"
@@ -167,6 +189,9 @@ export function MultiSelection({
                 onOptionClick={() => {
                     inputRef.current?.focus();
                 }}
+                isLoading={selector.options.isLoading}
+                lazyLoading={lazyLoading}
+                onScroll={onScroll}
             />
         </Fragment>
     );

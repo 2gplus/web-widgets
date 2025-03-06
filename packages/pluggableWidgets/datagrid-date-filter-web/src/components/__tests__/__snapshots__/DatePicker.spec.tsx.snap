@@ -1,26 +1,21 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Date picker component renders correctly 1`] = `
-[
+<DocumentFragment>
   <div
     class="date-filter-container"
     id="datepicker_0.123456789"
-  />,
+  />
   <span
     class="sr-only"
     id="undefined-label"
-  />,
+  />
   <div
     class="react-datepicker-wrapper"
   >
     <div
-      class="react-datepicker__input-container "
+      class="react-datepicker__input-container"
     >
-      <span
-        aria-live="polite"
-        class="react-datepicker__aria-live"
-        role="alert"
-      />
       <input
         aria-labelledby="undefined-label"
         class="form-control filter-input"
@@ -28,7 +23,7 @@ exports[`Date picker component renders correctly 1`] = `
         value=""
       />
     </div>
-  </div>,
+  </div>
   <button
     aria-controls="datepicker_0.123456789"
     aria-expanded="false"
@@ -46,31 +41,26 @@ exports[`Date picker component renders correctly 1`] = `
         fill="currentColor"
       />
     </svg>
-  </button>,
-]
+  </button>
+</DocumentFragment>
 `;
 
 exports[`Date picker component renders correctly when is not adjustable 1`] = `
-[
+<DocumentFragment>
   <div
     class="date-filter-container"
     id="datepicker_0.123456789"
-  />,
+  />
   <span
     class="sr-only"
     id="undefined-label"
-  />,
+  />
   <div
     class="react-datepicker-wrapper"
   >
     <div
-      class="react-datepicker__input-container "
+      class="react-datepicker__input-container"
     >
-      <span
-        aria-live="polite"
-        class="react-datepicker__aria-live"
-        role="alert"
-      />
       <input
         aria-labelledby="undefined-label"
         class="form-control"
@@ -78,7 +68,7 @@ exports[`Date picker component renders correctly when is not adjustable 1`] = `
         value=""
       />
     </div>
-  </div>,
+  </div>
   <button
     aria-controls="datepicker_0.123456789"
     aria-expanded="false"
@@ -96,33 +86,28 @@ exports[`Date picker component renders correctly when is not adjustable 1`] = `
         fill="currentColor"
       />
     </svg>
-  </button>,
-]
+  </button>
+</DocumentFragment>
 `;
 
 exports[`Date picker component renders correctly with a11y properties 1`] = `
-[
+<DocumentFragment>
   <div
     class="date-filter-container"
     id="datepicker_0.123456789"
-  />,
+  />
   <span
     class="sr-only"
     id="undefined-label"
   >
     my input
-  </span>,
+  </span>
   <div
     class="react-datepicker-wrapper"
   >
     <div
-      class="react-datepicker__input-container "
+      class="react-datepicker__input-container"
     >
-      <span
-        aria-live="polite"
-        class="react-datepicker__aria-live"
-        role="alert"
-      />
       <input
         aria-labelledby="undefined-label"
         class="form-control filter-input"
@@ -130,7 +115,7 @@ exports[`Date picker component renders correctly with a11y properties 1`] = `
         value=""
       />
     </div>
-  </div>,
+  </div>
   <button
     aria-controls="datepicker_0.123456789"
     aria-expanded="false"
@@ -148,31 +133,26 @@ exports[`Date picker component renders correctly with a11y properties 1`] = `
         fill="currentColor"
       />
     </svg>
-  </button>,
-]
+  </button>
+</DocumentFragment>
 `;
 
 exports[`Date picker component renders correctly with different locale and date format 1`] = `
-[
+<DocumentFragment>
   <div
     class="date-filter-container"
     id="datepicker_0.123456789"
-  />,
+  />
   <span
     class="sr-only"
     id="undefined-label"
-  />,
+  />
   <div
     class="react-datepicker-wrapper"
   >
     <div
-      class="react-datepicker__input-container "
+      class="react-datepicker__input-container"
     >
-      <span
-        aria-live="polite"
-        class="react-datepicker__aria-live"
-        role="alert"
-      />
       <input
         aria-labelledby="undefined-label"
         class="form-control"
@@ -180,7 +160,7 @@ exports[`Date picker component renders correctly with different locale and date 
         value=""
       />
     </div>
-  </div>,
+  </div>
   <button
     aria-controls="datepicker_0.123456789"
     aria-expanded="false"
@@ -198,6 +178,6 @@ exports[`Date picker component renders correctly with different locale and date 
         fill="currentColor"
       />
     </svg>
-  </button>,
-]
+  </button>
+</DocumentFragment>
 `;

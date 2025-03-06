@@ -1,112 +1,52 @@
-import { FilterSelector } from "@mendix/widget-plugin-filter-selector/FilterSelector";
-import { useWatchValues } from "@mendix/widget-plugin-hooks/useWatchValues";
-import { createElement, CSSProperties, ReactElement, useCallback, useRef, useState } from "react";
-import { DefaultFilterEnum } from "../../typings/DatagridDateFilterProps";
+import { FilterSelector } from "@mendix/widget-plugin-filtering/controls";
 import classNames from "classnames";
-import DatePickerComponent from "react-datepicker";
-import { useSetInitialConditionEffect } from "../features/initialize";
-import { DatePicker, RangeDateValue } from "./DatePicker";
+import { createElement, ReactElement } from "react";
+import { FilterTypeEnum } from "../helpers/base-types";
+import { DatePicker, DatePickerProps } from "./DatePicker";
 
-interface FilterComponentProps {
-    adjustable: boolean;
-    calendarStartDay?: number;
-    className?: string;
-    defaultFilter: DefaultFilterEnum;
-    defaultValue?: Date;
-    defaultStartDate?: Date;
-    defaultEndDate?: Date;
-    dateFormat?: string;
-    locale?: string;
+export interface FilterComponentProps extends DatePickerProps {
     id?: string;
+    class: string;
+    tabIndex?: number;
+    style?: React.CSSProperties;
     placeholder?: string;
     screenReaderButtonCaption?: string;
     screenReaderCalendarCaption?: string;
     screenReaderInputCaption?: string;
-    tabIndex?: number;
-    styles?: CSSProperties;
-    updateFilters?: (value: Date | undefined, rangeValues: RangeDateValue, type: DefaultFilterEnum) => void;
+    filterFn?: FilterTypeEnum;
+    onFilterChange: (fn: FilterTypeEnum) => void;
 }
 
+export type FilterComponent = typeof FilterComponent;
+
 export function FilterComponent(props: FilterComponentProps): ReactElement {
-    const [type, setType] = useState<DefaultFilterEnum>(props.defaultFilter);
-    const [value, setValue] = useState<Date | undefined>(props.defaultValue);
-    const [rangeValues, setRangeValues] = useState<RangeDateValue>([props.defaultStartDate, props.defaultEndDate]);
-    const pickerRef = useRef<DatePickerComponent | null>(null);
-
-    useWatchValues(
-        (_prev, _next) => {
-            props.updateFilters?.(value, rangeValues, type);
-        },
-        [value, rangeValues, type]
-    );
-
-    const focusInput = useCallback(() => {
-        if (pickerRef.current) {
-            pickerRef.current.setFocus();
-        }
-    }, [pickerRef.current]);
-
-    useSetInitialConditionEffect({
-        initialFilterType: type,
-        initialFilterValue: value ?? rangeValues,
-        updateFilters: props.updateFilters
-    });
-
     return (
         <div
-            className={classNames("filter-container", props.className)}
-            data-focusindex={props.tabIndex ?? 0}
-            style={props.styles}
+            className={classNames("filter-container", props.class)}
+            data-focusindex={props.tabIndex}
+            style={props.style}
         >
             {props.adjustable && (
                 <FilterSelector
-                    ariaLabel={props.screenReaderButtonCaption}
-                    defaultFilter={props.defaultFilter}
-                    id={props.id}
-                    onChange={useCallback(
-                        type => {
-                            setType(prev => {
-                                if (prev === type) {
-                                    return prev;
-                                }
-                                focusInput();
-                                return type;
-                            });
-                        },
-                        [focusInput]
-                    )}
-                    options={
-                        [
-                            { value: "between", label: "Between" },
-                            { value: "greater", label: "Greater than" },
-                            { value: "greaterEqual", label: "Greater than or equal" },
-                            { value: "equal", label: "Equal" },
-                            { value: "notEqual", label: "Not equal" },
-                            { value: "smaller", label: "Smaller than" },
-                            { value: "smallerEqual", label: "Smaller than or equal" },
-                            { value: "empty", label: "Empty" },
-                            { value: "notEmpty", label: "Not empty" }
-                        ] as Array<{ value: DefaultFilterEnum; label: string }>
-                    }
+                    ariaLabel={props.screenReaderButtonCaption ?? "Select filter type"}
+                    value={props.filterFn ?? "equal"}
+                    onSelect={props.onFilterChange}
+                    options={OPTIONS}
                 />
             )}
-            <DatePicker
-                adjustable={props.adjustable}
-                calendarStartDay={props.calendarStartDay}
-                dateFormat={props.dateFormat}
-                disabledInput={type === "empty" || type === "notEmpty"}
-                enableRange={type === "between"}
-                locale={props.locale}
-                id={props.id}
-                placeholder={props.placeholder}
-                rangeValues={rangeValues}
-                ref={pickerRef}
-                screenReaderCalendarCaption={props.screenReaderCalendarCaption}
-                screenReaderInputCaption={props.screenReaderInputCaption}
-                setRangeValues={setRangeValues}
-                setValue={setValue}
-                value={value}
-            />
+            <DatePicker {...props} />
         </div>
     );
 }
+
+const OPTIONS = [
+    { value: "between", label: "Between" },
+    { value: "greater", label: "Greater than" },
+    { value: "greaterEqual", label: "Greater than or equal" },
+    { value: "equal", label: "Equal" },
+    { value: "notEqual", label: "Not equal" },
+    { value: "smaller", label: "Smaller than" },
+    { value: "smallerEqual", label: "Smaller than or equal" },
+    { value: "empty", label: "Empty" },
+    { value: "notEmpty", label: "Not empty" }
+] as Array<{ value: FilterTypeEnum; label: string }>;

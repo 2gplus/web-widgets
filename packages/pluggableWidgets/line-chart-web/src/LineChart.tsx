@@ -1,8 +1,14 @@
+import {
+    ChartWidget,
+    ChartWidgetProps,
+    getPlotChartDataTransforms,
+    traceEqual,
+    usePlotChartDataSeries
+} from "@mendix/shared-charts/main";
+import "@mendix/shared-charts/ui/Chart.scss";
+import { defaultEqual, flatEqual } from "@mendix/widget-plugin-platform/utils/flatEqual";
 import classNames from "classnames";
-import { createElement, ReactElement, useCallback, memo } from "react";
-import { ChartWidget, ChartWidgetProps, traceEqual } from "@mendix/shared-charts";
-import { getPlotChartDataTransforms, usePlotChartDataSeries } from "@mendix/shared-charts/hooks";
-import { flatEqual, defaultEqual } from "@mendix/widget-plugin-platform/utils/flatEqual";
+import { ReactElement, createElement, memo, useCallback } from "react";
 import { LineChartContainerProps } from "../typings/LineChartProps";
 
 const lineChartLayoutOptions: ChartWidgetProps["layoutOptions"] = {
@@ -67,13 +73,13 @@ export const LineChart = memo(
                 xAxisLabel={props.xAxisLabel?.value}
                 yAxisLabel={props.yAxisLabel?.value}
                 gridLinesMode={props.gridLines}
-                showSidebarEditor={props.enableDeveloperMode}
                 customLayout={props.customLayout}
                 customConfig={props.customConfigurations}
                 layoutOptions={lineChartLayoutOptions}
                 configOptions={lineChartConfigOptions}
                 seriesOptions={lineChartSeriesOptions}
                 enableThemeConfig={props.enableThemeConfig}
+                playground={props.playground}
             />
         );
     },

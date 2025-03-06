@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.2.1] - 2024-11-13
+
+### Fixed
+
+-   We fixed an issue where Tree Nodes resetting it's collapse state while reloading data.
+
+## [1.2.0] - 2024-05-15
+
+### Fixed
+
+-   We fixed an issue with nested Tree Nodes, where the nested empty Tree Node would break its parent behavior.
+
 ## [1.1.4] - 2023-10-13
 
 ### Fixed

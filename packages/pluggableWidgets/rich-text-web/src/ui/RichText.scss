@@ -1,60 +1,120 @@
-@use "~ckeditor4/plugins/tableselection/styles/tableselection.css";
-@use "~ckeditor4/plugins/dialog/styles/dialog.css" as dialog;
-@use "~ckeditor4/plugins/scayt/dialogs/dialog.css" as scaytDialog;
-@use "~ckeditor4/plugins/scayt/skins/moono-lisa/scayt.css";
-@use "~ckeditor4/plugins/autocomplete/skins/default.css" as autocomplete;
-@use "~ckeditor4/plugins/balloonpanel/skins/moono-lisa/balloonpanel.css";
-@use "~ckeditor4/plugins/balloontoolbar/skins/moono-lisa/balloontoolbar.css";
-@use "~ckeditor4/plugins/codesnippet/lib/highlight/styles/idea.css";
-@use "~ckeditor4/plugins/colordialog/dialogs/colordialog.css";
-@use "~ckeditor4/plugins/emoji/skins/default.css" as emoji;
-@use "~ckeditor4/plugins/preview/styles/screen.css";
-@use "~ckeditor4/plugins/copyformatting/styles/copyformatting.css";
+@use "RichTextIcons";
+
+$rte-border-color-default: #ced0d3;
+$rte-gray-ligher: #f8f8f8;
+$rte-brand-primary: #264ae5;
 
 .widget-rich-text {
+    position: relative;
+
+    &.form-control {
+        padding: unset;
+    }
+    .ql-container {
+        border: unset;
+    }
+
+    .flex-column-reverse {
+        .widget-rich-text-toolbar.ql-toolbar {
+            box-shadow: 2px 0 4px 0 var(--shadow-color-border, #00000014);
+
+            .ql-picker-options {
+                bottom: 100%;
+                top: unset;
+            }
+        }
+    }
+
+    .widget-rich-text-toolbar.ql-toolbar {
+        border: unset;
+        box-shadow: var(--shadow-small, 0 2px 4px 0) var(--shadow-color-border, #00000014);
+
+        .ql-picker {
+            &.ql-font,
+            &.ql-header,
+            &.ql-size {
+                margin-top: 2px;
+                background-color: var(--gray-lighter, $rte-gray-ligher);
+                border-radius: 4px;
+                margin-right: 4px;
+            }
+        }
+
+        .ql-picker-options {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .ql-formats {
+            button:focus {
+                font-weight: bold;
+            }
+        }
+    }
+
+    .widget-rich-text-footer {
+        align-items: center;
+        border-top: 1px solid var(--border-color-default, $rte-border-color-default);
+        color: var(--font-color-detail);
+        display: flex;
+        flex: 0 0 auto;
+        font-size: var(--navigation-sub-font-size);
+        height: var(--spacing-large);
+        overflow: hidden;
+        padding: 0 var(--form-label-gutter, 8px);
+        position: relative;
+        text-transform: none;
+        justify-content: end;
+    }
+
+    &.editor-readPanel {
+        background-color: transparent;
+        .widget-rich-text-container {
+            border: unset;
+        }
+    }
+
     &.editor-text {
-        .cke {
-            border: none;
-        }
-
-        .cke_top,
-        .cke_bottom {
-            background: inherit;
-            display: none;
+        .widget-rich-text-toolbar {
+            pointer-events: none;
+            background-color: var(--gray-lighter, $rte-gray-ligher);
         }
     }
 
-    &.editor-bordered {
-        .cke {
-            border: 1px solid #d1d1d1;
-        }
-
-        .cke_top,
-        .cke_bottom {
-            background: inherit;
-            display: none;
+    .ql-editor li[data-list="ordered"][data-custom-list="lower-alpha"] {
+        counter-increment: custom-list-alpha;
+        & > .ql-ui:before {
+            content: counter(custom-list-alpha, lower-alpha) ". ";
         }
     }
 
-    .cke_combo_on a.cke_combo_button,
-    .cke_combo_off a.cke_combo_button:hover,
-    .cke_combo_off a.cke_combo_button:focus,
-    .cke_combo_off a.cke_combo_button:active {
-        padding: 1px;
+    .widget-rich-text-prompt {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        align-content: center;
+        text-align: center;
     }
-}
 
-.widget-rich-text-loading-spinner {
-    width: 16px;
-    height: 16px;
-    animation: spin 2s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+    .sticky-sentinel.container-stuck {
+        & + .flexcontainer.flex-column {
+            overflow: visible;
+            .widget-rich-text-toolbar {
+                position: sticky;
+                z-index: 50;
+                top: 0;
+                background-color: white;
+            }
+        }
     }
-    100% {
-        transform: rotate(360deg);
+
+    [aria-hidden="true"] {
+        display: none;
+    }
+
+    .flexcontainer.flex-column {
+        overflow: visible;
     }
 }

@@ -1,19 +1,36 @@
 import "@testing-library/jest-dom";
-import { Alert } from "@mendix/widget-plugin-component-kit/Alert";
-import { FilterContextValue } from "@mendix/widget-plugin-filtering";
+import { FilterAPIv2 } from "@mendix/widget-plugin-filtering/context";
+import {
+    HeaderFiltersStore,
+    HeaderFiltersStoreProps
+} from "@mendix/widget-plugin-filtering/stores/generic/HeaderFiltersStore";
 import {
     actionValue,
     dynamicValue,
     EditableValueBuilder,
     ListAttributeValueBuilder
 } from "@mendix/widget-plugin-test-utils";
-import { mount } from "enzyme";
 import { render, fireEvent, screen, act } from "@testing-library/react";
 import { createContext, createElement } from "react";
 import DatagridDateFilter from "../../DatagridDateFilter";
+import { DatagridDateFilterContainerProps } from "../../../typings/DatagridDateFilterProps";
 import { MXGlobalObject, MXSessionConfig } from "../../../typings/global";
 
-function createMXObjectMock(code: string, langTag: string, firstDayOfWeek = 0): MXGlobalObject {
+export interface StaticInfo {
+    name: string;
+    filtersChannelName: string;
+}
+
+function createMXObjectMock(
+    code: string,
+    langTag: string,
+    firstDayOfWeek = 0,
+    patterns = {
+        date: "M/d/yyyy",
+        datetime: "M/d/yyyy, h:mm a",
+        time: "h:mm a"
+    }
+): MXGlobalObject {
     return {
         session: {
             getConfig: (): MXSessionConfig => ({
@@ -21,18 +38,14 @@ function createMXObjectMock(code: string, langTag: string, firstDayOfWeek = 0): 
                     code,
                     firstDayOfWeek,
                     languageTag: langTag,
-                    patterns: {
-                        date: "d.M.y",
-                        datetime: "d.M.y H.mm",
-                        time: "H.mm"
-                    }
+                    patterns
                 }
             })
         }
     };
 }
 
-const commonProps = {
+const commonProps: DatagridDateFilterContainerProps = {
     class: "filter-custom-class",
     tabIndex: 0,
     name: "filter-test",
@@ -41,18 +54,12 @@ const commonProps = {
     advanced: false
 };
 
-const mxObject = {
-    session: {
-        getConfig: () => ({
-            locale: {
-                languageTag: "en-US",
-                patterns: {
-                    date: "dd/MM/yyyy"
-                }
-            }
-        })
-    }
+const headerFilterStoreInfo: StaticInfo = {
+    name: commonProps.name,
+    filtersChannelName: ""
 };
+
+const mxObject = createMXObjectMock("en_US", "en-US");
 
 describe("Date Filter", () => {
     describe("with single instance", () => {
@@ -61,11 +68,16 @@ describe("Date Filter", () => {
         });
 
         describe("with single attribute", () => {
-            beforeAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                    filterDispatcher: jest.fn(),
-                    singleAttribute: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build()
-                } as FilterContextValue);
+            beforeEach(() => {
+                const props: HeaderFiltersStoreProps = {
+                    filterList: [
+                        { filter: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build() }
+                    ]
+                };
+                const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                    headerFilterStore.context
+                );
                 (window as any).mx = mxObject;
 
                 jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
@@ -73,7 +85,6 @@ describe("Date Filter", () => {
 
             it("renders correctly", () => {
                 const { asFragment } = render(<DatagridDateFilter {...commonProps} />);
-
                 expect(asFragment()).toMatchSnapshot();
             });
 
@@ -91,8 +102,8 @@ describe("Date Filter", () => {
 
                 fireEvent.input(screen.getByPlaceholderText("Placeholder"), { target: { value: "01/12/2020" } });
 
-                expect(action.execute).toBeCalledTimes(1);
-                expect(attribute.setValue).toBeCalledTimes(1);
+                expect(action.execute).toHaveBeenCalledTimes(1);
+                expect(attribute.setValue).toHaveBeenCalledTimes(1);
             });
 
             describe("with defaultValue", () => {
@@ -127,27 +138,34 @@ describe("Date Filter", () => {
             });
 
             afterAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
             });
         });
 
-        describe("with multiple attributes", () => {
+        describe("with double attributes", () => {
             beforeAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                    filterDispatcher: jest.fn(),
-                    multipleAttributes: {
-                        attribute1: new ListAttributeValueBuilder()
-                            .withId("attribute1")
-                            .withType("DateTime")
-                            .withFilterable(true)
-                            .build(),
-                        attribute2: new ListAttributeValueBuilder()
-                            .withId("attribute2")
-                            .withType("DateTime")
-                            .withFilterable(true)
-                            .build()
-                    }
-                } as FilterContextValue);
+                const props: HeaderFiltersStoreProps = {
+                    filterList: [
+                        {
+                            filter: new ListAttributeValueBuilder()
+                                .withId("attr1")
+                                .withType("DateTime")
+                                .withFilterable(true)
+                                .build()
+                        },
+                        {
+                            filter: new ListAttributeValueBuilder()
+                                .withId("attr2")
+                                .withType("DateTime")
+                                .withFilterable(true)
+                                .build()
+                        }
+                    ]
+                };
+                const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                    headerFilterStore.context
+                );
                 (window as any).mx = mxObject;
 
                 jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
@@ -160,76 +178,88 @@ describe("Date Filter", () => {
             });
 
             afterAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
             });
         });
 
         describe("with wrong attribute's type", () => {
             beforeAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                    filterDispatcher: jest.fn(),
-                    singleAttribute: new ListAttributeValueBuilder().withType("Decimal").withFilterable(true).build()
-                } as FilterContextValue);
+                const props: HeaderFiltersStoreProps = {
+                    filterList: [
+                        { filter: new ListAttributeValueBuilder().withType("Decimal").withFilterable(true).build() }
+                    ]
+                };
+                const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                    headerFilterStore.context
+                );
                 (window as any).mx = mxObject;
             });
 
             it("renders error message", () => {
-                const filter = mount(<DatagridDateFilter {...commonProps} />);
+                const { container } = render(<DatagridDateFilter {...commonProps} />);
 
-                expect(filter.find(Alert).text()).toBe(
-                    "The attribute type being used for Date filter is not 'Date and time'"
+                expect(container.querySelector(".alert")?.textContent).toEqual(
+                    "Unable to get filter store. Check parent widget configuration."
                 );
             });
 
             afterAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
             });
         });
 
         describe("with wrong multiple attributes' types", () => {
             beforeAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                    filterDispatcher: jest.fn(),
-                    multipleAttributes: {
-                        attribute1: new ListAttributeValueBuilder()
-                            .withId("attribute1")
-                            .withType("String")
-                            .withFilterable(true)
-                            .build(),
-                        attribute2: new ListAttributeValueBuilder()
-                            .withId("attribute2")
-                            .withType("Decimal")
-                            .withFilterable(true)
-                            .build()
-                    }
-                } as FilterContextValue);
+                const props: HeaderFiltersStoreProps = {
+                    filterList: [
+                        {
+                            filter: new ListAttributeValueBuilder()
+                                .withId("attr1")
+                                .withType("String")
+                                .withFilterable(true)
+                                .build()
+                        },
+                        {
+                            filter: new ListAttributeValueBuilder()
+                                .withId("attr2")
+                                .withType("Decimal")
+                                .withFilterable(true)
+                                .build()
+                        }
+                    ]
+                };
+                const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                    headerFilterStore.context
+                );
                 (window as any).mx = mxObject;
             });
 
             it("renders error message", () => {
-                const filter = mount(<DatagridDateFilter {...commonProps} />);
+                const { container } = render(<DatagridDateFilter {...commonProps} />);
 
-                expect(filter.find(Alert).text()).toBe(
-                    'The Date filter widget can\'t be used with the filters options you have selected. It requires a "Date and Time" attribute to be selected.'
+                expect(container.querySelector(".alert")?.textContent).toEqual(
+                    "Unable to get filter store. Check parent widget configuration."
                 );
             });
 
             afterAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
             });
         });
 
         describe("with no context", () => {
             beforeAll(() => {
-                (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+                (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
                 (window as any).mx = mxObject;
             });
 
             it("renders error message", () => {
-                const filter = mount(<DatagridDateFilter {...commonProps} />);
+                const { container } = render(<DatagridDateFilter {...commonProps} />);
 
-                expect(filter.find(Alert).text()).toBe(
-                    "The Date filter widget must be placed inside the header of the Data grid 2.0 or Gallery widget."
+                expect(container.querySelector(".alert")?.textContent).toEqual(
+                    "The filter widget must be placed inside the column or header of the Data grid 2.0 or inside header of the Gallery widget."
                 );
             });
         });
@@ -237,10 +267,15 @@ describe("Date Filter", () => {
 
     describe("with multiple instances", () => {
         beforeAll(() => {
-            (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                filterDispatcher: jest.fn(),
-                singleAttribute: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build()
-            } as FilterContextValue);
+            const props: HeaderFiltersStoreProps = {
+                filterList: [
+                    { filter: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build() }
+                ]
+            };
+            const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+            (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                headerFilterStore.context
+            );
             (window as any).mx = mxObject;
 
             jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
@@ -254,30 +289,33 @@ describe("Date Filter", () => {
         });
 
         afterAll(() => {
-            (window as any)["com.mendix.widgets.web.filterable.filterContext"] = undefined;
+            (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = undefined;
             delete (global as any)["com.mendix.widgets.web.UUID"];
         });
     });
 
     describe("with session config", () => {
-        let oldMxObject: MXGlobalObject;
         beforeEach(() => {
-            (window as any)["com.mendix.widgets.web.filterable.filterContext"] = createContext({
-                filterDispatcher: jest.fn(),
-                singleAttribute: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build()
-            } as FilterContextValue);
-            oldMxObject = window.mx;
+            const props: HeaderFiltersStoreProps = {
+                filterList: [
+                    { filter: new ListAttributeValueBuilder().withType("DateTime").withFilterable(true).build() }
+                ]
+            };
+            const headerFilterStore = new HeaderFiltersStore(props, headerFilterStoreInfo, null);
+            (window as any)["com.mendix.widgets.web.filterable.filterContext.v2"] = createContext<FilterAPIv2>(
+                headerFilterStore.context
+            );
         });
 
         it("has correct short week days for en-US", async () => {
             window.mx = createMXObjectMock("en_US", "en-US");
             render(<DatagridDateFilter {...commonProps} defaultValue={dynamicValue(new Date("2021-12-10"))} />);
 
-            const open = screen.getByLabelText("Show calendar");
+            const input = screen.getByRole("textbox");
             await act(async () => {
-                fireEvent.click(open);
+                fireEvent.click(input);
             });
-            const header = screen.getByText(/december 2021/gi).parentElement?.lastChild;
+            const header = screen.getByText(/december 2021/i).parentElement?.lastChild;
             expect(header?.textContent).toEqual("SuMoTuWeThFrSa");
         });
 
@@ -285,11 +323,11 @@ describe("Date Filter", () => {
             window.mx = createMXObjectMock("en_US", "en-US", 1);
             render(<DatagridDateFilter {...commonProps} defaultValue={dynamicValue(new Date("2021-12-10"))} />);
 
-            const open = screen.getByLabelText("Show calendar");
+            const input = screen.getByRole("textbox");
             await act(async () => {
-                fireEvent.click(open);
+                fireEvent.click(input);
             });
-            const header = screen.getByText(/december 2021/gi).parentElement?.lastChild;
+            const header = screen.getByText(/december 2021/i).parentElement?.lastChild;
             expect(header?.textContent).toEqual("MoTuWeThFrSaSu");
         });
 
@@ -297,11 +335,11 @@ describe("Date Filter", () => {
             window.mx = createMXObjectMock("pt_BR", "pt-BR");
             render(<DatagridDateFilter {...commonProps} defaultValue={dynamicValue(new Date("2021-12-10"))} />);
 
-            const open = screen.getByLabelText("Show calendar");
+            const input = screen.getByRole("textbox");
             await act(async () => {
-                fireEvent.click(open);
+                fireEvent.click(input);
             });
-            const header = screen.getByText(/dezembro 2021/gi).parentElement?.lastChild;
+            const header = screen.getByText(/dezembro 2021/i).parentElement?.lastChild;
             expect(header?.textContent).toEqual("domsegterquaquisexsab");
         });
 
@@ -309,11 +347,11 @@ describe("Date Filter", () => {
             window.mx = createMXObjectMock("fi_FI", "fi-FI", 1);
             render(<DatagridDateFilter {...commonProps} defaultValue={dynamicValue(new Date("2021-12-10"))} />);
 
-            const open = screen.getByLabelText("Show calendar");
+            const input = screen.getByRole("textbox");
             await act(async () => {
-                fireEvent.click(open);
+                fireEvent.click(input);
             });
-            const header = screen.getByText(/joulukuu 2021/gi).parentElement?.lastChild;
+            const header = screen.getByText(/joulukuu 2021/i).parentElement?.lastChild;
             expect(header?.textContent).toEqual("matiketopelasu");
         });
 
@@ -321,16 +359,12 @@ describe("Date Filter", () => {
             window.mx = createMXObjectMock("fi_FI", "fi-FI");
             render(<DatagridDateFilter {...commonProps} defaultValue={dynamicValue(new Date("2021-12-10"))} />);
 
-            const open = screen.getByLabelText("Show calendar");
+            const input = screen.getByRole("textbox");
             await act(async () => {
-                fireEvent.click(open);
+                fireEvent.click(input);
             });
-            const header = screen.getByText(/joulukuu 2021/gi).parentElement?.lastChild;
+            const header = screen.getByText(/joulukuu 2021/i).parentElement?.lastChild;
             expect(header?.textContent).toEqual("sumatiketopela");
-        });
-
-        afterEach(() => {
-            window.mx = oldMxObject;
         });
     });
 });

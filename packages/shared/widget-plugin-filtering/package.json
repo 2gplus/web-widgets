@@ -1,32 +1,58 @@
 {
-  "name": "@mendix/widget-plugin-filtering",
-  "version": "1.0.0",
-  "description": "Filtering API plugin.",
-  "license": "Apache-2.0",
-  "copyright": "© Mendix Technology BV 2023. All rights reserved.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mendix/web-widgets.git"
-  },
-  "type": "module",
-  "main": "./dist/main.js",
-  "exports": {
-    ".": "./dist/main.js"
-  },
-  "files": [
-    "dist",
-    "!*.map"
-  ],
-  "scripts": {
-    "compile": "tsc",
-    "format": "prettier --write .",
-    "lint": "eslint --ext .ts,.tsx ./src",
-    "prepare": "tsc",
-    "dev": "tsc --watch"
-  },
-  "devDependencies": {
-    "@mendix/eslint-config-web-widgets": "workspace:*",
-    "@mendix/prettier-config-web-widgets": "workspace:*",
-    "@mendix/tsconfig-web-widgets": "workspace:*"
-  }
+    "name": "@mendix/widget-plugin-filtering",
+    "version": "1.1.0",
+    "description": "Filtering API plugin.",
+    "license": "Apache-2.0",
+    "copyright": "© Mendix Technology BV 2025. All rights reserved.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mendix/web-widgets.git"
+    },
+    "type": "module",
+    "exports": {
+        "./*": "./dist/*.js"
+    },
+    "typesVersions": {
+        "*": {
+            "*": [
+                "dist/*"
+            ]
+        }
+    },
+    "files": [
+        "dist",
+        "!*.map"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "format": "prettier --write .",
+        "lint": "eslint --ext .ts,.tsx ./src",
+        "prepare": "tsc",
+        "test": "jest",
+        "dev": "tsc --watch"
+    },
+    "devDependencies": {
+        "@mendix/eslint-config-web-widgets": "workspace:*",
+        "@mendix/prettier-config-web-widgets": "workspace:*",
+        "@mendix/tsconfig-web-widgets": "workspace:*",
+        "@mendix/widget-plugin-test-utils": "workspace:*",
+        "@swc/core": "^1.7.26",
+        "@swc/jest": "^0.2.36",
+        "date-fns": "^3.6.0",
+        "jest-environment-jsdom": "^29.4.1"
+    },
+    "dependencies": {
+        "@floating-ui/react": "^0.26.27",
+        "@floating-ui/react-dom": "^2.1.2",
+        "@mendix/widget-plugin-external-events": "workspace:*",
+        "@mendix/widget-plugin-hooks": "workspace:*",
+        "@mendix/widget-plugin-platform": "workspace:*",
+        "downshift": "^9.0.8",
+        "mendix": "^10.16.49747",
+        "mobx": "6.12.3",
+        "mobx-react-lite": "4.0.7"
+    },
+    "peerDependencies": {
+        "date-fns": "^3.6.0"
+    }
 }

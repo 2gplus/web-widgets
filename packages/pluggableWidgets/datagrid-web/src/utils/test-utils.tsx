@@ -1,15 +1,16 @@
 import { createElement } from "react";
 import { GUID, ObjectItem } from "mendix";
-import { dynamicValue, list, listAttr, listExp } from "@mendix/widget-plugin-test-utils";
+import { dynamicValue, listAttr, listExp } from "@mendix/widget-plugin-test-utils";
 import { WidgetProps } from "../components/Widget";
 import { ColumnsType } from "../../typings/DatagridProps";
 import { Cell } from "../components/Cell";
-import { GridColumn } from "../typings/GridColumn";
-import { Column } from "../helpers/Column";
-import { GridSelectionProps } from "@mendix/widget-plugin-grid/selection/useGridSelectionProps";
-import { initGridState } from "../features/model/use-grid-state";
-import { paramsFromColumns } from "../features/model/utils";
-import * as Grid from "../typings/GridModel";
+import { ColumnId, GridColumn } from "../typings/GridColumn";
+import { SelectActionHelper } from "../helpers/SelectActionHelper";
+import { FocusTargetController } from "@mendix/widget-plugin-grid/keyboard-navigation/FocusTargetController";
+import { PositionController } from "@mendix/widget-plugin-grid/keyboard-navigation/PositionController";
+import { VirtualGridLayout } from "@mendix/widget-plugin-grid/keyboard-navigation/VirtualGridLayout";
+import { ColumnStore } from "../helpers/state/column/ColumnStore";
+import { IColumnParentStore } from "../helpers/state/ColumnGroupStore";
 
 export const column = (header = "Test", patch?: (col: ColumnsType) => void): ColumnsType => {
     const c: ColumnsType = {
@@ -25,7 +26,12 @@ export const column = (header = "Test", patch?: (col: ColumnsType) => void): Col
         sortable: false,
         width: "autoFill" as const,
         wrapText: false,
-        visible: dynamicValue(true)
+        visible: dynamicValue(true),
+        minWidth: "auto",
+        minWidthLimit: 100,
+        allowEventPropagation: true,
+        fetchOptionsLazy: true,
+        filterCaptionType: "attribute"
     };
 
     if (patch) {
@@ -35,17 +41,8 @@ export const column = (header = "Test", patch?: (col: ColumnsType) => void): Col
     return c;
 };
 
-export function mockSelectionProps(patch?: (props: GridSelectionProps) => GridSelectionProps): GridSelectionProps {
-    const props: GridSelectionProps = {
-        isSelected: jest.fn(() => false),
-        onSelect: jest.fn(),
-        onSelectAll: jest.fn(),
-        onSelectAdjacent: jest.fn(),
-        selectionMethod: "checkbox",
-        selectionType: "None",
-        showCheckboxColumn: false,
-        showSelectAllToggle: false
-    };
+export function mockSelectionProps(patch?: (props: SelectActionHelper) => SelectActionHelper): SelectActionHelper {
+    const props = new SelectActionHelper("None", undefined, "checkbox", false, 5, "clear");
 
     if (patch) {
         patch(props);
@@ -54,19 +51,29 @@ export function mockSelectionProps(patch?: (props: GridSelectionProps) => GridSe
     return props;
 }
 
-export function mockState(columns: Column[]): Grid.State {
-    return initGridState({
-        params: paramsFromColumns(columns, list(0)),
-        columns
-    });
+export function mockGridColumn(c: ColumnsType, index: number): GridColumn {
+    const parentStore: IColumnParentStore = {
+        isLastVisible(_column: ColumnStore): boolean {
+            return false;
+        },
+        isResizing: false,
+        sorting: {
+            getDirection(_columnId: ColumnId): ["asc" | "desc", number] | undefined {
+                return undefined;
+            },
+            toggleSort(_columnId: ColumnId): void {
+                return undefined;
+            }
+        }
+    };
+
+    return new ColumnStore(index, c, parentStore);
 }
 
 export function mockWidgetProps(): WidgetProps<GridColumn, ObjectItem> {
     const id = "dg1";
     const columnsProp = [column("Test")];
-    const columns = columnsProp.map((col, index) => new Column(col, index));
-    const state = mockState(columns);
-    const selectionProps = mockSelectionProps();
+    const columns = columnsProp.map((col, index) => mockGridColumn(col, index));
 
     return {
         CellComponent: Cell,
@@ -85,20 +92,28 @@ export function mockWidgetProps(): WidgetProps<GridColumn, ObjectItem> {
         onExportCancel: jest.fn(),
         page: 1,
         pageSize: 10,
+        paginationType: "buttons",
         paging: false,
         pagingPosition: "bottom",
-        state,
-        actions: {
-            toggleHidden: jest.fn(),
-            resize: jest.fn(),
-            setFilter: jest.fn(),
-            sortBy: jest.fn(),
-            swap: jest.fn()
-        },
-        valueForSort: () => "dummy",
-        selectionProps,
+        showPagingButtons: "auto",
+        visibleColumns: columns,
+        availableColumns: columns,
+        columnsSwap: jest.fn(),
+        setIsResizing: jest.fn(),
         selectionStatus: "unknown",
         setPage: jest.fn(),
-        processedRows: 0
+        processedRows: 0,
+        gridInteractive: false,
+        selectActionHelper: mockSelectionProps(),
+        cellEventsController: { getProps: () => Object.create({}) },
+        checkboxEventsController: { getProps: () => Object.create({}) },
+        isLoading: false,
+        isFetchingNextBatch: false,
+        loadingType: "spinner",
+        columnsLoading: false,
+        focusController: new FocusTargetController(
+            new PositionController(),
+            new VirtualGridLayout(1, columns.length, 10)
+        )
     };
 }

@@ -6,6 +6,748 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.30.1] DataWidgets - 2025-02-25
+
+### [2.30.1] Datagrid
+
+#### Fixed
+
+-   Fixed a layout issue when using "autofit content" in column settings.
+
+-   Fixed a problem where the column didn't set its default value in the personalization if the column is hidden by default.
+
+## [2.30.0] DataWidgets - 2025-02-20
+
+### [2.10.0] DatagridDropdownFilter
+
+#### Added
+
+-   New set of settings allowing to make drop-down look and behave similar to combobox widget
+
+#### Changed
+
+-   HTML is changed to meet modern accessibility requirements
+
+### [2.30.0] Datagrid
+
+#### Changed
+
+-   We have optimized some internal workings to improve export to Excel performance.
+
+-   Column settings related to drop-down filter are moved into dedicated group
+
+#### Fixed
+
+-   Accessibility fix regarding keyboard navigation and focus
+
+-   Fixed issue with filters losing focus on refresh
+
+-   Fixed issue with loading indicator not being displayed in some scenarios
+
+#### Breaking changes
+
+-   Drop-down filter is rewritten with new, more accurate HTML for better accessibility, which may break existing CSS styling for projects using drop-down filter
+
+-   HTML structure changed, which may affect some CSS and styling
+
+## [2.29.1] DataWidgets - 2025-01-24
+
+### [2.29.1] Datagrid
+
+#### Fixed
+
+-   We fixed the position configuration of paging button that removed on previous version.
+
+## [2.29.0] DataWidgets - 2025-01-21
+
+### [2.11.1] DatagridDateFilter
+
+#### Fixed
+
+-   We fixed an issue with range date filter working incorrectly in some cases.
+
+### [2.29.0] Datagrid
+
+#### Added
+
+-   We introduced a setting to exclude filters from being stored in the Personalization configuration.
+
+-   We have introduced show number of rows for virtual scrolling and load more pagination mode.
+
+## [2.28.2] DataWidgets - 2024-12-12
+
+### [2.28.2] Datagrid
+
+#### Fixed
+
+-   We've stopped showing the loading indicator when all data were already loaded. The loading indicator was incorrectly displayed during client refresh operations involving a microflow.
+
+## [2.28.1] DataWidgets - 2024-11-21
+
+### Fixed
+
+-   We fixed an issue where css selector "--brand-primary" gets overwrite by datagrid.
+
+### [2.28.1] Datagrid
+
+#### Fixed
+
+-   We fixed an issue where Export to Excel was not working in certain cases.
+
+## [2.28.0] DataWidgets - 2024-11-13
+
+### [2.10.4] DatagridDateFilter
+
+#### Changed
+
+-   We improved type mismatch filter error message.
+
+### [2.9.3] DatagridDropdownFilter
+
+#### Fixed
+
+-   We fixed an issue where filters not able to set guid value for reference selector.
+
+#### Changed
+
+-   We improved type mismatch filter error message.
+
+### [2.8.4] DatagridNumberFilter
+
+#### Changed
+
+-   We improved type mismatch filter error message.
+
+#### Fixed
+
+-   We fixed an issue where onChange wouldn't triggered on empty or not empty filter.
+
+### [2.8.4] DatagridTextFilter
+
+#### Changed
+
+-   We improved type mismatch filter error message.
+
+#### Fixed
+
+-   We fixed an issue where onChange wouldn't triggered on empty or not empty filter.
+
+### [2.28.0] Datagrid
+
+#### Fixed
+
+-   Fixed issue with xpath when widget has many filters.
+
+#### Added
+
+-   We have introduced the loading state in Datagrid 2, so that the loading state is displayed on every pagination, filter search, or loading.
+
+#### Changed
+
+-   We improved resizing behaviour of the widget. It is now saving personalization settings only at the end of the resizing.
+
+### [1.13.0] Gallery
+
+#### Fixed
+
+-   Fixed issue with xpath when widget has many filters.
+
+### [1.2.1] TreeNode
+
+#### Fixed
+
+-   We fixed an issue where Tree Nodes resetting it's collapse state while reloading data.
+
+## [2.26.0] DataWidgets - 2024-10-31
+
+### [2.10.3] DatagridDateFilter
+
+#### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+### [2.9.2] DatagridDropdownFilter
+
+#### Fixed
+
+-   We fixed an issue where onChange events were not being triggered on dropdown filter.
+
+-   We fixed an issue with dropdown filters in some cases not setting or resetting.
+
+### [2.8.3] DatagridNumberFilter
+
+#### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+### [2.8.3] DatagridTextFilter
+
+#### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+### [2.26.1] Datagrid
+
+#### Changed
+
+-   We improved our drop-down filter integration - now the drop-down can store its value in the personalization config. For best results, the new 'Use lazy load' property should be set to false.
+
+#### Added
+
+-   We added new 'Use lazy load' property that can be used to improve the end-user experience.
+
+#### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+### [1.12.2] Gallery
+
+#### Fixed
+
+-   We resolved an issue where the gallery filter was not being applied at first.
+
+-   We fixed an issue with grid wide filters not resetting.
+
+## [2.24.1] DataWidgets - 2024-10-14
+
+### Fixed
+
+-   We fixed an issue where filters wouldn't reset.
+
+### [2.8.2] DatagridNumberFilter
+
+#### Fixed
+
+-   We fixed an issue where filters wouldn't reset.
+
+### [2.8.2] DatagridTextFilter
+
+#### Fixed
+
+-   We fixed an issue where filters wouldn't reset.
+
+## [2.24.0] DataWidgets - 2024-09-23
+
+### [2.10.2] DatagridDateFilter
+
+#### Changed
+
+-   Widget maintenance.
+
+#### Fixed
+
+-   Fixed issue with "empty" and "not empty" filters showing incorrect results.
+
+### [2.9.1] DatagridDropdownFilter
+
+#### Changed
+
+-   Widget maintenance.
+
+### [2.8.1] DatagridNumberFilter
+
+#### Changed
+
+-   Widget maintenance.
+
+### [2.8.1] DatagridTextFilter
+
+#### Changed
+
+-   Widget maintenance.
+
+### [2.24.0] Datagrid
+
+#### Added
+
+-   We have introduced support for reference set associations in the linked attribute property.
+
+### [1.2.1] DropdownSort
+
+#### Changed
+
+-   Widget maintenance.
+
+### [1.12.0] Gallery
+
+#### Changed
+
+-   Widget maintenance.
+
+## [2.23.0] DataWidgets - 2024-09-20
+
+### Breaking changes
+
+-   We removed "Filter groups" properties.
+
+### [2.10.0] DatagridDateFilter
+
+#### Breaking changes
+
+-   We removed "Group key" property.
+
+### [2.9.0] DatagridDropdownFilter
+
+#### Breaking changes
+
+-   We removed "Group key" property.
+
+### [2.8.0] DatagridNumberFilter
+
+#### Breaking changes
+
+-   We removed "Group key" property.
+
+### [2.8.0] DatagridTextFilter
+
+#### Breaking changes
+
+-   We removed "Group key" property.
+
+### [2.23.0] Datagrid
+
+#### Fixed
+
+-   We fixed refreshed interval timer being duplicated on pagination click.
+
+#### Breaking changes
+
+-   We removed "Filter groups" properties.
+
+### [1.11.0] Gallery
+
+#### Breaking changes
+
+-   We removed "Filter groups" properties.
+
+## [2.22.0] DataWidgets - 2024-09-13
+
+### Changed
+
+-   Improved filters in data widgets.
+
+### [2.9.0] DatagridDateFilter
+
+#### Changed
+
+-   Improved integration with parent widgets.
+
+#### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+### [2.8.0] DatagridDropdownFilter
+
+#### Changed
+
+-   Improved integration with parent widgets.
+
+#### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+### [2.7.0] DatagridNumberFilter
+
+#### Changed
+
+-   Improved integration with parent widgets.
+
+#### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+### [2.7.0] DatagridTextFilter
+
+#### Changed
+
+-   Improved integration with parent widgets.
+
+#### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+### [2.22.0] Datagrid
+
+#### Changed
+
+-   Major filter improvement.
+
+#### Fixed
+
+-   Personalization and other fixes.
+
+#### Added
+
+-   The “Filter groups” is a new way of configuring header filters of the widget. This way of configuring filters has four main advantages over previous “Grid wide filtering”: 1. More than 4 filters are allowed in the header at the same time. 2. No restriction on filter type. The header can have one, two or more filters of the same data type. 3. Dropdown filters can use associations. 4. If personalization is enabled, filter state is saved along with other widget settings.
+
+### [1.2.0] DropdownSort
+
+#### Changed
+
+-   Reworked and improved integration with gallery.
+
+### [1.10.0] Gallery
+
+#### Changed
+
+-   Major filter improvement.
+
+#### Fixed
+
+-   Personalization sync and other minor fixes.
+
+#### Added
+
+-   The “Filter groups” is a new way of configuring header filters of the widget. This way of configuring filters has three main advantages over previous “Grid wide filtering”: 1. More than 4 filters are allowed in the header at the same time. 2. No restriction on filter type. The header can have one, two or more filters of the same data type. 3. Dropdown filters can use associations.
+
+## [2.21.4] DataWidgets - 2024-08-20
+
+### [1.9.2] Gallery
+
+#### Fixed
+
+-   We fixed an issue where the style property was not applied.
+
+## [2.21.3] DataWidgets - 2024-08-15
+
+### [2.6.1] DatagridNumberFilter
+
+#### Fixed
+
+-   We fixed an issue with the filter unexpectedly focusing when combined with conditional visibility.
+
+### [2.6.1] DatagridTextFilter
+
+#### Fixed
+
+-   We fixed an issue with the filter unexpectedly focusing when combined with conditional visibility.
+
+## [2.21.2] DataWidgets - 2024-08-07
+
+### [2.21.2] Datagrid
+
+#### Fixed
+
+-   We fixed Export to Excel not exporting when datasource had unavailable data.
+
+## [2.21.1] DataWidgets - 2024-07-10
+
+### [2.7.1] DatagridDropdownFilter
+
+#### Fixed
+
+-   We fixed on change event not triggering for association filters.
+
+### [2.21.1] Datagrid
+
+#### Fixed
+
+-   We have resolved an issue where the Data Grid would not render in certain cases when a visibility expression was configured on some of its columns.
+
+## [2.21.0] DataWidgets - 2024-07-08
+
+### [2.21.0] Datagrid
+
+#### Fixed
+
+-   Fixed an issue where data could not be exported if some columns used associations.
+
+#### Added
+
+-   Added a new "Export value" property for columns with custom content.
+
+## [2.20.1] DataWidgets - 2024-06-26
+
+### [1.9.1] Gallery
+
+#### Fixed
+
+-   We fixed an issue where cursor couldn't be moved inside text input fields with arrow keys.
+
+## [2.20.0] DataWidgets - 2024-06-19
+
+### Added
+
+-   Update JS actions for resetting filters in Data grid 2 and Gallery. `Reset_All_Filters` and `Reset_Filter` now have the option to reset to default filter's value.
+
+-   New JS actions for setting filters in Data grid 2 and Gallery. `Set_Filter` set a single filter to a specific value within Data grid 2 or Gallery.
+
+### Breaking changes
+
+-   Data widgets now use Atlas variables for its styling. This may change how the widgets look depending on the custom variables.
+
+### [2.8.0] DatagridDateFilter
+
+#### Fixed
+
+-   The default filter values are now restored on initial page load.
+
+#### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+#### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+### [2.7.0] DatagridDropdownFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+#### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+### [2.6.0] DatagridNumberFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+#### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+### [2.6.0] DatagridTextFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+#### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+### [2.20.0] Datagrid
+
+#### Changed
+
+-   We update event listener for `Reset_All_Filters` to allow reset to default value.
+
+### [1.9.0] Gallery
+
+#### Fixed
+
+-   We fixed an issue with Gallery widget where content may break out of grid boundaries. Thanks to Ronnie van Doorn for the suggestion.
+
+#### Changed
+
+-   We update event listener for `Reset_All_Filters` to allow reset to default value.
+
+## [2.19.1] DataWidgets - 2024-05-27
+
+### [2.19.0] Datagrid
+
+#### Fixed
+
+-   We fixed an issue with Datagrid 2 not working correctly when **Use React client** setting is on.
+
+## [2.19.0] DataWidgets - 2024-05-15
+
+### [2.7.1] DatagridDateFilter
+
+#### Fixed
+
+-   We fixed an issue where the filter type selector was not switching types correctly.
+
+### [1.2.0] TreeNode
+
+#### Fixed
+
+-   We fixed an issue with nested Tree Nodes, where the nested empty Tree Node would break its parent behavior.
+
+## [2.18.1] DataWidgets - 2024-05-14
+
+### [2.18.1] Datagrid
+
+#### Fixed
+
+-   Fixed an issue when exporting numbers to excel. Instead of the type number, the value exported was of string type.
+
+## [2.18.0] DataWidgets - 2024-04-30
+
+### [2.5.1] DatagridNumberFilter
+
+#### Fixed
+
+-   We resolved an issue where the default value was not working in certain cases.
+
+### [2.5.1] DatagridTextFilter
+
+#### Fixed
+
+-   We resolved an issue where the default value was not working in certain cases.
+
+### [2.18.0] Datagrid
+
+#### Changed
+
+-   We have changed the value displayed in the pagination on design mode. Now the value displayed is the page size.
+
+#### Fixed
+
+-   Fixed an issue where pagination buttons wouldn't show up when there's no items in the Datagrid 2 pagination even when button visibility was set to "always".
+
+#### Added
+
+-   A new property that allows to change the behavior of the item selection.
+
+-   A new property that controls custom content events.
+
+#### Removed
+
+-   We removed the sorting console warnings that were being triggered incorrectly.
+
+### [1.8.0] Gallery
+
+#### Changed
+
+-   We have changed the value displayed in the pagination on design mode. Now the value displayed is the page size.
+
+#### Added
+
+-   A new property that allows to change the behavior of the item selection.
+
+-   A new property that allows to configure the trigger event for the "on click" action.
+
+## [2.17.0] DataWidgets - 2024-04-17
+
+### [2.17.0] Datagrid
+
+#### Fixed
+
+-   Fixed an issue with default column colors in design mode.
+
+-   Fixed an issue with dynamic text not rendering.
+
+#### Changed
+
+-   We have enhanced the swap behavior of the columns, making it more intuitive and user-friendly. This improvement also includes a slight adjustment to the classnames applied to the elements being swapped, providing better control over their styling.
+
+#### Added
+
+-   We added the ability to store personalization configuration in the browser's local storage, in addition to the existing option of using an attribute.
+
+## [2.16.1] DataWidgets - 2024-04-16
+
+### [2.16.1] Datagrid
+
+#### Fixed
+
+-   We fixed an issue with sorting by columns that display dynamic text or custom content.
+
+## [2.16.0] DataWidgets - 2024-04-09
+
+### [2.16.0] Datagrid
+
+#### Added
+
+-   Limited the number of items rendered on design mode to 3.
+
+-   We have expanded the pagination options by introducing a new feature called 'Load more'. This option enables users to load additional data with the click of a button. Thank you, @sharadsums, for making this feature.
+
+#### Changed
+
+-   Previously, if the attribute configured for storing personalization settings was changed externally, the data grid did not reflect these changes. Moving forward, the data grid widget will now automatically re-read and apply personalization settings whenever the underlying attribute changes.
+
+#### Fixed
+
+-   We fixed an issue where the columns exported on ExportToExcel action are not the same as the ones visible on Datagrid 2.
+
+-   We made Visible property of columns required. It is no longer possible to leave the expression empty, therefore you will need to explicitly set a boolean value to set the visibility.
+
+### [1.7.0] Gallery
+
+#### Added
+
+-   Limited the number of items rendered on design mode to 3.
+
+## [2.15.0] DataWidgets - 2024-03-27
+
+### Fixed
+
+-   Fixed Datagrid Date Filter custom date formats throwing error. When customers try to use a custom format like `YYww.E` they were getting an error and also the output date were not correct.
+
+### Added
+
+-   New JS actions for resetting filters in Data grid 2 and Gallery. `Reset_All_Filters` resets all filters within Data grid 2 or Gallery. `Reset_Filter` resets a single filter.
+
+### [2.7.0] DatagridDateFilter
+
+#### Fixed
+
+-   Fixed custom date format throwing error. When customers try to use a custom format like `YYww.E` they were getting an error and also the output date were not correct.
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+### [2.6.0] DatagridDropdownFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+### [2.5.0] DatagridNumberFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+### [2.5.0] DatagridTextFilter
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+### [2.15.0] Datagrid
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+### [1.6.0] Gallery
+
+#### Added
+
+-   A new hook that subscribes the widget to external events.
+
+## [2.14.0] DataWidgets - 2024-03-06
+
+### [2.14.0] Datagrid
+
+#### Fixed
+
+-   We fixed an issue where the columns exported on ExportToExcel action are not the same as the ones visible on Datagrid 2.
+
+### [1.5.0] Gallery
+
+#### Added
+
+-   We added a new feature to Gallery: Now it is possible to navigate on gallery items using keyboard.
+
+-   We added a new feature to Gallery: You can use the keyboard to select multiple items inside the gallery, just as simple as shift + arrow keys. You can also unselect an item with shift+space.
+
+## [2.13.0] DataWidgets - 2024-02-05
+
+### [2.13.0] Datagrid
+
+#### Added
+
+-   Minimum width property for columns that use auto-fill. When needed, you can adjust how the column content is rendered on small screen sizes.
+
+-   We add a double click option for datagrid's row selection trigger.
+
+## [2.12.1] DataWidgets - 2024-01-23
+
+### [2.12.1] Datagrid
+
+#### Fixed
+
+-   We fixed an issue where Dynamic text values cells would be blank in exported .xlsx
+
 ## [2.12.0] DataWidgets - 2024-01-16
 
 ### [2.12.0] Datagrid

@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ListValue, ListExpressionValue } from "mendix";
+import { DynamicValue, ListValue, ListExpressionValue } from "mendix";
 
 export type PositionEnum = "left" | "right" | "top" | "bottom";
 
@@ -20,6 +20,7 @@ export interface LanguageSelectorContainerProps {
     position: PositionEnum;
     trigger: TriggerEnum;
     hideForSingle: boolean;
+    screenReaderLabelCaption?: DynamicValue<string>;
 }
 
 export interface LanguageSelectorPreviewProps {
@@ -31,9 +32,11 @@ export interface LanguageSelectorPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     languageOptions: {} | { caption: string } | { type: string } | null;
     languageCaption: string;
     position: PositionEnum;
     trigger: TriggerEnum;
     hideForSingle: boolean;
+    screenReaderLabelCaption: string;
 }

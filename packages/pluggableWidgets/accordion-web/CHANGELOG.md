@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.3.4] - 2025-02-13
+
+### Fixed
+
+-   We fixed an issue where the initial collapsed state sometimes wouldn't update the accordion.
+
+## [2.3.3] - 2024-08-28
+
+### Changed
+
+-   Changed action required to false to avoid unnecessary warnings in the Studio Pro.
+
+## [2.3.2] - 2024-07-19
+
+### Fixed
+
+-   We fixed the issue where in nested mode, the display collapsed/uncollapsed content can be not in sync with the accordion state.
+
 ## [2.3.1] - 2023-09-27
 
 ### Fixed

@@ -1,19 +1,12 @@
 import { createElement } from "react";
-import { ChartWidget } from "@mendix/shared-charts";
-import {
-    dynamicValue,
-    EditableValueBuilder,
-    ListAttributeValueBuilder,
-    ListValueBuilder
-} from "@mendix/widget-plugin-test-utils";
+import { ChartWidget } from "@mendix/shared-charts/main";
+import { dynamic, EditableValueBuilder, ListAttributeValueBuilder, list } from "@mendix/widget-plugin-test-utils";
 import Big from "big.js";
 import { mount, ReactWrapper } from "enzyme";
 import { TimeSeries } from "../TimeSeries";
 import { LinesType, TimeSeriesContainerProps } from "../../typings/TimeSeriesProps";
 
-jest.mock("@mendix/shared-charts", () => ({
-    ChartWidget: jest.fn(() => null)
-}));
+jest.mock("react-plotly.js", () => jest.fn(() => null));
 
 describe("The TimeSeries widget", () => {
     function renderTimeSeries(
@@ -27,7 +20,6 @@ describe("The TimeSeries widget", () => {
                 lines={configs.map(setupBasicSeries)}
                 showLegend={false}
                 enableAdvancedOptions={false}
-                enableDeveloperMode={false}
                 widthUnit="percentage"
                 width={0}
                 heightUnit="pixels"
@@ -38,6 +30,7 @@ describe("The TimeSeries widget", () => {
                 enableThemeConfig={false}
                 yAxisRangeMode="tozero"
                 showRangeSlider
+                showPlaygroundSlot={false}
                 {...props}
             />
         );
@@ -65,7 +58,7 @@ describe("The TimeSeries widget", () => {
     });
 
     it("sets the line color on the data series based on the lineColor value", () => {
-        const timeSeries = renderTimeSeries([{ lineColor: dynamicValue("red") }, { lineColor: undefined }]);
+        const timeSeries = renderTimeSeries([{ lineColor: dynamic("red") }, { lineColor: undefined }]);
         const data = timeSeries.find(ChartWidget).prop("data");
         expect(data).toHaveLength(2);
         expect(data[0]).toHaveProperty("line.color", "red");
@@ -73,7 +66,7 @@ describe("The TimeSeries widget", () => {
     });
 
     it("sets the marker color on the data series based on the markerColor value", () => {
-        const timeSeries = renderTimeSeries([{ markerColor: undefined }, { markerColor: dynamicValue("blue") }]);
+        const timeSeries = renderTimeSeries([{ markerColor: undefined }, { markerColor: dynamic("blue") }]);
         const data = timeSeries.find(ChartWidget).prop("data");
         expect(data).toHaveLength(2);
         expect(data[0]).toHaveProperty("marker.color", undefined);
@@ -101,7 +94,7 @@ describe("The TimeSeries widget", () => {
     });
 
     it("sets the area fill color on the data series based on fillColor", () => {
-        const timeSeries = renderTimeSeries([{ fillColor: dynamicValue("red") }]);
+        const timeSeries = renderTimeSeries([{ fillColor: dynamic("red") }]);
         const data = timeSeries.find(ChartWidget).prop("data");
         expect(data).toHaveLength(1);
         expect(data[0]).toHaveProperty("fillcolor", "red");
@@ -149,7 +142,7 @@ function setupBasicSeries(overwriteConfig: Partial<LinesType>): LinesType {
         lineColor: overwriteConfig.lineColor ?? undefined,
         markerColor: overwriteConfig.markerColor ?? undefined,
         fillColor: overwriteConfig.fillColor ?? undefined,
-        staticDataSource: ListValueBuilder().simple(),
+        staticDataSource: list(2),
         staticXAttribute: xAttribute,
         staticYAttribute: yAttribute,
         enableFillArea: true

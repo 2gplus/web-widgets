@@ -1,8 +1,14 @@
-import { ReferenceSetValue } from "mendix";
-import { ComboboxContainerProps, SelectedItemsStyleEnum, SelectionMethodEnum } from "../../../typings/ComboboxProps";
-import { MultiSelector } from "../types";
-import { BaseAssociationSelector } from "./BaseAssociationSelector";
 import { ThreeStateCheckBoxEnum } from "@mendix/widget-plugin-component-kit/ThreeStateCheckBox";
+import { ReferenceSetValue } from "mendix";
+import {
+    ComboboxContainerProps,
+    SelectedItemsSortingEnum,
+    SelectedItemsStyleEnum,
+    SelectionMethodEnum
+} from "../../../typings/ComboboxProps";
+import { MultiSelector } from "../types";
+import { sortSelectedItems } from "../utils";
+import { BaseAssociationSelector } from "./BaseAssociationSelector";
 
 export class AssociationMultiSelector
     extends BaseAssociationSelector<string[], ReferenceSetValue>
@@ -12,16 +18,20 @@ export class AssociationMultiSelector
     selectedItemsStyle: SelectedItemsStyleEnum = "text";
     selectionMethod: SelectionMethodEnum = "checkbox";
     selectAllButton = false;
+    selectedItemsSorting: SelectedItemsSortingEnum = "none";
+
     updateProps(props: ComboboxContainerProps): void {
         super.updateProps(props);
         this.selectedItemsStyle = props.selectedItemsStyle;
         this.selectionMethod = props.selectionMethod;
         this.selectAllButton = props.selectAllButton;
-        this.currentValue =
-            this._attr?.value?.map(value => {
-                return value.id;
-            }) ?? null;
-        if (this.selectionMethod === "rowclick") {
+        this.selectedItemsSorting = props.selectedItemsSorting;
+
+        this.currentId = sortSelectedItems(this._attr?.value, this.selectedItemsSorting, this.options.sortOrder, id =>
+            this.caption.get(id)
+        );
+
+        if (this.selectionMethod === "rowclick" || this.customContentType === "yes") {
             this.selectedItemsStyle = "boxes";
         }
     }
@@ -34,14 +44,14 @@ export class AssociationMultiSelector
 
     getOptions(): string[] {
         return this.selectionMethod === "rowclick"
-            ? this.options.getAll().filter(option => !this.currentValue?.includes(option))
+            ? this.options.getAll().filter(option => !this.currentId?.includes(option))
             : this.options.getAll();
     }
 
     isOptionsSelected(): ThreeStateCheckBoxEnum {
         const options = this.options.getAll();
-        const unselectedOptions = options.filter(option => !this.currentValue?.includes(option));
-        if (this.currentValue && this.currentValue.length > 0) {
+        const unselectedOptions = options.filter(option => !this.currentId?.includes(option));
+        if (this.currentId && this.currentId.length > 0) {
             if (unselectedOptions.length === 0) {
                 return "all";
             } else {

@@ -1,7 +1,7 @@
 import type { ActionValue, ListValue, ObjectItem, SelectionSingleValue, SelectionMultiValue } from "mendix";
 import { executeAction } from "@mendix/widget-plugin-platform/framework/execute-action";
 import { useEffect, useRef } from "react";
-import { MultiSelectionStatus } from "./types";
+import { Direction, MultiSelectionStatus, ScrollKeyCode, SelectionMode, Size, MoveEvent1D, MoveEvent2D } from "./types";
 
 class SingleSelectionHelper {
     type = "Single" as const;
@@ -14,7 +14,7 @@ class SingleSelectionHelper {
     isSelected(value: ObjectItem): boolean {
         return this.selectionValue.selection?.id === value.id;
     }
-    add(value: ObjectItem): void {
+    reduceTo(value: ObjectItem): void {
         this.selectionValue.setSelection(value);
     }
     remove(_value: ObjectItem): void {
@@ -27,11 +27,7 @@ export class MultiSelectionHelper {
     private rangeStart: number | undefined;
     private rangeEnd: number | undefined;
 
-    constructor(
-        private selectionValue: SelectionMultiValue,
-        private selectableItems: ObjectItem[],
-        private readonly pageSize: number
-    ) {
+    constructor(private selectionValue: SelectionMultiValue, private selectableItems: ObjectItem[]) {
         this.rangeStart = undefined;
     }
 
@@ -65,6 +61,12 @@ export class MultiSelectionHelper {
         this._resetRange();
     }
 
+    reduceTo(value: ObjectItem): void {
+        this.selectionValue.setSelection([value]);
+        this._setRangeStart(value);
+        this._setRangeEnd(undefined);
+    }
+
     private _add(value: ObjectItem): void {
         if (!this.isSelected(value)) {
             this.selectionValue.setSelection(this.selectionValue.selection.concat(value));
@@ -79,47 +81,54 @@ export class MultiSelectionHelper {
         this.rangeStart = index > -1 ? index : undefined;
     }
 
-    private _setRangeEnd(item: ObjectItem | undefined): void {
-        if (item === undefined) {
+    private _setRangeEnd(item: undefined): void;
+    private _setRangeEnd(item: ObjectItem, mode: SelectionMode): void;
+    private _setRangeEnd(...params: [undefined] | [ObjectItem, SelectionMode]): void {
+        if (params.length === 1) {
             this.rangeEnd = undefined;
             return;
         }
 
-        const currentEnd = this.rangeEnd;
-        const nextEnd = this.selectableItems.indexOf(item);
-        this.rangeEnd = nextEnd > -1 ? nextEnd : undefined;
+        const [item, selectionMode] = params;
+        const prevEnd = this.rangeEnd;
+        const newEnd = this.selectableItems.indexOf(item);
+        this.rangeEnd = newEnd > -1 ? newEnd : undefined;
 
-        this._updateSelectionWithRange(this.rangeStart, currentEnd, nextEnd);
+        this._updateSelectionWithRange({
+            start: this.rangeStart,
+            end: prevEnd,
+            newEnd,
+            selectionMode
+        });
     }
 
-    private _updateSelectionWithRange(
-        start: undefined | number,
-        currentEnd: undefined | number,
-        nextEnd: number
-    ): void {
-        if (start === undefined) {
+    private _updateSelectionWithRange(params: {
+        /** Start index of the range */
+        start: number | undefined;
+        /** End index of the range */
+        end: number | undefined;
+        /** New end index of the range */
+        newEnd: number;
+        selectionMode: SelectionMode;
+    }): void {
+        const { start, end, newEnd, selectionMode } = params;
+        const isToggleMode = selectionMode === "toggle";
+
+        if (start === undefined || newEnd === -1 || end === newEnd) {
             return;
         }
 
-        if (nextEnd === -1) {
+        if (end === undefined) {
+            let newSelection = this._getRange(start, newEnd);
+            newSelection = isToggleMode ? this._union(this.selectionValue.selection, newSelection) : newSelection;
+            this.selectionValue.setSelection(newSelection);
             return;
         }
 
-        if (currentEnd === nextEnd) {
-            return;
-        }
+        const itemsToRemove = this._getRange(start, end);
+        const itemsToAdd = this._getRange(start, newEnd);
 
-        if (currentEnd === undefined) {
-            const itemsToAdd = this._getRange(start, nextEnd);
-            const selection = this._union(this.selectionValue.selection, itemsToAdd);
-            this.selectionValue.setSelection(selection);
-            return;
-        }
-
-        const itemsToRemove = this._getRange(start, currentEnd);
-        const itemsToAdd = this._getRange(start, nextEnd);
-
-        let selection = [...this.selectionValue.selection];
+        let selection: ObjectItem[] = isToggleMode ? [...this.selectionValue.selection] : [];
         selection = this._diff(selection, itemsToRemove);
         selection = this._union(selection, itemsToAdd);
         this.selectionValue.setSelection(selection);
@@ -166,45 +175,60 @@ export class MultiSelectionHelper {
 
     selectAll(): void {
         this.selectionValue.setSelection(this.selectableItems);
+        this._resetRange();
     }
 
     selectNone(): void {
         this.selectionValue.setSelection([]);
+        this._resetRange();
     }
 
-    selectUpTo(value: ObjectItem): void {
+    selectUpTo(value: ObjectItem, selectionMode: SelectionMode): void {
         if (this.rangeStart === undefined) {
             this._add(value);
             this._setRangeStart(value);
         } else {
-            this._setRangeEnd(value);
+            this._setRangeEnd(value, selectionMode);
         }
     }
 
-    _getAdjacentIndex(index: number, direction: "backward" | "forward", unit: "item" | "page" | "edge"): number {
+    _findIndexInList(index: number, direction: Direction, size: Size): number {
         const first = 0;
         const last = this.selectableItems.length - 1;
         const isForward = direction === "forward";
 
-        if (unit === "edge") {
+        if (size === "edge") {
             return isForward ? last : first;
         }
 
-        let result: number;
-        if (unit === "page") {
-            result = isForward ? index + this.pageSize : index - this.pageSize;
-        } else {
-            result = isForward ? index + 1 : index - 1;
+        const result = isForward ? index + size : index - size;
+
+        return clamp(result, first, last);
+    }
+
+    _findIndexInGrid(index: number, keycode: ScrollKeyCode, numberOfColumns: number): number {
+        const { columnIndex } = getColumnAndRowBasedOnIndex(numberOfColumns, this.selectableItems.length, index);
+
+        if (keycode === "PageDown") {
+            return this.selectableItems.length - (numberOfColumns - columnIndex);
         }
 
-        return Math.max(0, Math.min(result, last));
+        if (keycode === "Home") {
+            return index - columnIndex;
+        }
+
+        if (keycode === "End") {
+            return index + (numberOfColumns - (columnIndex + 1));
+        }
+
+        return columnIndex;
     }
 
     selectUpToAdjacent(
         value: ObjectItem,
         shiftKey: boolean,
-        direction: "backward" | "forward",
-        unit: "item" | "page" | "edge"
+        mode: SelectionMode,
+        event: MoveEvent1D | MoveEvent2D
     ): void {
         if (shiftKey === false) {
             this._resetRange();
@@ -212,7 +236,13 @@ export class MultiSelectionHelper {
         }
 
         const currentIndex = this.selectableItems.findIndex(item => item.id === value.id);
-        const adjacentIndex = this._getAdjacentIndex(currentIndex, direction, unit);
+        let adjacentIndex: number = -1;
+
+        if ("direction" in event) {
+            adjacentIndex = this._findIndexInList(currentIndex, event.direction, event.size);
+        } else {
+            adjacentIndex = this._findIndexInGrid(currentIndex, event.code, event.numberOfColumns);
+        }
 
         if (adjacentIndex === currentIndex) {
             return;
@@ -221,8 +251,13 @@ export class MultiSelectionHelper {
         if (this.rangeStart === undefined) {
             this._setRangeStart(value);
         }
+        const endItem = this.selectableItems.at(adjacentIndex);
 
-        this._setRangeEnd(this.selectableItems.at(adjacentIndex));
+        if (!endItem) {
+            return;
+        }
+
+        this._setRangeEnd(endItem, mode);
     }
 }
 
@@ -231,8 +266,7 @@ const clamp = (num: number, min: number, max: number): number => Math.min(Math.m
 export function useSelectionHelper(
     selection: SelectionSingleValue | SelectionMultiValue | undefined,
     dataSource: ListValue,
-    onSelectionChange: ActionValue | undefined,
-    pageSize: number
+    onSelectionChange: ActionValue | undefined
 ): SelectionHelper | undefined {
     const prevObjectListRef = useRef<ObjectItem[]>([]);
     const firstLoadDone = useRef(false);
@@ -263,7 +297,7 @@ export function useSelectionHelper(
             }
         } else {
             if (!selectionHelper.current) {
-                selectionHelper.current = new MultiSelectionHelper(selection, dataSource.items ?? [], pageSize);
+                selectionHelper.current = new MultiSelectionHelper(selection, dataSource.items ?? []);
             } else {
                 (selectionHelper.current as MultiSelectionHelper).updateProps(selection, dataSource.items ?? []);
             }
@@ -283,4 +317,52 @@ function objectListEqual(a: ObjectItem[], b: ObjectItem[]): boolean {
 
     const setB = new Set(b.map(obj => obj.id));
     return a.every(obj => setB.has(obj.id));
+}
+
+export type PositionInGrid = {
+    columnIndex: number;
+    rowIndex: number;
+};
+
+/**
+ * Given an index and number of columns,
+ * this function returns which row the index is located in a grid.
+ * @function getRowBasedOnItemIndex
+ * @param {number} index - The index used to find the row.
+ * @param {number} numberOfColumns - The number of columns of the grid.
+ * @return {number}
+ *
+ */
+function getRowBasedOnItemIndex(index: number, numberOfColumns: number): number {
+    return Math.floor(index / numberOfColumns);
+}
+
+/**
+ * @typedef {Object} PositionInGrid
+ * @property {number} columnIndex - The position in the columns for the given index
+ * @property {number} rowIndex - The position in the row for the given index
+ */
+
+/**
+ * Given the number of columns, total items displayed and an index,
+ * this function returns the position (column and row) of the index in a 2D grid.
+ * @function getColumnAndRowBasedOnIndex
+ * @param {number} numberOfColumns - The number of columns of the grid.
+ * @param {number} totalItems - The number of items displayed in the grid.
+ * @param {number} index - The position of the item in the total items array.
+ * @return {PositionInGrid}
+ *
+ */
+export function getColumnAndRowBasedOnIndex(
+    numberOfColumns: number,
+    totalItems: number,
+    index: number
+): PositionInGrid {
+    if (index < 0 || index >= totalItems) {
+        return { columnIndex: -1, rowIndex: -1 };
+    }
+
+    const columnIndex = index % numberOfColumns;
+    const rowIndex = getRowBasedOnItemIndex(index, numberOfColumns);
+    return { columnIndex, rowIndex };
 }

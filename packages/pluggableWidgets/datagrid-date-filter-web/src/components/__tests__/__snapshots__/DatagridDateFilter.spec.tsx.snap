@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Date Filter with single instance with multiple attributes renders correctly 1`] = `
+exports[`Date Filter with single instance with double attributes renders correctly 1`] = `
 <DocumentFragment>
   <div
     class="filter-container filter-custom-class"
@@ -13,13 +13,25 @@ exports[`Date Filter with single instance with multiple attributes renders corre
         class="filter-selector-content"
       >
         <button
-          aria-controls="DateFilter1-filter-selectors"
+          aria-activedescendant=""
+          aria-controls="downshift-:ra:-menu"
           aria-expanded="false"
-          aria-haspopup="true"
+          aria-haspopup="listbox"
+          aria-label="Equal"
           class="btn btn-default filter-selector-button button-icon equal"
+          id="downshift-:ra:-toggle-button"
+          role="combobox"
+          tabindex="0"
         >
            
         </button>
+        <ul
+          aria-label="Select filter type"
+          class="filter-selectors hidden"
+          id="downshift-:ra:-menu"
+          role="listbox"
+          style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 0px);"
+        />
       </div>
     </div>
     <div
@@ -34,13 +46,8 @@ exports[`Date Filter with single instance with multiple attributes renders corre
       class="react-datepicker-wrapper"
     >
       <div
-        class="react-datepicker__input-container "
+        class="react-datepicker__input-container"
       >
-        <span
-          aria-live="polite"
-          class="react-datepicker__aria-live"
-          role="alert"
-        />
         <input
           aria-labelledby="DateFilter1-label"
           class="form-control filter-input"
@@ -84,13 +91,25 @@ exports[`Date Filter with single instance with single attribute renders correctl
         class="filter-selector-content"
       >
         <button
-          aria-controls="DateFilter1-filter-selectors"
+          aria-activedescendant=""
+          aria-controls="downshift-:r0:-menu"
           aria-expanded="false"
-          aria-haspopup="true"
+          aria-haspopup="listbox"
+          aria-label="Equal"
           class="btn btn-default filter-selector-button button-icon equal"
+          id="downshift-:r0:-toggle-button"
+          role="combobox"
+          tabindex="0"
         >
            
         </button>
+        <ul
+          aria-label="Select filter type"
+          class="filter-selectors hidden"
+          id="downshift-:r0:-menu"
+          role="listbox"
+          style="position: fixed; left: 0px; top: 0px; transform: translate(0px, 0px);"
+        />
       </div>
     </div>
     <div
@@ -105,13 +124,8 @@ exports[`Date Filter with single instance with single attribute renders correctl
       class="react-datepicker-wrapper"
     >
       <div
-        class="react-datepicker__input-container "
+        class="react-datepicker__input-container"
       >
-        <span
-          aria-live="polite"
-          class="react-datepicker__aria-live"
-          role="alert"
-        />
         <input
           aria-labelledby="DateFilter1-label"
           class="form-control filter-input"

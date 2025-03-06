@@ -9,31 +9,21 @@
             <propertyGroup caption="Data source">
                 <property key="stringAttribute" type="attribute">
                     <caption>Value attribute</caption>
-                    <description>The attribute used for the content of the rich text editor, recommendation is to use a unlimited string data type.</description>
+                    <description>The attribute used for the content of the text editor, recommendation is to use an unlimited string data type.</description>
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="sanitizeContent" type="boolean" defaultValue="true">
-                    <caption>Sanitize content</caption>
-                    <description>The strict sanitize rules will remove all unsupported HTML tags and attributes before displaying. WARNING disabling this option is a security risk for XSS attacks</description>
-                </property>
             </propertyGroup>
             <propertyGroup caption="General">
-                <property key="advancedMode" type="boolean" defaultValue="false">
-                    <caption>Enable advanced options</caption>
+                <systemProperty key="Label" />
+                <property key="enableStatusBar" type="boolean" defaultValue="true">
+                    <caption>Enable status bar</caption>
                     <description />
                 </property>
-                <property key="editorType" type="enumeration" defaultValue="classic">
-                    <caption>Editor style</caption>
-                    <description>Display the editor formatting options in a toolbar or a bubble when text is selected</description>
-                    <enumerationValues>
-                        <enumerationValue key="classic">Toolbar</enumerationValue>
-                        <enumerationValue key="inline">Inline</enumerationValue>
-                    </enumerationValues>
-                </property>
+            </propertyGroup>
+            <propertyGroup caption="Toolbar">
                 <property key="preset" type="enumeration" defaultValue="basic">
-                    <!-- For why this caption have name Toolbar check WC-1010 -->
                     <caption>Toolbar</caption>
                     <description />
                     <enumerationValues>
@@ -43,7 +33,16 @@
                         <enumerationValue key="custom">Custom</enumerationValue>
                     </enumerationValues>
                 </property>
-                <systemProperty key="Label" />
+                <property key="toolbarLocation" type="enumeration" defaultValue="top" required="true">
+                    <caption>Location</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="auto">Sticky</enumerationValue>
+                        <enumerationValue key="top">Top</enumerationValue>
+                        <enumerationValue key="bottom">Bottom</enumerationValue>
+                        <enumerationValue key="hide">Hide</enumerationValue>
+                    </enumerationValues>
+                </property>
             </propertyGroup>
             <propertyGroup caption="Editability">
                 <systemProperty key="Editability" />
@@ -53,7 +52,7 @@
                     <enumerationValues>
                         <enumerationValue key="text">Rich text</enumerationValue>
                         <enumerationValue key="bordered">Bordered</enumerationValue>
-                        <enumerationValue key="borderedToolbar">Bordered toolbar</enumerationValue>
+                        <enumerationValue key="readPanel">Read panel</enumerationValue>
                     </enumerationValues>
                 </property>
             </propertyGroup>
@@ -65,27 +64,103 @@
             <propertyGroup caption="Dimensions">
                 <property key="widthUnit" type="enumeration" defaultValue="percentage">
                     <caption>Width unit</caption>
-                    <description>Percentage: portion of parent size. Pixels: absolute amount of pixels.</description>
+                    <description />
                     <enumerationValues>
-                        <enumerationValue key="percentage">Percentage</enumerationValue>
                         <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentage">Percentage</enumerationValue>
                     </enumerationValues>
                 </property>
                 <property key="width" type="integer" defaultValue="100">
                     <caption>Width</caption>
                     <description />
                 </property>
-                <property key="heightUnit" type="enumeration" defaultValue="percentageOfWidth">
+                <property key="heightUnit" type="enumeration" defaultValue="pixels">
                     <caption>Height unit</caption>
                     <description />
                     <enumerationValues>
-                        <enumerationValue key="percentageOfWidth">Percentage of width</enumerationValue>
+                        <enumerationValue key="percentageOfWidth">Auto</enumerationValue>
                         <enumerationValue key="pixels">Pixels</enumerationValue>
-                        <enumerationValue key="percentageOfParent">Percentage of parent</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="height" type="integer" defaultValue="75">
+                <property key="height" type="integer" defaultValue="250">
                     <caption>Height</caption>
+                    <description />
+                </property>
+                <property key="minHeightUnit" type="enumeration" defaultValue="pixels">
+                    <caption>Minimum Height unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="minHeight" type="integer" defaultValue="250">
+                    <caption>Minimum height</caption>
+                    <description />
+                </property>
+                <property key="maxHeightUnit" type="enumeration" defaultValue="none">
+                    <caption>Maximum Height unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="maxHeight" type="integer" defaultValue="250">
+                    <caption>Maximum height</caption>
+                    <description />
+                </property>
+                <property key="OverflowY" type="enumeration" defaultValue="auto">
+                    <caption>Vertical Overflow</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="auto">Auto</enumerationValue>
+                        <enumerationValue key="scroll">Scroll</enumerationValue>
+                        <enumerationValue key="hidden">Hidden</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Events">
+            <propertyGroup caption="Events">
+                <property key="onChange" type="action" required="false">
+                    <caption>On change</caption>
+                    <description />
+                </property>
+                <property key="onFocus" type="action" required="false">
+                    <caption>On enter</caption>
+                    <description />
+                </property>
+                <property key="onBlur" type="action" required="false">
+                    <caption>On leave</caption>
+                    <description />
+                </property>
+                <property key="onLoad" type="action" required="false">
+                    <caption>On load</caption>
+                    <description />
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="On change behavior">
+                <property key="onChangeType" type="enumeration" defaultValue="onLeave">
+                    <caption>On change type</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="onLeave">When user leaves input field</enumerationValue>
+                        <enumerationValue key="onDataChange">While user is entering data</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Advanced">
+            <propertyGroup caption="Advanced">
+                <property key="spellCheck" type="boolean" defaultValue="false">
+                    <caption>Enable spell checking</caption>
                     <description />
                 </property>
             </propertyGroup>
@@ -100,205 +175,93 @@
                         <enumerationValue key="advanced">Advanced</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="documentGroup" type="boolean" defaultValue="true">
-                    <caption>Document group</caption>
+                <property key="history" type="boolean" defaultValue="true">
+                    <caption>Edit History</caption>
                     <description />
                 </property>
-                <property key="clipboardGroup" type="boolean" defaultValue="true">
-                    <caption>Clipboard group</caption>
+                <property key="fontStyle" type="boolean" defaultValue="true">
+                    <caption>Font style</caption>
                     <description />
                 </property>
-                <property key="editingGroup" type="boolean" defaultValue="true">
-                    <caption>Editing group</caption>
+                <property key="fontScript" type="boolean" defaultValue="true">
+                    <caption>Font script</caption>
                     <description />
                 </property>
-                <property key="formsGroup" type="boolean" defaultValue="true">
-                    <caption>Forms group</caption>
+                <property key="list" type="boolean" defaultValue="true">
+                    <caption>List</caption>
                     <description />
                 </property>
-                <property key="separatorGroup" type="boolean" defaultValue="true">
-                    <caption>Separator group</caption>
+                <property key="indent" type="boolean" defaultValue="true">
+                    <caption>Indentation</caption>
                     <description />
                 </property>
-                <property key="basicStylesGroup" type="boolean" defaultValue="true">
-                    <caption>Basic style group</caption>
+                <property key="embed" type="boolean" defaultValue="true">
+                    <caption>Embedded media</caption>
                     <description />
                 </property>
-                <property key="paragraphGroup" type="boolean" defaultValue="true">
-                    <caption>Paragraph group</caption>
+                <property key="align" type="boolean" defaultValue="true">
+                    <caption>Alignment</caption>
                     <description />
                 </property>
-                <property key="linksGroup" type="boolean" defaultValue="true">
-                    <caption>Links group</caption>
+                <property key="code" type="boolean" defaultValue="true">
+                    <caption>Syntax</caption>
                     <description />
                 </property>
-                <property key="separator2Group" type="boolean" defaultValue="true">
-                    <caption>Separator 2 group</caption>
+                <property key="fontColor" type="boolean" defaultValue="true">
+                    <caption>Font colors</caption>
                     <description />
                 </property>
-                <property key="stylesGroup" type="boolean" defaultValue="true">
-                    <caption>Styles group</caption>
+                <property key="header" type="boolean" defaultValue="true">
+                    <caption>Content type</caption>
                     <description />
                 </property>
-                <property key="colorsGroup" type="boolean" defaultValue="true">
-                    <caption>Colors group</caption>
-                    <description />
-                </property>
-                <property key="toolsGroup" type="boolean" defaultValue="true">
-                    <caption>Tools group</caption>
-                    <description />
-                </property>
-                <property key="insertGroup" type="boolean" defaultValue="false">
-                    <caption>Insert group</caption>
-                    <description />
-                </property>
-                <property key="othersGroup" type="boolean" defaultValue="true">
-                    <caption>Others group</caption>
+                <property key="remove" type="boolean" defaultValue="true">
+                    <caption>Removal</caption>
                     <description />
                 </property>
                 <property key="advancedConfig" type="object" isList="true" required="false">
                     <caption>Advanced groups</caption>
                     <description />
                     <properties>
-                        <property key="ctItemType" type="enumeration" required="true" defaultValue="seperator">
+                        <property key="ctItemType" type="enumeration" required="true" defaultValue="separator">
                             <caption>Button</caption>
                             <category>Item</category>
                             <description>Button Type</description>
                             <enumerationValues>
-                                <enumerationValue key="seperator">Seperator</enumerationValue>
-                                <enumerationValue key="About">About</enumerationValue>
-                                <enumerationValue key="Anchor">Anchor</enumerationValue>
-                                <enumerationValue key="BGColor">Background Color</enumerationValue>
-                                <enumerationValue key="Blockquote">Blockquote</enumerationValue>
-                                <enumerationValue key="Bold">Bold</enumerationValue>
-                                <enumerationValue key="BulletedList">Bulleted List</enumerationValue>
-                                <enumerationValue key="Button">Button</enumerationValue>
-                                <enumerationValue key="Checkbox">Checkbox</enumerationValue>
-                                <enumerationValue key="CodeSnippet">Code Snippet</enumerationValue>
-                                <enumerationValue key="Copy">Copy</enumerationValue>
-                                <enumerationValue key="CreateDiv">Create Div</enumerationValue>
-                                <enumerationValue key="Cut">Cut</enumerationValue>
-                                <enumerationValue key="Find">Find</enumerationValue>
-                                <enumerationValue key="Flash">Flash</enumerationValue>
-                                <enumerationValue key="Font">Font</enumerationValue>
-                                <enumerationValue key="FontSize">Font Size</enumerationValue>
-                                <enumerationValue key="Form">Form</enumerationValue>
-                                <enumerationValue key="Format">Format</enumerationValue>
-                                <enumerationValue key="HiddenField">Hidden Field</enumerationValue>
-                                <enumerationValue key="HorizontalRule">Horizontal Rule</enumerationValue>
-                                <enumerationValue key="Iframe">Iframe</enumerationValue>
-                                <enumerationValue key="Image">Image (Edit/Insert)</enumerationValue>
-                                <enumerationValue key="ImageButton">Image Button</enumerationValue>
-                                <enumerationValue key="Indent">Indent</enumerationValue>
-                                <enumerationValue key="Italic">Italic</enumerationValue>
-                                <enumerationValue key="JustifyBlock">Justify Block</enumerationValue>
-                                <enumerationValue key="JustifyCenter">Justify Center</enumerationValue>
-                                <enumerationValue key="JustifyLeft">Justify Left</enumerationValue>
-                                <enumerationValue key="JustifyRight">Justify Right</enumerationValue>
-                                <enumerationValue key="Language">Language</enumerationValue>
-                                <enumerationValue key="Link">Link</enumerationValue>
-                                <enumerationValue key="Maximize">Maximize</enumerationValue>
-                                <enumerationValue key="mendixlink">Microflow Link</enumerationValue>
-                                <enumerationValue key="NewPage">New Page</enumerationValue>
-                                <enumerationValue key="NumberedList">Numbered List</enumerationValue>
-                                <enumerationValue key="Outdent">Outdent</enumerationValue>
-                                <enumerationValue key="PageBreak">Page Break</enumerationValue>
-                                <enumerationValue key="Paste">Paste</enumerationValue>
-                                <enumerationValue key="PasteFromWord">Paste From Word</enumerationValue>
-                                <enumerationValue key="PasteText">Paste Text</enumerationValue>
-                                <enumerationValue key="Preview">Preview</enumerationValue>
-                                <enumerationValue key="Print">Print</enumerationValue>
-                                <enumerationValue key="Radio">Radio</enumerationValue>
-                                <enumerationValue key="Redo">Redo</enumerationValue>
-                                <enumerationValue key="RemoveFormat">Remove Format</enumerationValue>
-                                <enumerationValue key="Replace">Replace</enumerationValue>
-                                <enumerationValue key="Scayt">Scayt</enumerationValue>
-                                <enumerationValue key="Select">Select</enumerationValue>
-                                <enumerationValue key="SelectAll">Select All</enumerationValue>
-                                <enumerationValue key="ShowBlocks">Show Blocks</enumerationValue>
-                                <enumerationValue key="Smiley">Smiley</enumerationValue>
-                                <enumerationValue key="Source">Source</enumerationValue>
-                                <enumerationValue key="SpecialChar">Special Char</enumerationValue>
-                                <enumerationValue key="Strike">Strike</enumerationValue>
-                                <enumerationValue key="Styles">Styles</enumerationValue>
-                                <enumerationValue key="Subscript">Subscript</enumerationValue>
-                                <enumerationValue key="Superscript">Superscript</enumerationValue>
-                                <enumerationValue key="Table">Table</enumerationValue>
-                                <enumerationValue key="Templates">Templates</enumerationValue>
-                                <enumerationValue key="BidiLtr">Text LTR</enumerationValue>
-                                <enumerationValue key="BidiRtl">Text RTL</enumerationValue>
-                                <enumerationValue key="TextColor">TextColor</enumerationValue>
-                                <enumerationValue key="TextField">TextField</enumerationValue>
-                                <enumerationValue key="Textarea">Textarea</enumerationValue>
-                                <enumerationValue key="Underline">Underline</enumerationValue>
-                                <enumerationValue key="Undo">Undo</enumerationValue>
-                                <enumerationValue key="Unlink">Unlink</enumerationValue>
+                                <enumerationValue key="separator">separator</enumerationValue>
+                                <enumerationValue key="undo">Undo</enumerationValue>
+                                <enumerationValue key="redo">Redo</enumerationValue>
+                                <enumerationValue key="bold">Bold</enumerationValue>
+                                <enumerationValue key="italic">Italic</enumerationValue>
+                                <enumerationValue key="underline">Underline</enumerationValue>
+                                <enumerationValue key="strike">Strike</enumerationValue>
+                                <enumerationValue key="superScript">Super Script</enumerationValue>
+                                <enumerationValue key="subScript">Sub Script</enumerationValue>
+                                <enumerationValue key="orderedList">Ordered List</enumerationValue>
+                                <enumerationValue key="bulletList">Bullet List</enumerationValue>
+                                <enumerationValue key="lowerAlphaList">Lower Alpha List</enumerationValue>
+                                <enumerationValue key="checkList">Check List</enumerationValue>
+                                <enumerationValue key="minIndent">Left Indent</enumerationValue>
+                                <enumerationValue key="plusIndent">Right Indent</enumerationValue>
+                                <enumerationValue key="direction">Direction</enumerationValue>
+                                <enumerationValue key="link">Link</enumerationValue>
+                                <enumerationValue key="image">Image</enumerationValue>
+                                <enumerationValue key="video">Video</enumerationValue>
+                                <enumerationValue key="formula">Formula</enumerationValue>
+                                <enumerationValue key="blockquote">Blockquote</enumerationValue>
+                                <enumerationValue key="codeBlock">Code Block</enumerationValue>
+                                <enumerationValue key="viewCode">View Code</enumerationValue>
+                                <enumerationValue key="align">Left Align</enumerationValue>
+                                <enumerationValue key="centerAlign">Center Align</enumerationValue>
+                                <enumerationValue key="rightAlign">Right Align</enumerationValue>
+                                <enumerationValue key="font">Font</enumerationValue>
+                                <enumerationValue key="color">Color</enumerationValue>
+                                <enumerationValue key="background">Background</enumerationValue>
+                                <enumerationValue key="header">Header</enumerationValue>
+                                <enumerationValue key="clean">Clean</enumerationValue>
                             </enumerationValues>
                         </property>
-                        <property key="ctItemToolbar" type="string" required="true" defaultValue="toolbar1">
-                            <caption>Toolbar ID</caption>
-                            <category>Item</category>
-                            <description>Identifies in which toolbar this button appears. Make sure to give this a short and descriptive identifier. Items with the same Toolbar ID will be grouped</description>
-                        </property>
                     </properties>
-                </property>
-            </propertyGroup>
-        </propertyGroup>
-        <propertyGroup caption="Events">
-            <propertyGroup caption="Events">
-                <property key="onKeyPress" type="action">
-                    <caption>On key press</caption>
-                    <description />
-                </property>
-                <property key="onChange" type="action">
-                    <caption>On change</caption>
-                    <description />
-                </property>
-            </propertyGroup>
-        </propertyGroup>
-        <propertyGroup caption="Advanced">
-            <propertyGroup caption="Advanced">
-                <property key="enterMode" type="enumeration" defaultValue="paragraph">
-                    <caption>Enter mode</caption>
-                    <description />
-                    <enumerationValues>
-                        <enumerationValue key="paragraph">Paragraph</enumerationValue>
-                        <enumerationValue key="breakLines">Break lines</enumerationValue>
-                        <enumerationValue key="blocks">Blocks</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="shiftEnterMode" type="enumeration" defaultValue="paragraph">
-                    <caption>Shift enter mode</caption>
-                    <description />
-                    <enumerationValues>
-                        <enumerationValue key="paragraph">Paragraph</enumerationValue>
-                        <enumerationValue key="breakLines">Break lines</enumerationValue>
-                        <enumerationValue key="blocks">Blocks</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="spellChecker" type="boolean" defaultValue="true">
-                    <caption>Spell checker</caption>
-                    <description />
-                </property>
-                <property key="codeHighlight" type="boolean" defaultValue="false">
-                    <caption>Enable code highlight</caption>
-                    <description />
-                </property>
-                <property key="advancedContentFilter" type="enumeration" defaultValue="auto">
-                    <caption>Advanced content filter</caption>
-                    <description />
-                    <enumerationValues>
-                        <enumerationValue key="auto">Auto</enumerationValue>
-                        <enumerationValue key="custom">Custom</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="allowedContent" type="string" required="false" multiline="true">
-                    <caption>Allowed content</caption>
-                    <description />
-                </property>
-                <property key="disallowedContent" type="string" required="false" multiline="true">
-                    <caption>Disallowed content</caption>
-                    <description />
                 </property>
             </propertyGroup>
         </propertyGroup>

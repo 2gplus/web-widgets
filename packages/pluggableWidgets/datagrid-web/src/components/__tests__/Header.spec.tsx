@@ -1,8 +1,8 @@
 import { render, shallow } from "enzyme";
 import { createElement } from "react";
-import { Header, HeaderProps } from "../Header";
-import { ColumnResizer } from "../ColumnResizer";
 import { GridColumn } from "../../typings/GridColumn";
+import { ColumnResizer } from "../ColumnResizer";
+import { Header, HeaderProps } from "../Header";
 
 describe("Header", () => {
     it("renders the structure correctly", () => {
@@ -66,23 +66,24 @@ describe("Header", () => {
     });
 
     it("calls setSortBy store function with correct parameters when sortable", () => {
+        const mockedFunction = jest.fn();
         const column = {
             columnId: "0",
             columnNumber: 0,
             header: "My sortable column",
-            canSort: true
+            canSort: true,
+            sortDir: undefined,
+            toggleSort: mockedFunction
         } as any;
-        const mockedFunction = jest.fn();
-        const component = shallow(
-            <Header {...mockHeaderProps()} column={column} sortable setSortBy={mockedFunction} />
-        );
+
+        const component = shallow(<Header {...mockHeaderProps()} column={column} sortable />);
 
         const clickableRegion = component.find(".column-header");
 
         expect(clickableRegion).toHaveLength(1);
 
         clickableRegion.simulate("click");
-        expect(mockedFunction).toHaveBeenLastCalledWith("0");
+        expect(mockedFunction).toHaveBeenCalled();
     });
 
     it("renders the structure correctly when filterable with custom classes", () => {
@@ -120,11 +121,13 @@ function mockHeaderProps(): HeaderProps {
         gridId: "dg1",
         column: {
             columnId: "dg1-column0",
-            columnNumber: 0,
-            header: "Test"
+            columnIndex: 0,
+            header: "Test",
+            sortDir: undefined,
+            toggleSort: () => undefined
         } as GridColumn,
         draggable: false,
-        dragOver: undefined,
+        dropTarget: undefined,
         filterable: false,
         filterWidget: undefined,
         hidable: false,
@@ -132,10 +135,7 @@ function mockHeaderProps(): HeaderProps {
         resizer: <ColumnResizer setColumnWidth={jest.fn()} />,
         sortable: false,
         swapColumns: jest.fn(),
-        setDragOver: jest.fn(),
-        visibleColumns: [],
-        setSortBy: jest.fn(),
-        setIsDragging: jest.fn(),
-        sortRule: undefined
+        setDropTarget: jest.fn(),
+        setIsDragging: jest.fn()
     };
 }

@@ -4,7 +4,16 @@ import {
     ContainerProps,
     datasource
 } from "@mendix/widget-plugin-platform/preview/structure-preview-api";
-import { hidePropertiesIn, moveProperty, Properties, transformGroupsIntoTabs } from "@mendix/pluggable-widgets-tools";
+import { checkSlot, withPlaygroundSlot } from "@mendix/shared-charts/preview";
+
+import {
+    hidePropertiesIn,
+    hidePropertyIn,
+    moveProperty,
+    Properties,
+    transformGroupsIntoTabs,
+    Problem
+} from "@mendix/pluggable-widgets-tools";
 
 import { HeatMapPreviewProps } from "../typings/HeatMapProps";
 
@@ -40,14 +49,17 @@ export function getProperties(
     defaultProperties: Properties,
     platform: "web" | "desktop"
 ): Properties {
+    if (values.showPlaygroundSlot === false) {
+        hidePropertyIn(defaultProperties, values, "playground");
+    }
+
     if (platform === "web") {
         if (!values.enableAdvancedOptions) {
             hidePropertiesIn(defaultProperties, values, [
                 "customLayout",
                 "customConfigurations",
                 "customSeriesOptions",
-                "enableThemeConfig",
-                "enableDeveloperMode"
+                "enableThemeConfig"
             ]);
         }
 
@@ -58,9 +70,8 @@ export function getProperties(
         return clean;
     } else {
         hidePropertiesIn(defaultProperties, values, ["enableAdvancedOptions"]);
-        // Remove Visibiltiy tab
-        defaultProperties.splice(-2, 1);
     }
+
     return defaultProperties;
 }
 
@@ -70,7 +81,7 @@ export function getPreview(values: HeatMapPreviewProps, isDarkMode: boolean): St
         light: { structure: HeatMapLight, legend: HeatMapLegendLight }
     };
 
-    const getImage = (type: "structure" | "legend") => {
+    const getImage = (type: "structure" | "legend"): string => {
         const colorMode = isDarkMode ? "dark" : "light";
         return items[colorMode][type];
     };
@@ -93,15 +104,25 @@ export function getPreview(values: HeatMapPreviewProps, isDarkMode: boolean): St
         children: []
     } as ContainerProps;
 
-    return {
+    const chart: StructurePreviewProps = {
         type: "RowLayout",
         columnSize: "fixed",
         children: values.showScale ? [chartImage, legendImage, filler] : [chartImage, filler]
     };
+
+    return withPlaygroundSlot(values, chart);
 }
 
 export function getCustomCaption(values: HeatMapPreviewProps): string {
     type DsProperty = { caption?: string };
     const dsProperty: DsProperty = datasource(values.seriesDataSource)().property ?? {};
     return dsProperty.caption || "Heatmap chart";
+}
+
+export function check(props: HeatMapPreviewProps): Problem[] {
+    const errors: Array<Problem[] | Problem> = [];
+
+    errors.push(checkSlot(props));
+
+    return errors.flat();
 }

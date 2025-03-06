@@ -6,6 +6,248 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.30.1] - 2025-02-25
+
+### Fixed
+
+-   Fixed a layout issue when using "autofit content" in column settings.
+
+-   Fixed a problem where the column didn't set its default value in the personalization if the column is hidden by default.
+
+## [2.30.0] - 2025-02-20
+
+### Changed
+
+-   We have optimized some internal workings to improve export to Excel performance.
+
+-   Column settings related to drop-down filter are moved into dedicated group
+
+### Fixed
+
+-   Accessibility fix regarding keyboard navigation and focus
+
+-   Fixed issue with filters losing focus on refresh
+
+-   Fixed issue with loading indicator not being displayed in some scenarios
+
+-   We fixed an issue where an incorrect filter type was saved to personalization when a column was hidden by default.
+
+### Breaking changes
+
+-   Drop-down filter is rewritten with new, more accurate HTML for better accessibility, which may break existing CSS styling for projects using drop-down filter
+
+-   HTML structure changed, which may affect some CSS and styling
+
+## [2.29.1] - 2025-01-24
+
+### Fixed
+
+-   We fixed the position configuration of paging button that removed on previous version.
+
+## [2.29.0] - 2025-01-21
+
+### Added
+
+-   We introduced a setting to exclude filters from being stored in the Personalization configuration.
+
+-   We have introduced show number of rows for virtual scrolling and load more pagination mode.
+
+## [2.28.2] - 2024-12-12
+
+### Fixed
+
+-   We've stopped showing the loading indicator when all data were already loaded. The loading indicator was incorrectly displayed during client refresh operations involving a microflow.
+
+## [2.28.1] - 2024-11-21
+
+### Fixed
+
+-   We fixed an issue where Export to Excel was not working in certain cases.
+
+## [2.28.0] - 2024-11-13
+
+### Fixed
+
+-   Fixed issue with xpath when widget has many filters.
+
+### Added
+
+-   We have introduced the loading state in Datagrid 2, so that the loading state is displayed on every pagination, filter search, or loading.
+
+### Changed
+
+-   We improved resizing behaviour of the widget. It is now saving personalization settings only at the end of the resizing.
+
+## [2.26.1] - 2024-10-31
+
+### Changed
+
+-   We improved our drop-down filter integration - now the drop-down can store its value in the personalization config. For best results, the new 'Use lazy load' property should be set to false.
+
+### Added
+
+-   We added new 'Use lazy load' property that can be used to improve the end-user experience.
+
+### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+## [2.24.0] - 2024-09-23
+
+### Added
+
+-   We have introduced support for reference set associations in the linked attribute property.
+
+## [2.23.0] - 2024-09-20
+
+### Fixed
+
+-   We fixed refreshed interval timer being duplicated on pagination click.
+
+### Breaking changes
+
+-   We removed "Filter groups" properties.
+
+## [2.22.0] - 2024-09-13
+
+### Changed
+
+-   Major filter improvement.
+
+### Fixed
+
+-   Personalization and other fixes.
+
+### Added
+
+-   The “Filter groups” is a new way of configuring header filters of the widget. This way of configuring filters has four main advantages over previous “Grid wide filtering”: 1. More than 4 filters are allowed in the header at the same time. 2. No restriction on filter type. The header can have one, two or more filters of the same data type. 3. Dropdown filters can use associations. 4. If personalization is enabled, filter state is saved along with other widget settings.
+
+## [2.21.2] - 2024-08-07
+
+### Fixed
+
+-   We fixed Export to Excel not exporting when datasource had unavailable data.
+
+## [2.21.1] - 2024-07-10
+
+### Fixed
+
+-   We have resolved an issue where the Data Grid would not render in certain cases when a visibility expression was configured on some of its columns.
+
+## [2.21.0] - 2024-07-08
+
+### Fixed
+
+-   Fixed an issue where data could not be exported if some columns used associations.
+
+### Added
+
+-   Added a new "Export value" property for columns with custom content.
+
+## [2.20.0] - 2024-06-19
+
+### Changed
+
+-   We update event listener for `Reset_All_Filters` to allow reset to default value.
+
+## [2.19.0] - 2024-05-27
+
+### Fixed
+
+-   We fixed an issue with Datagrid 2 not working correctly when **Use React client** setting is on.
+
+## [2.18.1] - 2024-05-14
+
+### Fixed
+
+-   Fixed an issue when exporting numbers to excel. Instead of the type number, the value exported was of string type.
+
+## [2.18.0] - 2024-04-30
+
+### Changed
+
+-   We have changed the value displayed in the pagination on design mode. Now the value displayed is the page size.
+
+### Fixed
+
+-   Fixed an issue where pagination buttons wouldn't show up when there's no items in the Datagrid 2 pagination even when button visibility was set to "always".
+
+### Added
+
+-   A new property that allows to change the behavior of the item selection.
+
+-   A new property that controls custom content events.
+
+### Removed
+
+-   We removed the sorting console warnings that were being triggered incorrectly.
+
+## [2.17.0] - 2024-04-17
+
+### Fixed
+
+-   Fixed an issue with default column colors in design mode.
+
+-   Fixed an issue with dynamic text not rendering.
+
+### Changed
+
+-   We have enhanced the swap behavior of the columns, making it more intuitive and user-friendly. This improvement also includes a slight adjustment to the classnames applied to the elements being swapped, providing better control over their styling.
+
+### Added
+
+-   We added the ability to store personalization configuration in the browser's local storage, in addition to the existing option of using an attribute.
+
+## [2.16.1] - 2024-04-16
+
+### Fixed
+
+-   We fixed an issue with sorting by columns that display dynamic text or custom content.
+
+## [2.16.0] - 2024-04-09
+
+### Added
+
+-   Limited the number of items rendered on design mode to 3.
+
+-   We have expanded the pagination options by introducing a new feature called 'Load more'. This option enables users to load additional data with the click of a button. Thank you, @sharadsums, for making this feature.
+
+### Changed
+
+-   Previously, if the attribute configured for storing personalization settings was changed externally, the data grid did not reflect these changes. Moving forward, the data grid widget will now automatically re-read and apply personalization settings whenever the underlying attribute changes.
+
+### Fixed
+
+-   We fixed an issue where the columns exported on ExportToExcel action are not the same as the ones visible on Datagrid 2.
+
+-   We made Visible property of columns required. It is no longer possible to leave the expression empty, therefore you will need to explicitly set a boolean value to set the visibility.
+
+## [2.15.0] - 2024-03-27
+
+### Added
+
+-   A new hook that subscribes the widget to external events.
+
+## [2.14.0] - 2024-03-06
+
+### Fixed
+
+-   We fixed an issue where the columns exported on ExportToExcel action are not the same as the ones visible on Datagrid 2.
+
+## [2.13.0] - 2024-02-05
+
+### Added
+
+-   Minimum width property for columns that use auto-fill. When needed, you can adjust how the column content is rendered on small screen sizes.
+
+-   We add a double click option for datagrid's row selection trigger.
+
+## [2.12.1] - 2024-01-23
+
+### Fixed
+
+-   We fixed an issue where Dynamic text values cells would be blank in exported .xlsx
+
 ## [2.12.0] - 2024-01-16
 
 ### Added

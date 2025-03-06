@@ -6,9 +6,7 @@ exports[`Combo box (Association) renders combobox widget 1`] = `
     class="widget-combobox"
   >
     <div
-      aria-controls="downshift-0-menu"
-      aria-expanded="false"
-      class="form-control widget-combobox-input-container"
+      class="widget-combobox-input-container form-control"
       id="downshift-0-toggle-button"
       tabindex="-1"
     >
@@ -21,6 +19,7 @@ exports[`Combo box (Association) renders combobox widget 1`] = `
           aria-controls="downshift-0-menu"
           aria-expanded="false"
           aria-labelledby="comboBox1-label"
+          aria-required="true"
           autocomplete="off"
           class="widget-combobox-input"
           id="comboBox1"
@@ -31,7 +30,7 @@ exports[`Combo box (Association) renders combobox widget 1`] = `
         <div
           class="widget-combobox-placeholder-text"
         >
-          111
+          obj_111
         </div>
       </div>
       <button
@@ -82,6 +81,7 @@ exports[`Combo box (Association) renders combobox widget 1`] = `
     >
       <div
         class="widget-combobox-menu-header widget-combobox-item"
+        tabindex="0"
       >
         <span
           class="widget-combobox-menu-header-select-all-button widget-combobox-icon-container"
@@ -117,9 +117,7 @@ exports[`Combo box (Association) toggles combobox menu on: input CLICK(focus) / 
     class="widget-combobox"
   >
     <div
-      aria-controls="downshift-2-menu"
-      aria-expanded="false"
-      class="form-control widget-combobox-input-container"
+      class="widget-combobox-input-container form-control"
       id="downshift-2-toggle-button"
       tabindex="-1"
     >
@@ -132,6 +130,7 @@ exports[`Combo box (Association) toggles combobox menu on: input CLICK(focus) / 
           aria-controls="downshift-2-menu"
           aria-expanded="false"
           aria-labelledby="comboBox1-label"
+          aria-required="true"
           autocomplete="off"
           class="widget-combobox-input"
           id="comboBox1"
@@ -142,7 +141,7 @@ exports[`Combo box (Association) toggles combobox menu on: input CLICK(focus) / 
         <div
           class="widget-combobox-placeholder-text"
         >
-          111
+          obj_111
         </div>
       </div>
       <button
@@ -193,6 +192,7 @@ exports[`Combo box (Association) toggles combobox menu on: input CLICK(focus) / 
     >
       <div
         class="widget-combobox-menu-header widget-combobox-item"
+        tabindex="0"
       >
         <span
           class="widget-combobox-menu-header-select-all-button widget-combobox-icon-container"
@@ -228,9 +228,7 @@ exports[`Combo box (Association) toggles combobox menu on: input TOGGLE BUTTON 1
     class="widget-combobox"
   >
     <div
-      aria-controls="downshift-7-menu"
-      aria-expanded="false"
-      class="form-control widget-combobox-input-container"
+      class="widget-combobox-input-container form-control"
       id="downshift-7-toggle-button"
       tabindex="-1"
     >
@@ -243,6 +241,7 @@ exports[`Combo box (Association) toggles combobox menu on: input TOGGLE BUTTON 1
           aria-controls="downshift-7-menu"
           aria-expanded="false"
           aria-labelledby="comboBox1-label"
+          aria-required="true"
           autocomplete="off"
           class="widget-combobox-input"
           id="comboBox1"
@@ -253,7 +252,7 @@ exports[`Combo box (Association) toggles combobox menu on: input TOGGLE BUTTON 1
         <div
           class="widget-combobox-placeholder-text"
         >
-          111
+          obj_111
         </div>
       </div>
       <button
@@ -304,6 +303,7 @@ exports[`Combo box (Association) toggles combobox menu on: input TOGGLE BUTTON 1
     >
       <div
         class="widget-combobox-menu-header widget-combobox-item"
+        tabindex="0"
       >
         <span
           class="widget-combobox-menu-header-select-all-button widget-combobox-icon-container"

@@ -11,19 +11,24 @@ import {
 import {
     ComboboxContainerProps,
     FilterTypeEnum,
-    OptionsSourceAssociationCustomContentTypeEnum
+    LoadingTypeEnum,
+    OptionsSourceAssociationCustomContentTypeEnum,
+    OptionsSourceAssociationCaptionTypeEnum
 } from "../../../typings/ComboboxProps";
 
 type ExtractionReturnValue = [
     ReferenceValue | ReferenceSetValue,
     ListValue,
     ListAttributeValue<string> | ListExpressionValue<string>,
+    OptionsSourceAssociationCaptionTypeEnum,
     DynamicValue<string> | undefined,
     boolean,
     FilterTypeEnum,
     ActionValue | undefined,
     ListWidgetValue | undefined,
-    OptionsSourceAssociationCustomContentTypeEnum
+    OptionsSourceAssociationCustomContentTypeEnum,
+    boolean,
+    LoadingTypeEnum
 ];
 
 export function extractAssociationProps(props: ComboboxContainerProps): ExtractionReturnValue {
@@ -59,16 +64,21 @@ export function extractAssociationProps(props: ComboboxContainerProps): Extracti
     const clearable = props.clearable;
     const customContent = props.optionsSourceAssociationCustomContent;
     const customContentType = props.optionsSourceAssociationCustomContentType;
+    const lazyLoading = (props.lazyLoading && props.optionsSourceAssociationCaptionType !== "expression") ?? false;
+    const loadingType = props.loadingType;
 
     return [
         attr,
         ds,
         captionType === "attribute" ? captionAttribute! : captionExpression!,
+        captionType,
         emptyOption,
         clearable,
         filterType,
         onChangeEvent,
         customContent,
-        customContentType
+        customContentType,
+        lazyLoading,
+        loadingType
     ];
 }

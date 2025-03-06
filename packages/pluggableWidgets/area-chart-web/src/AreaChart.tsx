@@ -1,8 +1,15 @@
+import {
+    ChartWidget,
+    ChartWidgetProps,
+    SeriesMapper,
+    containerPropsEqual,
+    getPlotChartDataTransforms,
+    usePlotChartDataSeries
+} from "@mendix/shared-charts/main";
+import "@mendix/shared-charts/ui/Chart.scss";
 import classNames from "classnames";
-import { createElement, ReactElement, useCallback, memo } from "react";
+import { createElement, memo, ReactElement, useCallback } from "react";
 import { AreaChartContainerProps, SeriesType } from "../typings/AreaChartProps";
-import { ChartWidget, ChartWidgetProps, containerPropsEqual } from "@mendix/shared-charts";
-import { getPlotChartDataTransforms, SeriesMapper, usePlotChartDataSeries } from "@mendix/shared-charts/hooks";
 
 const areaChartLayoutOptions: ChartWidgetProps["layoutOptions"] = {
     xaxis: {
@@ -67,13 +74,13 @@ export const AreaChart = memo(function AreaChart(props: AreaChartContainerProps)
             xAxisLabel={props.xAxisLabel?.value}
             yAxisLabel={props.yAxisLabel?.value}
             gridLinesMode={props.gridLines}
-            showSidebarEditor={props.enableDeveloperMode}
             customLayout={props.customLayout}
             customConfig={props.customConfigurations}
             layoutOptions={areaChartLayoutOptions}
             configOptions={areaChartConfigOptions}
             seriesOptions={areaChartSeriesOptions}
             enableThemeConfig={props.enableThemeConfig}
+            playground={props.playground}
         />
     );
 }, containerPropsEqual);

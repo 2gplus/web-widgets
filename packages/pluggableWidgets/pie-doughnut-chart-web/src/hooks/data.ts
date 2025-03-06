@@ -1,11 +1,10 @@
-import { ValueStatus } from "mendix";
-import { useEffect, useMemo, useState } from "react";
 import { ensure } from "@mendix/pluggable-widgets-tools";
-import Big from "big.js";
-import { PieChartContainerProps } from "../../typings/PieChartProps";
-import { ChartProps } from "@mendix/shared-charts/dist/components/Chart";
+import { ChartWidgetProps, compareAttrValuesAsc } from "@mendix/shared-charts/main";
 import { executeAction } from "@mendix/widget-plugin-platform/framework/execute-action";
-import { compareAttrValuesAsc } from "@mendix/shared-charts/dist/utils/compareAttrValuesAsc";
+import Big from "big.js";
+import { ObjectItem, ValueStatus } from "mendix";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PieChartContainerProps } from "../../typings/PieChartProps";
 
 type PieChartDataSeriesHooks = Pick<
     PieChartContainerProps,
@@ -19,6 +18,7 @@ type PieChartDataSeriesHooks = Pick<
     | "seriesSortOrder"
     | "seriesValueAttribute"
     | "tooltipHoverText"
+    | "seriesItemSelection"
 >;
 
 type LocalPieChartData = {
@@ -39,8 +39,9 @@ export const usePieChartDataSeries = ({
     seriesSortOrder,
     seriesValueAttribute,
     onClickAction,
-    tooltipHoverText
-}: PieChartDataSeriesHooks): ChartProps["data"] => {
+    tooltipHoverText,
+    seriesItemSelection
+}: PieChartDataSeriesHooks): ChartWidgetProps["data"] => {
     const [pieChartData, setPieChartData] = useState<LocalPieChartData[]>([]);
 
     useEffect(() => {
@@ -72,9 +73,17 @@ export const usePieChartDataSeries = ({
         tooltipHoverText
     ]);
 
-    const onClick = useMemo(() => (onClickAction ? () => executeAction(onClickAction) : undefined), [onClickAction]);
+    const onClick = useCallback(
+        (item: ObjectItem) => {
+            executeAction(onClickAction?.get(item));
+            if (seriesItemSelection && seriesItemSelection.type === "Single") {
+                seriesItemSelection.setSelection(item);
+            }
+        },
+        [onClickAction, seriesItemSelection]
+    );
 
-    return useMemo<ChartProps["data"]>(
+    return useMemo<ChartWidgetProps["data"]>(
         () => [
             {
                 customSeriesOptions,
@@ -88,10 +97,40 @@ export const usePieChartDataSeries = ({
                 hoverinfo: pieChartData.some(({ itemHoverText }) => itemHoverText !== undefined && itemHoverText !== "")
                     ? "text"
                     : "none",
-                dataSourceItems: [],
+                dataSourceItems: sortDatasourceItems(
+                    seriesDataSource.items ?? [],
+                    seriesSortOrder,
+                    seriesSortAttribute
+                ),
                 onClick
             }
         ],
-        [customSeriesOptions, holeRadius, pieChartData, onClick]
+        [
+            customSeriesOptions,
+            holeRadius,
+            pieChartData,
+            onClick,
+            seriesDataSource.items,
+            seriesSortAttribute,
+            seriesSortOrder
+        ]
     );
 };
+
+function sortDatasourceItems(
+    items: ObjectItem[],
+    seriesSortOrder: "asc" | "desc",
+    seriesSortAttribute: PieChartContainerProps["seriesSortAttribute"]
+): ObjectItem[] {
+    const sortedItems = [...items].sort((firstItem, secondItem) => {
+        const first = seriesSortAttribute?.get(firstItem).value;
+        const second = seriesSortAttribute?.get(secondItem).value;
+        return compareAttrValuesAsc(first, second);
+    });
+
+    if (seriesSortOrder === "desc") {
+        sortedItems.reverse();
+    }
+
+    return sortedItems;
+}

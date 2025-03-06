@@ -1,95 +1,56 @@
+import { render } from "@testing-library/react";
 import { createElement } from "react";
-import { render as renderEnzyme } from "enzyme";
-import { render, fireEvent } from "@testing-library/react";
-import { DatePicker } from "../DatePicker";
 import ReactDOM from "react-dom";
-import { doubleMonthOrDayWhenSingle } from "../../utils/utils";
+import { doubleMonthOrDayWhenSingle } from "../../utils/date-utils";
+import { DatePicker } from "../DatePicker";
 
 describe("Date picker component", () => {
     beforeAll(() => {
         jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
 
-        // @ts-ignore
-        jest.spyOn(ReactDOM, "createPortal").mockReturnValue((element, node) => {
-            return element;
+        jest.spyOn(ReactDOM, "createPortal").mockImplementation((element, _node, _key) => {
+            return element as ReturnType<typeof ReactDOM.createPortal>;
         });
     });
 
     it("renders correctly", () => {
-        const component = renderEnzyme(
-            <DatePicker adjustable setValue={jest.fn()} dateFormat="dd/MM/yyyy" locale="nl-NL" />
-        );
+        const component = render(<DatePicker adjustable expanded={false} onChange={jest.fn()} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders correctly when is not adjustable", () => {
-        const component = renderEnzyme(
-            <DatePicker adjustable={false} setValue={jest.fn()} dateFormat="dd/MM/yyyy" locale="nl-NL" />
-        );
+        const component = render(<DatePicker adjustable={false} expanded={false} onChange={jest.fn()} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders correctly with different locale and date format", () => {
-        const component = renderEnzyme(
-            <DatePicker adjustable={false} setValue={jest.fn()} dateFormat="yyyy-MM-dd" locale="pt-BR" />
+        const component = render(
+            <DatePicker
+                adjustable={false}
+                expanded={false}
+                onChange={jest.fn()}
+                locale={"fr_FR"}
+                dateFormat={"yyyyMMdd"}
+            />
         );
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders correctly with a11y properties", () => {
-        const component = renderEnzyme(
+        const component = render(
             <DatePicker
                 adjustable
-                setValue={jest.fn()}
-                dateFormat="yyyy-MM-dd"
-                locale="pt-BR"
+                expanded={false}
+                onChange={jest.fn()}
                 screenReaderInputCaption="my input"
                 screenReaderCalendarCaption="my calendar"
             />
         );
 
-        expect(component).toMatchSnapshot();
-    });
-
-    it("calls for setValue when value changes", async () => {
-        const setValue = jest.fn();
-        const component = render(
-            <DatePicker
-                adjustable
-                setValue={setValue}
-                dateFormat="dd/MM/yyyy"
-                locale="nl-NL"
-                placeholder="Placeholder"
-            />
-        );
-
-        fireEvent.change(component.getByPlaceholderText("Placeholder"), { target: { value: "01/12/2020" } });
-
-        expect(setValue).toBeCalledTimes(1);
-    });
-
-    it("calls for setRangeValues when value changes", async () => {
-        const setRangeValues = jest.fn();
-        const component = render(
-            <DatePicker
-                adjustable
-                setValue={jest.fn()}
-                setRangeValues={setRangeValues}
-                dateFormat="dd/MM/yyyy"
-                enableRange
-                locale="nl-NL"
-                placeholder="Placeholder"
-            />
-        );
-
-        fireEvent.change(component.getByPlaceholderText("Placeholder"), {
-            // Trick to trigger events (Should be dd/MM/yyyy - dd/MM/yyyy) but the library does not validate values coming from the input. That's why it is readonly when running on the browser.
-            target: { value: "01/12/2020" }
-        });
-        expect(setRangeValues).toBeCalledTimes(1);
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     test.each([

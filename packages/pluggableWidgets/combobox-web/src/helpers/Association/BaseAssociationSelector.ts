@@ -1,24 +1,31 @@
-import { ObjectItem, ReferenceValue, ReferenceSetValue, ActionValue } from "mendix";
-import { ComboboxContainerProps, OptionsSourceAssociationCustomContentTypeEnum } from "../../../typings/ComboboxProps";
+import { ActionValue, ListAttributeValue, ObjectItem, ReferenceSetValue, ReferenceValue } from "mendix";
+import { executeAction } from "@mendix/widget-plugin-platform/framework/execute-action";
+import {
+    ComboboxContainerProps,
+    LoadingTypeEnum,
+    OptionsSourceAssociationCustomContentTypeEnum
+} from "../../../typings/ComboboxProps";
+import { LazyLoadProvider } from "../LazyLoadProvider";
 import { Status } from "../types";
 import { AssociationOptionsProvider } from "./AssociationOptionsProvider";
 import { AssociationSimpleCaptionsProvider } from "./AssociationSimpleCaptionsProvider";
 import { extractAssociationProps } from "./utils";
-import { executeAction } from "@mendix/widget-plugin-platform/framework/execute-action";
 
 export class BaseAssociationSelector<T extends string | string[], R extends ReferenceSetValue | ReferenceValue> {
     status: Status = "unavailable";
     options: AssociationOptionsProvider;
     clearable = false;
-    currentValue: T | null = null;
+    currentId: T | null = null;
     caption: AssociationSimpleCaptionsProvider;
     readOnly = false;
+    lazyLoading = false;
+    loadingType?: LoadingTypeEnum;
     customContentType: OptionsSourceAssociationCustomContentTypeEnum = "no";
     validation?: string = undefined;
     protected _attr: R | undefined;
     private onChangeEvent?: ActionValue;
-
     private _valuesMap: Map<string, ObjectItem> = new Map();
+    private lazyLoader: LazyLoadProvider = new LazyLoadProvider();
 
     constructor() {
         this.caption = new AssociationSimpleCaptionsProvider(this._valuesMap);
@@ -30,13 +37,20 @@ export class BaseAssociationSelector<T extends string | string[], R extends Refe
             attr,
             ds,
             captionProvider,
+            captionType,
             emptyOption,
             clearable,
             filterType,
             onChangeEvent,
             customContent,
-            customContentType
+            customContentType,
+            lazyLoading,
+            loadingType
         ] = extractAssociationProps(props);
+
+        this.lazyLoader.updateProps(ds);
+        this.lazyLoader.setLimit(this.lazyLoader.getLimit(ds.limit, attr.readOnly, attr.status, lazyLoading));
+
         this._attr = attr as R;
         this.caption.updateProps({
             emptyOptionText: emptyOption,
@@ -48,7 +62,9 @@ export class BaseAssociationSelector<T extends string | string[], R extends Refe
         this.options._updateProps({
             attr,
             ds,
-            filterType
+            filterType,
+            lazyLoading,
+            attributeId: captionType === "attribute" ? (captionProvider as ListAttributeValue<string>).id : undefined
         });
 
         if (
@@ -61,7 +77,7 @@ export class BaseAssociationSelector<T extends string | string[], R extends Refe
             emptyOption.status === "unavailable"
         ) {
             this.status = "unavailable";
-            this.currentValue = null;
+            this.currentId = null;
             this.clearable = false;
 
             return;
@@ -72,6 +88,8 @@ export class BaseAssociationSelector<T extends string | string[], R extends Refe
         this.onChangeEvent = onChangeEvent;
         this.customContentType = customContentType;
         this.validation = attr.validation;
+        this.lazyLoading = lazyLoading;
+        this.loadingType = loadingType;
     }
 
     setValue(_value: T | null): void {

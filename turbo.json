@@ -38,6 +38,11 @@
             "cache": false,
             "dependsOn": ["release", "release:module", "push-update", "verify"]
         },
+        "create-translation": {
+            "cache": false,
+            "outputs": [],
+            "inputs": ["src/**/*.xml", "!src/**/package.xml"]
+        },
         "publish-marketplace": {
             "cache": false
         },
@@ -55,5 +60,5 @@
             "outputs": []
         }
     },
-    "globalDependencies": ["automation/**", ".npmrc", ".github/**"]
+    "globalDependencies": ["automation/**", ".npmrc", ".nvmrc", ".github/**", "package.json"]
 }

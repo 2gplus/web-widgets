@@ -6,6 +6,40 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+-   We updated plotly.js library to version 3.0.
+
+## [5.2.0] - 2025-01-21
+
+### Fixed
+
+-   We add listen to widget functionality on pie chart selection.
+
+## [5.1.1] - 2024-12-12
+
+### Fixed
+
+-   We fixed an issue on pie chart onClick when multiple points are added to the same item.
+
+## [5.1.0] - 2024-10-28
+
+### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+## [5.0.2] - 2024-10-15
+
+### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+## [5.0.1] - 2024-09-19
+
+### Fixed
+
+-   We fixed an issue where Pie chart on click event was not working properly, not executing the on click action.
+
 ## [3.1.2] - 2023-11-21
 
 ### Fixed

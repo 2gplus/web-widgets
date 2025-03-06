@@ -3,8 +3,8 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
-import { ActionValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import { ListValue, ListActionValue, ListAttributeValue, ListExpressionValue, SelectionSingleValue } from "mendix";
 import { Big } from "big.js";
 
 export type SeriesSortOrderEnum = "asc" | "desc";
@@ -24,8 +24,10 @@ export interface PieChartContainerProps {
     seriesSortAttribute?: ListAttributeValue<string | boolean | Date | Big>;
     seriesSortOrder: SeriesSortOrderEnum;
     seriesColorAttribute?: ListExpressionValue<string>;
+    seriesItemSelection?: SelectionSingleValue;
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground?: ReactNode;
     showLegend: boolean;
     holeRadius: number;
     tooltipHoverText?: ListExpressionValue<string>;
@@ -33,7 +35,7 @@ export interface PieChartContainerProps {
     width: number;
     heightUnit: HeightUnitEnum;
     height: number;
-    onClickAction?: ActionValue;
+    onClickAction?: ListActionValue;
     enableThemeConfig: boolean;
     customLayout: string;
     customConfigurations: string;
@@ -49,14 +51,17 @@ export interface PieChartPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     seriesDataSource: {} | { caption: string } | { type: string } | null;
     seriesName: string;
     seriesValueAttribute: string;
     seriesSortAttribute: string;
     seriesSortOrder: SeriesSortOrderEnum;
     seriesColorAttribute: string;
+    seriesItemSelection: "None" | "Single";
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     showLegend: boolean;
     holeRadius: number | null;
     tooltipHoverText: string;

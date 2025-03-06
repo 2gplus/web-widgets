@@ -1,60 +1,60 @@
+import { Properties, hidePropertyIn, hidePropertiesIn } from "@mendix/pluggable-widgets-tools";
 import { StructurePreviewProps } from "@mendix/widget-plugin-platform/preview/structure-preview-api";
-import { Properties, hidePropertiesIn, transformGroupsIntoTabs, hidePropertyIn } from "@mendix/pluggable-widgets-tools";
-
-import { RichTextPreviewProps } from "../typings/RichTextProps";
+import { RichTextPreviewProps } from "typings/RichTextProps";
 import RichTextPreviewSVGDark from "./assets/rich-text-preview-dark.svg";
 import RichTextPreviewSVGLight from "./assets/rich-text-preview-light.svg";
 
-const advancedModeItems: Array<keyof RichTextPreviewProps> = [
-    "enterMode",
-    "shiftEnterMode",
-    "spellChecker",
-    "codeHighlight",
-    "advancedContentFilter",
-    "allowedContent",
-    "disallowedContent"
-];
-const toolbarGroups: Array<keyof RichTextPreviewProps> = [
-    "toolsGroup",
-    "separatorGroup",
-    "stylesGroup",
-    "basicStylesGroup",
-    "clipboardGroup",
-    "colorsGroup",
-    "documentGroup",
-    "editingGroup",
-    "formsGroup",
-    "linksGroup",
-    "insertGroup",
-    "paragraphGroup",
-    "othersGroup",
-    "separator2Group"
+const toolbarGroupKeys: Array<keyof RichTextPreviewProps> = [
+    "history",
+    "fontStyle",
+    "fontScript",
+    "fontColor",
+    "list",
+    "indent",
+    "embed",
+    "align",
+    "code",
+    "header",
+    "remove"
 ];
 
-export function getProperties(
-    values: RichTextPreviewProps,
-    defaultProperties: Properties,
-    platform: "web" | "desktop"
-): Properties {
+export function getProperties(values: RichTextPreviewProps, defaultProperties: Properties): Properties {
     if (values.preset !== "custom") {
-        hidePropertiesIn(defaultProperties, values, toolbarGroups.concat(["toolbarConfig", "advancedConfig"]));
+        hidePropertiesIn(defaultProperties, values, toolbarGroupKeys.concat(["toolbarConfig", "advancedConfig"]));
     }
+
     if (values.toolbarConfig === "basic") {
-        hidePropertiesIn(defaultProperties, values, ["advancedConfig"]);
+        hidePropertyIn(defaultProperties, values, "advancedConfig");
     }
     if (values.toolbarConfig === "advanced") {
-        hidePropertiesIn(defaultProperties, values, toolbarGroups);
+        hidePropertiesIn(defaultProperties, values, toolbarGroupKeys);
     }
-    if (values.advancedContentFilter === "auto") {
-        hidePropertiesIn(defaultProperties, values, ["allowedContent", "disallowedContent"]);
-    }
-    if (platform === "web") {
-        transformGroupsIntoTabs(defaultProperties);
-        if (!values.advancedMode) {
-            hidePropertiesIn(defaultProperties, values, advancedModeItems);
-        }
+
+    if (values.heightUnit === "percentageOfWidth") {
+        hidePropertyIn(defaultProperties, values, "height");
     } else {
-        hidePropertyIn(defaultProperties, values, "advancedMode");
+        hidePropertiesIn(defaultProperties, values, [
+            "minHeight",
+            "minHeightUnit",
+            "maxHeight",
+            "maxHeightUnit",
+            "OverflowY"
+        ]);
+    }
+
+    if (values.minHeightUnit === "none") {
+        hidePropertyIn(defaultProperties, values, "minHeight");
+    }
+
+    if (values.maxHeightUnit === "none") {
+        hidePropertiesIn(defaultProperties, values, ["maxHeight", "OverflowY"]);
+    }
+
+    if (!values.onChange) {
+        hidePropertyIn(defaultProperties, values, "onChangeType");
+    }
+    if (values.toolbarLocation === "hide") {
+        hidePropertyIn(defaultProperties, values, "preset");
     }
     return defaultProperties;
 }
@@ -66,10 +66,6 @@ export function getPreview(props: RichTextPreviewProps, isDarkMode: boolean): St
     return {
         type: "Image",
         document: props.stringAttribute ? doc.replace("[No attribute selected]", `[${props.stringAttribute}]`) : doc,
-        height: 148
+        height: 150
     };
-}
-
-export function getCustomCaption(values: RichTextPreviewProps, _platform = "desktop"): string {
-    return values.stringAttribute || "Rich Text";
 }

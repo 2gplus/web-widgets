@@ -6,6 +6,88 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.11.1] - 2025-01-21
+
+### Fixed
+
+-   We fixed an issue with range date filter working incorrectly in some cases.
+
+## [2.10.4] - 2024-11-13
+
+### Changed
+
+-   We improved type mismatch filter error message.
+
+### Breaking changes
+
+-   We improved accessibility for the filter type select button - the select menu shows on enter, space, and arrow keys.
+
+### Added
+
+-   We improved screen reader integration.
+
+## [2.10.3] - 2024-10-31
+
+### Fixed
+
+-   We fixed an issue with grid wide filters not resetting.
+
+## [2.10.2] - 2024-09-23
+
+### Changed
+
+-   Widget maintenance.
+
+### Fixed
+
+-   Fixed issue with "empty" and "not empty" filters showing incorrect results.
+
+## [2.10.0] - 2024-09-20
+
+### Breaking changes
+
+-   We removed "Group key" property.
+
+## [2.9.0] - 2024-09-13
+
+### Changed
+
+-   Improved integration with parent widgets.
+
+### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+## [2.8.0] - 2024-06-19
+
+### Fixed
+
+-   The default filter values are now restored on initial page load.
+
+### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+## [2.7.1] - 2024-05-15
+
+### Fixed
+
+-   We fixed an issue where the filter type selector was not switching types correctly.
+
+## [2.7.0] - 2024-03-27
+
+### Fixed
+
+-   Fixed custom date format throwing error. When customers try to use a custom format like `YYww.E` they were getting an error and also the output date were not correct.
+
+### Added
+
+-   A new hook that subscribes the widget to external events.
+
 ## [2.6.2] - 2023-10-13
 
 ### Fixed

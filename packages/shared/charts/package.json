@@ -1,54 +1,63 @@
 {
-  "name": "@mendix/shared-charts",
-  "version": "1.1.3",
-  "description": "Shared components for charts",
-  "private": true,
-  "copyright": "© Mendix Technology BV 2023. All rights reserved.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "start": "tsc --watch",
-    "prepare": "npm run compile",
-    "precompile": "rimraf ./dist",
-    "compile": "tsc && copy-and-watch \"src/**/*.{scss,svg,js}\" \"dist/\"",
-    "build:externals": "rollup --config rollup.config.js",
-    "build": "ts-node ./scripts/build.ts",
-    "release:externals": "rollup --config rollup.config.js --configProduction",
-    "release": "ts-node ./scripts/release.ts",
-    "format": "prettier --write .",
-    "lint": "eslint --ext .jsx,.js,.ts,.tsx . && tsc --noEmit",
-    "test": "pluggable-widgets-tools test:unit:web"
-  },
-  "devDependencies": {
-    "@mendix/eslint-config-web-widgets": "workspace:*",
-    "@mendix/pluggable-widgets-tools": "^10.0.1",
-    "@mendix/prettier-config-web-widgets": "workspace:*",
-    "@mendix/widget-plugin-component-kit": "workspace:*",
-    "@mendix/widget-plugin-hooks": "workspace:*",
-    "@mendix/widget-plugin-platform": "workspace:*",
-    "@mendix/widget-plugin-test-utils": "workspace:*",
-    "@types/plotly.js": "^2.12.30",
-    "@types/react-plotly.js": "^2.5.0",
-    "@types/shelljs": "^0.8.11",
-    "ansi-colors": "^4.1.3",
-    "copy-and-watch": "^0.1.6",
-    "mendix-client": "^7.15.8",
-    "rimraf": "^2.7.1",
-    "ts-node": "^10.9.1"
-  },
-  "dependencies": {
-    "ace-builds": "^1.32.0",
-    "classnames": "^2.3.2",
-    "deepmerge": "^4.3.1",
-    "fast-json-patch": "^3.1.1",
-    "json-source-map": "^0.6.1",
-    "plotly.js": "^2.27.1",
-    "react-ace": "^10.1.0",
-    "react-plotly.js": "^2.6.0"
-  },
-  "files": [
-    "dist",
-    "hooks",
-    "rollup"
-  ]
+    "name": "@mendix/shared-charts",
+    "version": "2.0.2",
+    "description": "Shared components for charts",
+    "private": true,
+    "copyright": "© Mendix Technology BV 2025. All rights reserved.",
+    "type": "module",
+    "exports": {
+        ".": null,
+        "./rollup/shared-libs-config.cjs": "./dist/rollup/shared-libs-config.cjs",
+        "./ui/*": "./dist/ui/*",
+        "./*": "./dist/*.js"
+    },
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./dist/*"
+            ]
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "predev": "pnpm clear && pnpm copy",
+        "dev": "tsc --build --verbose --watch tsconfig.json",
+        "clear": "rimraf ./dist",
+        "copy": "copy-and-watch \"src/**/*.{scss,svg}\" \"dist/\"",
+        "build": "tsc --build --verbose tsconfig.build.json",
+        "postbuild": "pnpm copy",
+        "release": "pnpm build",
+        "prepare": "turbo build",
+        "format": "prettier --write .",
+        "lint": "eslint --ext .jsx,.js,.ts,.tsx . && tsc --noEmit",
+        "test": "jest"
+    },
+    "devDependencies": {
+        "@mendix/eslint-config-web-widgets": "workspace:*",
+        "@mendix/prettier-config-web-widgets": "workspace:*",
+        "@mendix/tsconfig-web-widgets": "workspace:^",
+        "@mendix/widget-plugin-component-kit": "workspace:*",
+        "@mendix/widget-plugin-hooks": "workspace:*",
+        "@mendix/widget-plugin-platform": "workspace:*",
+        "@mendix/widget-plugin-test-utils": "workspace:*",
+        "@rollup/plugin-commonjs": "^25.0.8",
+        "@rollup/plugin-node-resolve": "^15.2.3",
+        "@rollup/plugin-replace": "^2.4.2",
+        "@rollup/plugin-terser": "^0.4.4",
+        "@types/plotly.js-dist-min": "^2.3.4",
+        "@types/react-plotly.js": "^2.6.3",
+        "copy-and-watch": "^0.1.6",
+        "rimraf": "^4.4.1",
+        "rollup": "^2.79.2",
+        "rollup-plugin-copy": "^3.5.0"
+    },
+    "dependencies": {
+        "classnames": "^2.3.2",
+        "deepmerge": "^4.3.1",
+        "plotly.js": "npm:plotly.js-dist-min@3.0.0",
+        "plotly.js-dist-min": "^3.0.0",
+        "react-plotly.js": "^2.6.0"
+    }
 }

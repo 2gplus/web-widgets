@@ -3,7 +3,7 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
+import { ComponentType, CSSProperties, ReactNode } from "react";
 import { DynamicValue, ListValue, ListActionValue, ListAttributeValue, ListExpressionValue } from "mendix";
 import { Big } from "big.js";
 
@@ -82,7 +82,8 @@ export interface AreaChartContainerProps {
     tabIndex?: number;
     series: SeriesType[];
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground?: ReactNode;
     xAxisLabel?: DynamicValue<string>;
     yAxisLabel?: DynamicValue<string>;
     showLegend: boolean;
@@ -105,9 +106,11 @@ export interface AreaChartPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     series: SeriesPreviewType[];
     enableAdvancedOptions: boolean;
-    enableDeveloperMode: boolean;
+    showPlaygroundSlot: boolean;
+    playground: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     xAxisLabel: string;
     yAxisLabel: string;
     showLegend: boolean;

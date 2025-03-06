@@ -6,6 +6,78 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [2.10.0] - 2025-02-20
+
+### Added
+
+-   New set of settings allowing to make drop-down look and behave similar to combobox widget
+
+### Changed
+
+-   HTML is changed to meet modern accessibility requirements
+
+## [2.9.3] - 2024-11-13
+
+### Fixed
+
+-   We fixed an issue where filters not able to set guid value for reference selector.
+
+### Changed
+
+-   We improved type mismatch filter error message.
+
+## [2.9.2] - 2024-10-31
+
+### Fixed
+
+-   We fixed an issue where onChange events were not being triggered on dropdown filter.
+
+-   We fixed an issue with dropdown filters in some cases not setting or resetting.
+
+## [2.9.1] - 2024-09-23
+
+### Changed
+
+-   Widget maintenance.
+
+## [2.9.0] - 2024-09-20
+
+### Breaking changes
+
+-   We removed "Group key" property.
+
+## [2.8.0] - 2024-09-13
+
+### Changed
+
+-   Improved integration with parent widgets.
+
+### Added
+
+-   Group key -- a new setting to associate the filter with the group (see "Filter groups" in docs for more information).
+
+## [2.7.1] - 2024-07-10
+
+### Fixed
+
+-   We fixed on change event not triggering for association filters.
+
+## [2.7.0] - 2024-06-19
+
+### Added
+
+-   A new hook that subscribes the widget to `Set_Filter` action.
+
+### Changed
+
+-   We update event listener for `Reset_Filter` to allow reset to default value.
+
+## [2.6.0] - 2024-03-27
+
+### Added
+
+-   A new hook that subscribes the widget to external events.
+
 ## [2.5.2] - 2023-12-06
 
 ### Fixed

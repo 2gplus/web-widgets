@@ -1,10 +1,8 @@
 import type { EditableValue } from "mendix";
 import type { Big } from "big.js";
 import { Status } from "../constants.js";
+import { Writable } from "./type-utils.js";
 
-type Writable<T> = {
-    -readonly [K in keyof T]: T[K];
-};
 /* eslint-disable no-unused-vars */
 export enum FormatterType {
     Number = "number",
@@ -30,7 +28,8 @@ export class EditableValueBuilder<T extends string | boolean | Date | Big> {
         setValidator: jest.fn(),
         setValue: jest.fn((value: T) => this.withValue(value)),
         setTextValue: jest.fn(),
-        setFormatter: jest.fn()
+        setFormatter: jest.fn(),
+        isList: false
     };
 
     withValue(value?: T): EditableValueBuilder<T> {

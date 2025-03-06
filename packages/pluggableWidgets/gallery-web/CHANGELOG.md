@@ -6,6 +6,100 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.13.0] - 2024-11-13
+
+### Fixed
+
+-   Fixed issue with xpath when widget has many filters.
+
+## [1.12.2] - 2024-10-31
+
+### Fixed
+
+-   We resolved an issue where the gallery filter was not being applied at first.
+
+-   We fixed an issue with grid wide filters not resetting.
+
+## [1.12.0] - 2024-09-23
+
+### Changed
+
+-   Widget maintenance.
+
+## [1.11.0] - 2024-09-20
+
+### Breaking changes
+
+-   We removed "Filter groups" properties.
+
+## [1.10.0] - 2024-09-13
+
+### Changed
+
+-   Major filter improvement.
+
+### Fixed
+
+-   Personalization sync and other minor fixes.
+
+### Added
+
+-   The “Filter groups” is a new way of configuring header filters of the widget. This way of configuring filters has three main advantages over previous “Grid wide filtering”: 1. More than 4 filters are allowed in the header at the same time. 2. No restriction on filter type. The header can have one, two or more filters of the same data type. 3. Dropdown filters can use associations.
+
+## [1.9.2] - 2024-08-20
+
+### Fixed
+
+-   We fixed an issue where the style property was not applied.
+
+## [1.9.1] - 2024-06-26
+
+### Fixed
+
+-   We fixed an issue where cursor couldn't be moved inside text input fields with arrow keys.
+
+## [1.9.0] - 2024-06-19
+
+### Fixed
+
+-   We fixed an issue with Gallery widget where content may break out of grid boundaries. Thanks to Ronnie van Doorn for the suggestion.
+
+### Changed
+
+-   We update event listener for `Reset_All_Filters` to allow reset to default value.
+
+## [1.8.0] - 2024-04-30
+
+### Changed
+
+-   We have changed the value displayed in the pagination on design mode. Now the value displayed is the page size.
+
+### Added
+
+-   A new property that allows to change the behavior of the item selection.
+
+-   A new property that allows to configure the trigger event for the "on click" action.
+
+## [1.7.0] - 2024-04-09
+
+### Added
+
+-   Limited the number of items rendered on design mode to 3.
+
+## [1.6.0] - 2024-03-27
+
+### Added
+
+-   A new hook that subscribes the widget to external events.
+
+## [1.5.0] - 2024-03-06
+
+### Added
+
+-   We added a new feature to Gallery: Now it is possible to navigate on gallery items using keyboard.
+
+-   We added a new feature to Gallery: You can use the keyboard to select multiple items inside the gallery, just as simple as shift + arrow keys. You can also unselect an item with shift+space.
+
 ## [1.4.1] - 2023-11-28
 
 ### Fixed

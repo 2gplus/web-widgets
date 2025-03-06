@@ -6,6 +6,168 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Changed
+
+-   We updated plotly.js library to version 3.0.
+
+### Added
+
+-   We add a new widget called custom charts.
+
+## [5.1.2] Charts - 2025-01-21
+
+### [5.2.0] PieChart
+
+#### Fixed
+
+-   We add listen to widget functionality on pie chart selection.
+
+## [5.1.1] Charts - 2024-12-12
+
+### [5.1.1] PieChart
+
+#### Fixed
+
+-   We fixed an issue on pie chart onClick when multiple points are added to the same item.
+
+## [5.1.0] Charts - 2024-10-28
+
+### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] AreaChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] BarChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] BubbleChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] ColumnChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] HeatMap
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] LineChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners
+
+### [5.1.0] PieChart
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [5.1.0] TimeSeries
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+### [1.1.0] ChartPlayground
+
+#### Changed
+
+-   We changed bundling to make plotly scannable by package scanners.
+
+## [5.0.3] Charts - 2024-10-15
+
+### [5.0.1] AreaChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] BarChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] BubbleChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] ColumnChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] HeatMap
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] LineChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.2] PieChart
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [5.0.1] TimeSeries
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+### [1.0.1] ChartPlayground
+
+#### Fixed
+
+-   We fixed an issue where the widget is not automatically resized inside a pop up dialog.
+
+## [5.0.2] Charts - 2024-09-19
+
+### [5.0.1] PieChart
+
+#### Fixed
+
+-   We fixed an issue where Pie chart on click event was not working properly, not executing the on click action.
+
+## [5.0.1] Charts - 2024-07-02
+
+### Changed
+
+-   We changed build instructions to produce smaller widget mpk.
+
+## [5.0.0] Charts - 2024-06-14
+
+### Breaking changes
+
+-   We have removed the "Enable developer mode" property. As of version 5, the playground has become a pluggable widget called "Chart playground." This separation minimizes production code loaded to the client. To enable developer mode, simply drag and drop the playground to the chart you want to edit.
+
+-   We migrated from "Ace" code editor to the "CodeMirror" editor. The new editor comes with better defaults and is compatible with both legacy and new widget runtime.
+
 ## [4.2.4] Charts - 2023-11-30
 
 ### Fixed

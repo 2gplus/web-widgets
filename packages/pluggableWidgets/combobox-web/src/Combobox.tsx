@@ -1,12 +1,15 @@
 import { createElement, ReactElement } from "react";
-import { useActionEvents } from "./hooks/useActionEvents";
+
 import { ComboboxContainerProps } from "../typings/ComboboxProps";
-import { SingleSelection } from "./components/SingleSelection/SingleSelection";
+
 import { MultiSelection } from "./components/MultiSelection/MultiSelection";
+import { Placeholder } from "./components/Placeholder";
+import { SingleSelection } from "./components/SingleSelection/SingleSelection";
+import { SelectionBaseProps } from "./helpers/types";
+import { useActionEvents } from "./hooks/useActionEvents";
+import { useGetSelector } from "./hooks/useGetSelector";
 
 import "./ui/Combobox.scss";
-import { useGetSelector } from "./hooks/useGetSelector";
-import { Placeholder } from "./components/Placeholder";
 
 export default function Combobox(props: ComboboxContainerProps): ReactElement {
     const selector = useGetSelector(props);
@@ -15,11 +18,13 @@ export default function Combobox(props: ComboboxContainerProps): ReactElement {
         onLeaveEvent: props.onLeaveEvent,
         selector
     });
-    const commonProps = {
+    const commonProps: Omit<SelectionBaseProps<null>, "selector"> = {
         tabIndex: props.tabIndex!,
         inputId: props.id,
         labelId: `${props.id}-label`,
         noOptionsText: props.noOptionsText?.value,
+        readOnlyStyle: props.readOnlyStyle,
+        ariaRequired: props.ariaRequired,
         a11yConfig: {
             ariaLabels: {
                 clearSelection: props.clearButtonAriaLabel?.value ?? "",

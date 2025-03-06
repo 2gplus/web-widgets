@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.4.2] - 2024-10-31
+
+### Fixed
+
+-   We fixed an issue where the tooltip content would flicker on hover.
+
+## [1.4.1] - 2024-10-09
+
+### Fixed
+
+-   We fixed placement issues with tooltip when placed inside a layout container by adjusting the width of the trigger's container
+
+## [1.4.0] - 2024-08-14
+
+### Fixed
+
+-   We fixed placement issues with tooltip occasionally overflowing off the screen.
+
+## [1.3.4] - 2024-05-23
+
+### Fixed
+
+-   We fixed the issue where content inside tooltip are force to have fit to content width.
+
 ## [1.3.3] - 2023-09-27
 
 ### Fixed

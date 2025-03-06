@@ -5,14 +5,14 @@ const SNAPSHOT_SMALL = {
     country: 10,
     company: 20,
     role: 20,
-    employeesQuantity: 50
+    employee: 50
 };
 
 const SNAPSHOT_MEDIUM = {
     country: 20,
     company: 50,
     role: 100,
-    employeesQuantity: 200
+    employee: 200
 };
 
 const SNAPSHOT_LARGE = {
@@ -22,7 +22,7 @@ const SNAPSHOT_LARGE = {
     employee: 350
 };
 
-const FIVE_COMPANIES = {
+const SNAPSHOT_LARGE_5x5 = {
     country: 2,
     company: 5,
     role: 5,
@@ -41,7 +41,7 @@ const preset = {
     small: [SNAPSHOT_SMALL, "small"],
     medium: [SNAPSHOT_MEDIUM, "medium"],
     large: [SNAPSHOT_LARGE, "large"],
-    "five-companies": [FIVE_COMPANIES, "five-companies"]
+    large_5x5: [SNAPSHOT_LARGE_5x5, "large_5x5"]
 };
 
 function main() {
@@ -49,9 +49,15 @@ function main() {
 
     if (!presetName) {
         const usage = [
-            "Usage: node gen-employee-snapshot.js <preset>",
+            "Usage: node gen-employee-snapshot.js <PRESET>",
             "",
-            "preset - can be one of 'sample', 'medium', 'large', 'sample', 'five-companies'"
+            "PRESET - can be one of 'small', 'medium', 'large', 'sample', 'large_5x5'.",
+            "",
+            "sample    - single employee object, mainly for developer purposes and faster feedback.",
+            "small     - small size snapshot. Good for debugging and faster startups.",
+            "medium    - medium size snapshot for fine startup.",
+            "large     - large data snapshot. Good for testing but slow project initialization.",
+            "large_5x5 - generate large snapshot with only 5 roles and 5 companies."
         ];
         console.log(usage.join("\n"));
         return;

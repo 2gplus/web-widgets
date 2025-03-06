@@ -1,20 +1,12 @@
-import { ChartWidget } from "@mendix/shared-charts";
-import {
-    dynamicValue,
-    EditableValueBuilder,
-    ListAttributeValueBuilder,
-    ListValueBuilder
-} from "@mendix/widget-plugin-test-utils";
+import { ChartWidget } from "@mendix/shared-charts/main";
+import { EditableValueBuilder, ListAttributeValueBuilder, listExp, list } from "@mendix/widget-plugin-test-utils";
 import Big from "big.js";
 import { mount, ReactWrapper } from "enzyme";
-import { ListExpressionValue } from "mendix";
 import { createElement } from "react";
 import { SeriesType } from "../../typings/BarChartProps";
 import { BarChart } from "../BarChart";
 
-jest.mock("@mendix/shared-charts", () => ({
-    ChartWidget: jest.fn(() => null)
-}));
+jest.mock("react-plotly.js", () => jest.fn(() => null));
 
 describe("The BarChart widget", () => {
     function renderBarChart(configs: Array<Partial<SeriesType>>): ReactWrapper {
@@ -26,7 +18,6 @@ describe("The BarChart widget", () => {
                 series={configs.map(setupBasicSeries)}
                 showLegend={false}
                 enableAdvancedOptions={false}
-                enableDeveloperMode={false}
                 widthUnit="percentage"
                 width={0}
                 heightUnit="pixels"
@@ -35,6 +26,7 @@ describe("The BarChart widget", () => {
                 customLayout=""
                 customConfigurations=""
                 enableThemeConfig={false}
+                showPlaygroundSlot={false}
             />
         );
     }
@@ -47,7 +39,7 @@ describe("The BarChart widget", () => {
     });
 
     it("sets the bar color on the data series based on the barColor value", () => {
-        const barChart = renderBarChart([{ staticBarColor: exp("red") }, { staticBarColor: undefined }]);
+        const barChart = renderBarChart([{ staticBarColor: listExp(() => "red") }, { staticBarColor: undefined }]);
         const data = barChart.find(ChartWidget).prop("data");
         expect(data).toHaveLength(2);
         expect(data[0]).toHaveProperty("marker.color", "red");
@@ -93,12 +85,8 @@ function setupBasicSeries(overwriteConfig: Partial<SeriesType>): SeriesType {
         customSeriesOptions: overwriteConfig.customSeriesOptions ?? "",
         aggregationType: overwriteConfig.aggregationType ?? "avg",
         staticBarColor: overwriteConfig.staticBarColor ?? undefined,
-        staticDataSource: ListValueBuilder().simple(),
+        staticDataSource: list(2),
         staticXAttribute: xAttribute,
         staticYAttribute: yAttribute
     };
-}
-
-function exp(value: string): ListExpressionValue<string> {
-    return { get: () => dynamicValue(value) } as unknown as ListExpressionValue<string>;
 }

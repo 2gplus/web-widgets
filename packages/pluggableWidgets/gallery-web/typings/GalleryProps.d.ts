@@ -7,11 +7,15 @@ import { ComponentType, CSSProperties, ReactNode } from "react";
 import { ActionValue, DynamicValue, ListValue, ListActionValue, ListAttributeValue, ListExpressionValue, ListWidgetValue, SelectionSingleValue, SelectionMultiValue } from "mendix";
 import { Big } from "big.js";
 
+export type ItemSelectionModeEnum = "toggle" | "clear";
+
 export type PaginationEnum = "buttons" | "virtualScrolling";
 
 export type PagingPositionEnum = "below" | "above";
 
 export type ShowEmptyPlaceholderEnum = "none" | "custom";
+
+export type OnClickTriggerEnum = "single" | "double";
 
 export interface FilterListType {
     filter: ListAttributeValue<string | Big | boolean | Date>;
@@ -39,6 +43,7 @@ export interface GalleryContainerProps {
     advanced: boolean;
     datasource: ListValue;
     itemSelection?: SelectionSingleValue | SelectionMultiValue;
+    itemSelectionMode: ItemSelectionModeEnum;
     content?: ListWidgetValue;
     desktopItems: number;
     tabletItems: number;
@@ -49,6 +54,7 @@ export interface GalleryContainerProps {
     showEmptyPlaceholder: ShowEmptyPlaceholderEnum;
     emptyPlaceholder?: ReactNode;
     itemClass?: ListExpressionValue<string>;
+    onClickTrigger: OnClickTriggerEnum;
     onClick?: ListActionValue;
     onSelectionChange?: ActionValue;
     filterList: FilterListType[];
@@ -68,9 +74,11 @@ export interface GalleryPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     advanced: boolean;
     datasource: {} | { caption: string } | { type: string } | null;
     itemSelection: "None" | "Single" | "Multi";
+    itemSelectionMode: ItemSelectionModeEnum;
     content: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     desktopItems: number | null;
     tabletItems: number | null;
@@ -81,6 +89,7 @@ export interface GalleryPreviewProps {
     showEmptyPlaceholder: ShowEmptyPlaceholderEnum;
     emptyPlaceholder: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     itemClass: string;
+    onClickTrigger: OnClickTriggerEnum;
     onClick: {} | null;
     onSelectionChange: {} | null;
     filterList: FilterListPreviewType[];

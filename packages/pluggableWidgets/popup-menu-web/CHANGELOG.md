@@ -6,6 +6,50 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [4.0.2] - 2025-02-20
+
+### Fixed
+
+-   We fixed an issue where the user click interaction would trigger the overlayed element.
+
+## [4.0.1] - 2024-12-13
+
+### Breaking changes
+
+-   "The area to open or close the menu" field is now required.
+
+## [4.0.0] - 2024-11-13
+
+### Breaking changes
+
+-   We moved the widget styling to Atlas core to make exclusion variables work. Please update atlas-core module to a minimum 3.15.0 for Studio Pro 10.6.0 and above or 3.12.5 for below to keep the styling intact.
+
+### Added
+
+-   We added a configurable clipping strategy option.
+
+### Fixed
+
+-   We fixed an issue where popup menu would not overflow the parent widget.
+
+## [3.6.1] - 2024-09-18
+
+### Fixed
+
+-   We fixed popup menu getting cut off due to overflow in parent widget.
+
+## [3.6.0] - 2024-08-20
+
+### Added
+
+-   We added a new 'Close on' setting to customize the popup's closing behavior, allowing it to close when clicked or hovered outside the popup.
+
+### Breaking changes
+
+-   The default behavior for closing a popup set to open on 'hover' is now 'hover leave'.
+
+## [3.5.3] - 2024-01-08
+
 ### Fixed
 
 -   We fixed an issue where styling classes would apply on popup menu instead of the widget itself.

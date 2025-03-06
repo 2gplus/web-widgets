@@ -12,7 +12,7 @@
                     <caption>Enable advanced options</caption>
                     <description />
                 </property>
-                <property key="menuTrigger" type="widgets" required="false">
+                <property key="menuTrigger" type="widgets" required="true">
                     <caption>The area to open or close the menu.</caption>
                     <description>Responsible for toggling the Pop-up menu.</description>
                 </property>
@@ -91,6 +91,14 @@
                         <enumerationValue key="onhover">Hover</enumerationValue>
                     </enumerationValues>
                 </property>
+                <property key="hoverCloseOn" type="enumeration" defaultValue="onHoverLeave">
+                    <caption>Close on</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="onClickOutside">Click outside</enumerationValue>
+                        <enumerationValue key="onHoverLeave">Hover leave</enumerationValue>
+                    </enumerationValues>
+                </property>
                 <property key="position" type="enumeration" defaultValue="bottom">
                     <caption>Menu position</caption>
                     <description>The location of the menu relative to the click area.</description>
@@ -99,6 +107,14 @@
                         <enumerationValue key="right">Right</enumerationValue>
                         <enumerationValue key="top">Top</enumerationValue>
                         <enumerationValue key="bottom">Bottom</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="clippingStrategy" type="enumeration" defaultValue="absolute">
+                    <caption>Clipping strategy</caption>
+                    <description>'Absolute' positions the floating element relative to its nearest positioned ancestor, while 'Fixed' breaks it out of any clipping ancestor.</description>
+                    <enumerationValues>
+                        <enumerationValue key="absolute">Absolute</enumerationValue>
+                        <enumerationValue key="fixed">Fixed</enumerationValue>
                     </enumerationValues>
                 </property>
             </propertyGroup>

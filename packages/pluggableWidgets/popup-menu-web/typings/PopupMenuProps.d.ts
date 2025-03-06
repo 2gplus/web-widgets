@@ -26,7 +26,11 @@ export interface CustomItemsType {
 
 export type TriggerEnum = "onclick" | "onhover";
 
+export type HoverCloseOnEnum = "onClickOutside" | "onHoverLeave";
+
 export type PositionEnum = "left" | "right" | "top" | "bottom";
+
+export type ClippingStrategyEnum = "absolute" | "fixed";
 
 export interface BasicItemsPreviewType {
     itemType: ItemTypeEnum;
@@ -48,11 +52,13 @@ export interface PopupMenuContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     advancedMode: boolean;
-    menuTrigger?: ReactNode;
+    menuTrigger: ReactNode;
     basicItems: BasicItemsType[];
     customItems: CustomItemsType[];
     trigger: TriggerEnum;
+    hoverCloseOn: HoverCloseOnEnum;
     position: PositionEnum;
+    clippingStrategy: ClippingStrategyEnum;
     menuToggle: boolean;
 }
 
@@ -65,11 +71,14 @@ export interface PopupMenuPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     advancedMode: boolean;
     menuTrigger: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     basicItems: BasicItemsPreviewType[];
     customItems: CustomItemsPreviewType[];
     trigger: TriggerEnum;
+    hoverCloseOn: HoverCloseOnEnum;
     position: PositionEnum;
+    clippingStrategy: ClippingStrategyEnum;
     menuToggle: boolean;
 }

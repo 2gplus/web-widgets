@@ -96,7 +96,7 @@ export interface MapsContainerProps {
     height: number;
     zoom: ZoomEnum;
     mapProvider: MapProviderEnum;
-    mapStyles: string;
+    googleMapId: string;
 }
 
 export interface MapsPreviewProps {
@@ -108,6 +108,7 @@ export interface MapsPreviewProps {
     style: string;
     styleObject?: CSSProperties;
     readOnly: boolean;
+    renderMode?: "design" | "xray" | "structure";
     advanced: boolean;
     markers: MarkersPreviewType[];
     dynamicMarkers: DynamicMarkersPreviewType[];
@@ -130,5 +131,5 @@ export interface MapsPreviewProps {
     height: number | null;
     zoom: ZoomEnum;
     mapProvider: MapProviderEnum;
-    mapStyles: string;
+    googleMapId: string;
 }
