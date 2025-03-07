@@ -2,14 +2,14 @@ import { useEventCallback } from "@mendix/widget-plugin-hooks/useEventCallback";
 import { createElement, ReactElement, useCallback, useEffect, useRef, useState, MouseEvent, TouchEvent } from "react";
 
 export interface ColumnResizerProps {
-    minWidth?: number;
+    minWidth: number;
     setColumnWidth: (width: number) => void;
     onResizeEnds?: () => void;
     onResizeStart?: () => void;
 }
 
 export function ColumnResizer({
-    minWidth = 50,
+    minWidth,
     setColumnWidth,
     onResizeEnds,
     onResizeStart
@@ -52,6 +52,7 @@ export function ColumnResizer({
             if (currentWidth) {
                 const moveDifference = startPosition - mouseX;
                 let newWidth = currentWidth - moveDifference;
+                debugger;
                 if (newWidth < minWidth) {
                     newWidth = minWidth;
                 }

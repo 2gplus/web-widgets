@@ -498,7 +498,7 @@ export function check(values: DatagridPreviewProps): Problem[] {
         });
     }
 
-    // TODO Re-enable when migrating to 2G version
+    
     if (values.onClick) {
         errors.push({
             property: `onClick`,
@@ -506,12 +506,7 @@ export function check(values: DatagridPreviewProps): Problem[] {
                 "Action is removed please move action to Events / Click events. This action will not be executed on click"
         });
     }
-    // if (values.buttons.length > 0) {
-    //     errors.push({
-    //         property: "buttons",
-    //         message: "This implementation of buttons is no longer used, please move the buttons."
-    //     });
-    // }
+
     if (
         values.pagination !== "remote" &&
         !(!values.pageSize || !values.pageNumber || !values.pageSizeAttribute || !values.pagingAction)

@@ -38,7 +38,20 @@ const Container = observer((props: Props): ReactElement => {
 
     const clickActionHelper = useClickActionHelper({
         onClickTrigger: props.onClickTrigger,
-        onClick: props.onClick
+        onClick: (e:MouseEvent) => {
+            if(e.ctrlKey){
+                const clickEvent = props.rowClickevents.find(x => x.ctrlTrigger)
+                if(clickEvent){
+                    return clickEvent.onClick;
+                }
+            }
+            else{
+                const clickEvent = props.rowClickevents.find(x => !x.ctrlTrigger)
+                if(clickEvent){
+                    return clickEvent.onClick;
+                }
+            }
+        }
     });
 
     useOnResetFiltersEvent(rootStore.staticInfo.name, rootStore.staticInfo.filtersChannelName);
@@ -121,6 +134,10 @@ const Container = observer((props: Props): ReactElement => {
             isFetchingNextBatch={rootStore.loaderCtrl.isFetchingNextBatch}
             loadingType={props.loadingType}
             columnsLoading={!columnsStore.loaded}
+
+            // Custom 2G attributes
+            dataAttributes={props.dataObjects}
+            headerText={props.tableLabel}
         />
     );
 });

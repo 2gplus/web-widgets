@@ -19,9 +19,11 @@ import { ColumnPersonalizationSettings } from "../../../typings/personalization-
 
 export class ColumnStore implements GridColumn {
     columnIndex: number;
+    sortProperty?:string;
     isHidden: boolean;
     size: number | undefined = undefined;
     orderWeight: number;
+    minWidthLimit: number | undefined;
 
     private headerElementRef: HTMLDivElement | null = null;
 
@@ -47,8 +49,10 @@ export class ColumnStore implements GridColumn {
         this.baseInfo = new BaseColumnInfo(props); // base props never change, it is safe to no update them
 
         this.columnIndex = index; // this number also never changes
+
         this.isHidden = this.baseInfo.initiallyHidden;
         this.orderWeight = index * 10;
+
 
         makeObservable<
             ColumnStore,
@@ -91,6 +95,10 @@ export class ColumnStore implements GridColumn {
         this._attribute = props.attribute;
         this._content = props.content;
         this._dynamicText = props.dynamicText;
+
+        this.minWidthLimit = props.minWidthLimit ?? undefined;
+
+        this.sortProperty = props.sortProperty;
     }
 
     // old props

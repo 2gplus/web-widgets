@@ -6,6 +6,7 @@ import { GridColumn } from "../typings/GridColumn";
 import { SelectorCell } from "./SelectorCell";
 import { CheckboxCell } from "./CheckboxCell";
 import { SelectActionHelper } from "../helpers/SelectActionHelper";
+import {DataObjectsType} from "../../typings/DatagridProps";
 
 export interface RowProps<C extends GridColumn> {
     className?: string;
@@ -20,6 +21,7 @@ export interface RowProps<C extends GridColumn> {
     totalRows: number;
     clickable: boolean;
     eventsController: EventsController;
+    dataAttributes?: DataObjectsType[];
 }
 
 export function Row<C extends GridColumn>(props: RowProps<C>): ReactElement {
@@ -27,12 +29,18 @@ export function Row<C extends GridColumn>(props: RowProps<C>): ReactElement {
     const selected = selectActionHelper.isSelected(props.item);
     const ariaSelected = selectActionHelper.selectionType === "None" ? undefined : selected;
     const borderTop = props.index === 0;
-
+    const fragmentProps: any = {};
+    if (props.dataAttributes) {
+        for (const dataObject of props.dataAttributes) {
+            fragmentProps[`data-${dataObject.attribute}`] = dataObject.data?.get(props.item)?.value;
+        }
+    }
     return (
         <div
             className={classNames("tr", { "tr-selected": selected, "tr-preview": preview }, props.className)}
             role="row"
             aria-selected={ariaSelected}
+            {...fragmentProps}
         >
             {selectActionHelper.showCheckboxColumn && (
                 <CheckboxCell

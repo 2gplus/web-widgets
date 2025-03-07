@@ -7,6 +7,12 @@
     <helpUrl>https://docs.mendix.com/appstore/modules/data-grid-2</helpUrl>
     <properties>
         <propertyGroup caption="General">
+            <propertyGroup caption="Label">
+                <property key="tableLabel" type="textTemplate" required="false">
+                    <caption>Header label</caption>
+                    <description>Label to show at the top of the grid</description>
+                </property>
+            </propertyGroup>
             <propertyGroup caption="General">
                 <property key="advanced" type="boolean" defaultValue="false">
                     <caption>Enable advanced options</caption>
@@ -137,6 +143,10 @@
                             <property key="fetchOptionsLazy" type="boolean" defaultValue="true">
                                 <caption>Use lazy load</caption>
                                 <description>Lazy loading enables faster data grid loading, but with personalization enabled, value restoration will be limited.</description>
+                            </property>
+                            <property key="sortProperty" type="string" required="false">
+                                <caption>Sort property</caption>
+                                <description />
                             </property>
                             <property key="filterCaptionType" type="enumeration" defaultValue="expression">
                                 <caption>Option caption type</caption>
@@ -419,6 +429,130 @@
                     <translations>
                         <translation lang="en_US">Select row</translation>
                     </translations>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Events &amp; data">
+            <propertyGroup caption="Click events">
+                <property key="rowClickevents" type="object" isList="true" required="false">
+                    <caption>Click events</caption>
+                    <description />
+                    <properties>
+                        <propertyGroup caption="General">
+                            <property key="onClick" type="action" dataSource="../datasource" required="true">
+                                <caption>On click action</caption>
+                                <description />
+                            </property>
+                            <property key="ctrlTrigger" type="boolean" defaultValue="false">
+                                <caption>CTRL</caption>
+                                <description>Hold CTRL to execute the action</description>
+                            </property>
+                            <property key="defaultTrigger" type="enumeration" defaultValue="double">
+                                <caption>Default Trigger</caption>
+                                <description />
+                                <enumerationValues>
+                                    <enumerationValue key="single">Single click</enumerationValue>
+                                    <enumerationValue key="double">Double click</enumerationValue>
+                                </enumerationValues>
+                            </property>
+                            <property key="documentation" type="string" required="false">
+                                <caption>Documentation</caption>
+                                <description />
+                            </property>
+                        </propertyGroup>
+                    </properties>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Data objects">
+                <property key="dataObjects" type="object" isList="true" required="false">
+                    <caption>Data objects</caption>
+                    <description>Custom data- options on the row</description>
+                    <properties>
+                        <propertyGroup caption="General">
+                            <property key="attribute" type="string">
+                                <caption>Attribute</caption>
+                                <description>Attribute without data-</description>
+                            </property>
+                            <property key="data" type="expression" required="false" dataSource="../datasource">
+                                <caption>data in attribute</caption>
+                                <description />
+                                <returnType type="String" />
+                            </property>
+                        </propertyGroup>
+                    </properties>
+                </property>
+
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Sorting &amp; paging">
+            <propertyGroup caption="Paging">
+                <property key="pagingAction" type="action" required="false">
+                    <caption>Paging action</caption>
+                    <description>Action to execute to retrieve the batch</description>
+                </property>
+                <property key="pagingDisplayType" type="enumeration" defaultValue="objectBased">
+                    <caption>Display</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="objectBased">Object count</enumerationValue>
+                        <enumerationValue key="pageBased">Page count</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="pagingTotalCount" type="attribute" required="false">
+                    <caption>Total count</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                    </attributeTypes>
+                </property>
+                <property key="pageNumber" type="attribute" required="false">
+                    <caption>Page number</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                    </attributeTypes>
+                </property>
+                <property key="pageSizeAttribute" type="attribute" required="false">
+                    <caption>Page size</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="Integer" />
+                        <attributeType name="Long" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Sorting">
+                <property key="sortingType" type="enumeration" required="true" defaultValue="local">
+                    <caption>Sort Type</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="local">Local</enumerationValue>
+                        <enumerationValue key="remote">Remote</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="sortAttribute" type="attribute" required="false">
+                    <caption>Sort attribute</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="sortAscending" type="attribute" required="false">
+                    <caption>Sort ascending</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="Boolean" />
+                    </attributeTypes>
+                </property>
+                <property key="onSortChangedAction" type="action" required="false">
+                    <caption>Sort changed action</caption>
+                    <description />
+                </property>
+                <property key="executeSortChangedActionOnStartup" type="boolean" defaultValue="false" required="true">
+                    <caption>Execute "Sort changed action" on Startup</caption>
+                    <description />
                 </property>
             </propertyGroup>
         </propertyGroup>

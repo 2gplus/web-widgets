@@ -21,7 +21,7 @@ export interface IColumnGroupStore {
 
     availableColumns: GridColumn[];
     visibleColumns: GridColumn[];
-
+    _sortingType:string;
     columnFilters: ColumnFilterStore[];
 
     swapColumns(source: ColumnId, target: [ColumnId, "after" | "before"]): void;
@@ -37,6 +37,8 @@ export interface IColumnParentStore {
 export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
     readonly _allColumns: ColumnStore[];
     readonly _allColumnsById: Map<ColumnId, ColumnStore> = new Map();
+
+    _sortingType: string = "";
 
     readonly columnFilters: ColumnFilterStore[];
 

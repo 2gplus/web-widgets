@@ -119,21 +119,41 @@ const checkHidableSettings = (
 
 const checkSelectionSettings = (values: DatagridPreviewProps): Problem[] => {
     const errors: Problem[] = [];
+    // 2G widget contains multi event, so throw an error when the default events is still being used.
+    if (values.onClick) {
+        // errors.push({
+        //     property: `onClick`,
+        //     message:
+        //         "Action is removed please move action to Events / Click events. This action will not be executed on click"
+        // });
+    }
+
+    //On rowclick selection we cannot add a rowClickevent on single click
+    if (values.itemSelectionMethod === "rowClick") {
+        values.rowClickevents.forEach(x => {
+            if (x.defaultTrigger === "single" && !x.ctrlTrigger) {
+                errors.push({
+                    property: "rowClickevents",
+                    message:
+                        "Button is single click execution but the item selection is set to row click, this action will never be executed."
+                });
+            }
+        });
+    }
 
     if (values.itemSelection === "None" || values.onClick === null) {
         return errors;
     }
 
     if (values.onClickTrigger === "single" && values.itemSelectionMethod === "rowClick") {
-        return [
+        errors.push(
             {
                 severity: "error",
                 message:
                     "The row click action is ambiguous. " +
                     'Change "On click trigger" to "Double click" or "Selection method" to "Checkbox".'
-            }
-        ];
+            });
     }
 
-    return [];
+    return errors;
 };

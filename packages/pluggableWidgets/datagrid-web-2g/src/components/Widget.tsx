@@ -145,6 +145,7 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
             page={page}
             pageSize={pageSize}
             previousPage={() => setPage && setPage(prev => prev - 1)}
+            pagination={"buttons"}
         />
     ) : null;
     const cssGridStyles = useMemo(

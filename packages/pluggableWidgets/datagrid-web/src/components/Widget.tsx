@@ -1,13 +1,13 @@
 import { Pagination } from "@mendix/widget-plugin-grid/components/Pagination";
 import { SelectionStatus } from "@mendix/widget-plugin-grid/selection";
 import classNames from "classnames";
-import { ListActionValue, ObjectItem } from "mendix";
+import {DynamicValue, ListActionValue, ObjectItem} from "mendix";
 import { CSSProperties, ReactElement, ReactNode, createElement, Fragment } from "react";
 import {
     PagingPositionEnum,
     PaginationEnum,
     ShowPagingButtonsEnum,
-    LoadingTypeEnum
+    LoadingTypeEnum, DataObjectsType
 } from "../../typings/DatagridProps";
 import { WidgetPropsProvider } from "../helpers/useWidgetProps";
 import { CellComponent, EventsController } from "../typings/CellComponent";
@@ -80,6 +80,9 @@ export interface WidgetProps<C extends GridColumn, T extends ObjectItem = Object
 
     columnsSwap: (source: ColumnId, target: [ColumnId, "after" | "before"]) => void;
     setIsResizing: (status: boolean) => void;
+
+    headerText?: DynamicValue<string>;
+    dataAttributes?: DataObjectsType[];
 }
 
 export const Widget = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElement => {
@@ -132,12 +135,16 @@ const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
         preview,
         selectActionHelper,
         setPage,
-        visibleColumns
+        visibleColumns,
     } = props;
 
     const showHeader = !!headerContent;
-    const showTopBar = paging && (pagingPosition === "top" || pagingPosition === "both");
-
+    const hasHeaderText =
+        props.headerText !== undefined &&
+        props.headerText.status === "available" &&
+        props.headerText.value.trim().length > 0;
+    const showTopBar =
+        hasHeaderText || showHeader || (paging && (pagingPosition === "top" || pagingPosition === "both"));
     const pagination = paging ? (
         <Pagination
             canNextPage={hasMoreItems}
@@ -162,8 +169,25 @@ const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
 
     return (
         <Fragment>
-            {showTopBar && <WidgetTopBar>{pagination}</WidgetTopBar>}
-            {showHeader && <WidgetHeader headerTitle={headerTitle}>{headerContent}</WidgetHeader>}
+            {showTopBar && (
+                <WidgetTopBar>
+                    {hasHeaderText ? (
+                        <div className={"table-label"}>
+                            <h4>{props.headerText?.value}</h4>
+                        </div>
+                    ) : null}
+                    {showHeader && (
+                        <WidgetHeader
+                            className={hasHeaderText ? "widgets-align-right" : ""}
+                            headerTitle={headerTitle}
+                        >
+                            {headerContent}
+                        </WidgetHeader>
+                    )}
+                    {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
+                    {hasHeaderText ? <hr className={"table-header-line"} /> : null}
+                </WidgetTopBar>
+            )}
             <WidgetContent>
                 <Grid
                     aria-multiselectable={selectionEnabled ? selectActionHelper.selectionType === "Multi" : undefined}
@@ -210,6 +234,7 @@ const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                             focusController={props.focusController}
                             eventsController={props.cellEventsController}
                             pageSize={props.pageSize}
+                            dataAttributes={props.dataAttributes}
                         />
                         {(rows.length === 0 || preview) &&
                             emptyPlaceholderRenderer &&

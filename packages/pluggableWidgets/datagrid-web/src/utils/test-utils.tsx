@@ -31,7 +31,8 @@ export const column = (header = "Test", patch?: (col: ColumnsType) => void): Col
         minWidthLimit: 100,
         allowEventPropagation: true,
         fetchOptionsLazy: true,
-        filterCaptionType: "attribute"
+        filterCaptionType: "attribute",
+        sortProperty:"",
     };
 
     if (patch) {

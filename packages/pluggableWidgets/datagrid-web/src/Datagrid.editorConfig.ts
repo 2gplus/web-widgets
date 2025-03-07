@@ -107,6 +107,8 @@ export function getProperties(
         hidePropertyIn(defaultProperties, values, "emptyPlaceholder");
     }
 
+
+
     hideSelectionProperties(defaultProperties, values);
 
     changePropertyIn(
@@ -165,6 +167,11 @@ export function getProperties(
 
     if (values.configurationStorageType === "localStorage") {
         hidePropertiesIn(defaultProperties, values, ["configurationAttribute", "onConfigurationChange"]);
+    }
+
+    if (!values.onClick) {
+
+        // hidePropertiesIn(defaultProperties, values, ["onClick", "onClickTrigger"]);
     }
 
     return defaultProperties;
@@ -228,7 +235,8 @@ export const getPreview = (
                   minWidthLimit: 100,
                   allowEventPropagation: true,
                   exportValue: "",
-                  fetchOptionsLazy: true
+                  fetchOptionsLazy: true,
+                  sortProperty:""
               }
           ];
     const columns = rowLayout({

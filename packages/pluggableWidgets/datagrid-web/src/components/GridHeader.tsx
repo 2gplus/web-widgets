@@ -77,6 +77,7 @@ export function GridHeader({
                             resizable={columnsResizable && columns.at(-1) !== column}
                             resizer={
                                 <ColumnResizer
+                                    minWidth={column.minWidthLimit ?? 50}
                                     onResizeStart={() => setIsResizing(true)}
                                     onResizeEnds={() => setIsResizing(false)}
                                     setColumnWidth={(width: number) => column.setSize(width)}

@@ -30,6 +30,7 @@ export class RootGridStore extends BaseControllerHost {
     exportProgressCtrl: ProgressStore;
     loaderCtrl: DerivedLoaderController;
     paginationCtrl: PaginationController;
+    sortingType:string;
 
     private gate: Gate;
 
@@ -50,6 +51,7 @@ export class RootGridStore extends BaseControllerHost {
         this.settingsStore = new GridPersonalizationStore(props, this.columnsStore, this.headerFiltersStore);
         this.paginationCtrl = new PaginationController(this, { gate, query });
         this.exportProgressCtrl = exportCtrl;
+        this.sortingType = props.sortingType;
 
         new StateSyncController(this, {
             query,

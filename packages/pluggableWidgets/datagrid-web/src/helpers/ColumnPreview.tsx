@@ -14,9 +14,12 @@ export class ColumnPreview extends BaseColumn implements GridColumn {
             ...props,
             minWidthLimit: props.minWidthLimit ?? 100
         });
-
         this.props = props;
         this.columnIndex = columnNumber;
+    }
+
+    get minWidthLimit(): number | undefined{
+        return this.props.minWidthLimit ?? undefined;
     }
 
     columnClass(_item?: unknown): string | undefined {
@@ -74,4 +77,6 @@ export class ColumnPreview extends BaseColumn implements GridColumn {
                 return <span>Unknown content type: ${this.props.showContentAs}</span>;
         }
     }
+
+
 }

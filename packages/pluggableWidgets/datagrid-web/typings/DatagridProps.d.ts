@@ -38,6 +38,7 @@ export interface ColumnsType {
     filterAssociation?: ListReferenceValue | ListReferenceSetValue;
     filterAssociationOptions?: ListValue;
     fetchOptionsLazy: boolean;
+    sortProperty: string;
     filterCaptionType: FilterCaptionTypeEnum;
     filterAssociationOptionLabel?: ListExpressionValue<string>;
     filterAssociationOptionLabelAttr?: ListAttributeValue<string>;
@@ -71,6 +72,24 @@ export interface FilterListType {
     filter: ListAttributeValue<string | Big | boolean | Date>;
 }
 
+export type DefaultTriggerEnum = "single" | "double";
+
+export interface RowClickeventsType {
+    onClick?: ListActionValue;
+    ctrlTrigger: boolean;
+    defaultTrigger: DefaultTriggerEnum;
+    documentation: string;
+}
+
+export interface DataObjectsType {
+    attribute: string;
+    data?: ListExpressionValue<string>;
+}
+
+export type PagingDisplayTypeEnum = "objectBased" | "pageBased";
+
+export type SortingTypeEnum = "local" | "remote";
+
 export interface ColumnsPreviewType {
     showContentAs: ShowContentAsEnum;
     attribute: string;
@@ -84,6 +103,7 @@ export interface ColumnsPreviewType {
     filterAssociation: string;
     filterAssociationOptions: {} | { caption: string } | { type: string } | null;
     fetchOptionsLazy: boolean;
+    sortProperty: string;
     filterCaptionType: FilterCaptionTypeEnum;
     filterAssociationOptionLabel: string;
     filterAssociationOptionLabelAttr: string;
@@ -105,11 +125,24 @@ export interface FilterListPreviewType {
     filter: string;
 }
 
+export interface RowClickeventsPreviewType {
+    onClick: {} | null;
+    ctrlTrigger: boolean;
+    defaultTrigger: DefaultTriggerEnum;
+    documentation: string;
+}
+
+export interface DataObjectsPreviewType {
+    attribute: string;
+    data: string;
+}
+
 export interface DatagridContainerProps {
     name: string;
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
+    tableLabel?: DynamicValue<string>;
     advanced: boolean;
     datasource: ListValue;
     refreshInterval: number;
@@ -145,6 +178,18 @@ export interface DatagridContainerProps {
     exportDialogLabel?: DynamicValue<string>;
     cancelExportLabel?: DynamicValue<string>;
     selectRowLabel?: DynamicValue<string>;
+    rowClickevents: RowClickeventsType[];
+    dataObjects: DataObjectsType[];
+    pagingAction?: ActionValue;
+    pagingDisplayType: PagingDisplayTypeEnum;
+    pagingTotalCount?: EditableValue<Big>;
+    pageNumber?: EditableValue<Big>;
+    pageSizeAttribute?: EditableValue<Big>;
+    sortingType: SortingTypeEnum;
+    sortAttribute?: EditableValue<string>;
+    sortAscending?: EditableValue<boolean>;
+    onSortChangedAction?: ActionValue;
+    executeSortChangedActionOnStartup: boolean;
 }
 
 export interface DatagridPreviewProps {
@@ -157,6 +202,7 @@ export interface DatagridPreviewProps {
     styleObject?: CSSProperties;
     readOnly: boolean;
     renderMode?: "design" | "xray" | "structure";
+    tableLabel: string;
     advanced: boolean;
     datasource: {} | { caption: string } | { type: string } | null;
     refreshInterval: number | null;
@@ -193,4 +239,16 @@ export interface DatagridPreviewProps {
     exportDialogLabel: string;
     cancelExportLabel: string;
     selectRowLabel: string;
+    rowClickevents: RowClickeventsPreviewType[];
+    dataObjects: DataObjectsPreviewType[];
+    pagingAction: {} | null;
+    pagingDisplayType: PagingDisplayTypeEnum;
+    pagingTotalCount: string;
+    pageNumber: string;
+    pageSizeAttribute: string;
+    sortingType: SortingTypeEnum;
+    sortAttribute: string;
+    sortAscending: string;
+    onSortChangedAction: {} | null;
+    executeSortChangedActionOnStartup: boolean;
 }

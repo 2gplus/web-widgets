@@ -6,6 +6,7 @@ import { SelectActionHelper } from "../helpers/SelectActionHelper";
 import { CellComponent, EventsController } from "../typings/CellComponent";
 import { GridColumn } from "../typings/GridColumn";
 import { Row } from "./Row";
+import {DataObjectsType} from "../../typings/DatagridProps";
 
 interface RowsRendererProps {
     Cell: CellComponent<GridColumn>;
@@ -20,6 +21,7 @@ interface RowsRendererProps {
     rows: ObjectItem[];
     selectableWrapper?: (column: number, children: React.ReactElement) => React.ReactElement;
     selectActionHelper: SelectActionHelper;
+    dataAttributes?: DataObjectsType[];
 }
 
 export function RowsRenderer(props: RowsRendererProps): React.ReactElement {
@@ -41,6 +43,7 @@ export function RowsRenderer(props: RowsRendererProps): React.ReactElement {
                         key={`row_${item.id}`}
                         showSelectorCell={props.columnsHidable}
                         selectableWrapper={props.selectableWrapper}
+                        dataAttributes={props.dataAttributes}
                     />
                 );
             })}
