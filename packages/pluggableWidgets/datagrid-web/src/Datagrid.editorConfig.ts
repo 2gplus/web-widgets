@@ -18,6 +18,7 @@ import {
 } from "@mendix/widget-plugin-platform/preview/structure-preview-api";
 
 import { ColumnsPreviewType, DatagridPreviewProps } from "../typings/DatagridProps";
+import {customHideProperties} from "./CustomDatagrid-editorConfig";
 
 export function getProperties(
     values: DatagridPreviewProps,
@@ -169,10 +170,7 @@ export function getProperties(
         hidePropertiesIn(defaultProperties, values, ["configurationAttribute", "onConfigurationChange"]);
     }
 
-    if (!values.onClick) {
-
-        // hidePropertiesIn(defaultProperties, values, ["onClick", "onClickTrigger"]);
-    }
+    customHideProperties(values,defaultProperties,platform);
 
     return defaultProperties;
 }
