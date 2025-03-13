@@ -3,7 +3,7 @@ import { ObjectItem } from "mendix";
 import { ClickTrigger } from "@mendix/widget-plugin-grid/helpers/ClickActionHelper";
 import { SelectionMethod } from "../../helpers/SelectActionHelper";
 
-interface BaseContext {
+export interface BaseContext {
     item: ObjectItem;
     pageSize: number;
     selectionMethod: SelectionMethod;

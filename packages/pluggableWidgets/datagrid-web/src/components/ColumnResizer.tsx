@@ -52,7 +52,6 @@ export function ColumnResizer({
             if (currentWidth) {
                 const moveDifference = startPosition - mouseX;
                 let newWidth = currentWidth - moveDifference;
-                debugger;
                 if (newWidth < minWidth) {
                     newWidth = minWidth;
                 }

@@ -1,19 +1,20 @@
 import { DerivedPropsGate } from "@mendix/widget-plugin-mobx-kit/props-gate";
-import { ReactiveController, ReactiveControllerHost } from "@mendix/widget-plugin-mobx-kit/reactive-controller";
 import { ListValue, ValueStatus } from "mendix";
+import { DatasourceController } from "../DatasourceController";
+import { QueryController } from "../query-controller";
 import { action, autorun, makeAutoObservable } from "mobx";
-import { QueryController } from "./query-controller";
+import { ReactiveController, ReactiveControllerHost } from "@mendix/widget-plugin-mobx-kit/reactive-controller";
 
-type Gate = DerivedPropsGate<{ datasource: ListValue }>;
-type DatasourceControllerSpec = { gate: Gate };
+type Gate = DerivedPropsGate<{ datasource: ListValue; remotePaging: boolean }>;
+type CustomDatasourceControllerSpec = { gate: Gate };
 
-export class DatasourceController implements ReactiveController, QueryController {
+export class CustomDatasourceController implements ReactiveController, QueryController {
     private gate: Gate;
     private refreshing = false;
     private fetching = false;
     private pageSize = Infinity;
 
-    constructor(host: ReactiveControllerHost, spec: DatasourceControllerSpec) {
+    constructor(host: ReactiveControllerHost, spec: CustomDatasourceControllerSpec) {
         host.addController(this);
         this.gate = spec.gate;
 
@@ -60,13 +61,6 @@ export class DatasourceController implements ReactiveController, QueryController
 
     private get datasource(): ListValue {
         return this.gate.props.datasource;
-    }
-
-    get isLoading(): boolean {
-        if (this.isRefreshing || this.isFetchingNextBatch) {
-            return false;
-        }
-        return this.isDSLoading;
     }
 
     get isRefreshing(): boolean {
@@ -142,5 +136,15 @@ export class DatasourceController implements ReactiveController, QueryController
 
     setPageSize(size: number): void {
         this.pageSize = size;
+    }
+
+    get isLoading(): boolean {
+        if (this.gate.props.remotePaging && this.isRefreshing) {
+            return this.isDSLoading;
+        }
+        if (!this.gate.props.remotePaging && (this.isRefreshing || this.isFetchingNextBatch)) {
+            return false;
+        }
+        return this.isDSLoading;
     }
 }

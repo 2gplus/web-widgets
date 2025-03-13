@@ -5,7 +5,7 @@ import { action, computed, makeObservable, observable } from "mobx";
 import { DatagridContainerProps } from "../../../typings/DatagridProps";
 import { ColumnId, GridColumn } from "../../typings/GridColumn";
 import { ColumnFilterSettings, ColumnPersonalizationSettings } from "../../typings/personalization-settings";
-import { SortInstruction } from "../../typings/sorting";
+import { SortInstruction, SortRule } from "../../typings/sorting";
 import { StaticInfo } from "../../typings/static-info";
 import {
     ColumnsSortingStore,
@@ -15,55 +15,86 @@ import {
 } from "./ColumnsSortingStore";
 import { ColumnFilterStore } from "./column/ColumnFilterStore";
 import { ColumnStore } from "./column/ColumnStore";
+import { ActionValue, EditableValue } from "mendix";
+import { RemoteColumnsSortingStore } from "./RemoteColumnsSortingStore";
+import { CustomColumnStore } from "./column/CustomColumnStore";
+import { QueryController } from "../../controllers/query-controller";
 
 export interface IColumnGroupStore {
     loaded: boolean;
 
     availableColumns: GridColumn[];
     visibleColumns: GridColumn[];
-    _sortingType:string;
     columnFilters: ColumnFilterStore[];
 
     swapColumns(source: ColumnId, target: [ColumnId, "after" | "before"]): void;
     setIsResizing(status: boolean): void;
+
+    //Custom props to set the SortProperty and ASC / DESC
+    isRemoteSorting: boolean;
+    sortPropertyAttribute?: EditableValue<string>;
+    sortPropertyASC?: EditableValue<boolean>;
+    sortChangedAction?: ActionValue;
 }
 
 export interface IColumnParentStore {
-    isLastVisible(column: ColumnStore): boolean;
+    isLastVisible(column: ColumnStore | CustomColumnStore): boolean;
     isResizing: boolean;
     sorting: IColumnSortingStore;
 }
 
 export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
-    readonly _allColumns: ColumnStore[];
-    readonly _allColumnsById: Map<ColumnId, ColumnStore> = new Map();
-
-    _sortingType: string = "";
+    readonly _allColumns: ColumnStore[] | CustomColumnStore[];
+    readonly _allColumnsById: Map<ColumnId, ColumnStore | CustomColumnStore> = new Map();
 
     readonly columnFilters: ColumnFilterStore[];
 
-    sorting: ColumnsSortingStore;
+    isRemoteSorting: boolean;
+
+    sorting: ColumnsSortingStore | RemoteColumnsSortingStore;
     isResizing: boolean = false;
 
     constructor(
-        props: Pick<DatagridContainerProps, "columns" | "datasource">,
+        props: Pick<
+            DatagridContainerProps,
+            "columns" | "datasource" | "sortingType" | "sortAttribute" | "sortAscending" | "onSortChangedAction"
+        >,
         info: StaticInfo,
-        dsViewState: Array<FilterCondition | undefined> | null
+        dsViewState: Array<FilterCondition | undefined> | null,
+        query: QueryController
     ) {
+        this.isRemoteSorting = props.sortingType === "remote";
         this._allColumns = [];
         this.columnFilters = [];
-
-        props.columns.forEach((columnProps, i) => {
-            const initCond = dsViewState?.at(i) ?? null;
-            const column = new ColumnStore(i, columnProps, this);
-            this._allColumnsById.set(column.columnId, column);
-            this._allColumns[i] = column;
-            this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
-        });
-
-        this.sorting = new ColumnsSortingStore(
-            sortInstructionsToSortRules(props.datasource.sortOrder, this._allColumns)
-        );
+        //Update remote sorting
+        if (this.isRemoteSorting && props.sortAttribute && props.sortAscending !== undefined) {
+            props.columns.forEach((columnProps, i) => {
+                const initCond = dsViewState?.at(i) ?? null;
+                const column = new CustomColumnStore(i, columnProps, this);
+                this._allColumnsById.set(column.columnId, column);
+                this._allColumns[i] = column;
+                this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
+            });
+            // this.sorting = new RemoteColumnsSortingStore([[props.sortAttribute.value.toString(), props.sortAscending ? props.sortAscending.value ? props.sortAscending.value : false:false]], props.sortAttribute, props.sortAscending, props.onSortChangedAction);
+            this.sorting = new RemoteColumnsSortingStore(
+                [],
+                query,
+                props.sortAttribute,
+                props.sortAscending,
+                props.onSortChangedAction
+            );
+        } else {
+            props.columns.forEach((columnProps, i) => {
+                const initCond = dsViewState?.at(i) ?? null;
+                const column = new ColumnStore(i, columnProps, this);
+                this._allColumnsById.set(column.columnId, column);
+                this._allColumns[i] = column;
+                this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
+            });
+            this.sorting = new ColumnsSortingStore(
+                sortInstructionsToSortRules(props.datasource.sortOrder, this._allColumns as ColumnStore[])
+            );
+        }
 
         makeObservable<ColumnGroupStore, "_allColumns" | "_allColumnsOrdered">(this, {
             _allColumns: observable,
@@ -91,11 +122,17 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
         return dispose;
     }
 
-    updateProps(props: Pick<DatagridContainerProps, "columns">): void {
+    updateProps(
+        props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction">
+    ): void {
         props.columns.forEach((columnProps, i) => {
             this._allColumns[i].updateProps(columnProps);
             this.columnFilters[i].updateProps(columnProps);
         });
+
+        if (this.isRemoteSorting) {
+            (this.sorting as RemoteColumnsSortingStore).updateProps(props);
+        }
 
         if (this.visibleColumns.length < 1) {
             // if all columns are hidden after the update - reset hidden state for all columns
@@ -126,17 +163,20 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
 
     get loaded(): boolean {
         // check if all columns loaded, then we can render
+        //@ts-ignore
         return this._allColumns.every(c => c.loaded);
     }
 
-    private get _allColumnsOrdered(): ColumnStore[] {
-        return [...this._allColumns].sort((columnA, columnB) => columnA.orderWeight - columnB.orderWeight);
+    private get _allColumnsOrdered(): ColumnStore[] | CustomColumnStore[] {
+        return [...(this._allColumns as ColumnStore[])].sort(
+            (columnA, columnB) => columnA.orderWeight - columnB.orderWeight
+        );
     }
 
     get availableColumns(): ColumnStore[] {
         // columns that are not hidden by visibility expression
         // visible field name is misleading, it means available
-        return [...this._allColumnsOrdered].filter(column => column.isAvailable);
+        return [...(this._allColumnsOrdered as ColumnStore[])].filter(column => column.isAvailable);
     }
 
     get visibleColumns(): ColumnStore[] {
@@ -151,7 +191,7 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
     }
 
     get sortInstructions(): SortInstruction[] | undefined {
-        return sortRulesToSortInstructions(this.sorting.rules, this._allColumns);
+        return sortRulesToSortInstructions(this.sorting.rules as SortRule[], this._allColumns as ColumnStore[]);
     }
 
     get columnSettings(): ColumnPersonalizationSettings[] {
@@ -193,7 +233,7 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
         }
     }
 
-    isLastVisible(column: ColumnStore): boolean {
+    isLastVisible(column: ColumnStore | CustomColumnStore): boolean {
         return this.visibleColumns.at(-1) === column;
     }
 }

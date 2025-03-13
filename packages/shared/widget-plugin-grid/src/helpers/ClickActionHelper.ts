@@ -7,8 +7,15 @@ export type ExecuteActionFx = (item: ObjectItem) => void;
 export type ClickTrigger = "single" | "double" | "none";
 
 export class ClickActionHelper {
-    constructor(private trigger: ClickTrigger, private listAction?: ListActionValue | null | object) {}
+    constructor(
+        private trigger: ClickTrigger,
+        private triggerOnCtrl: boolean,
+        private listAction?: ListActionValue | null | object
+    ) {}
 
+    get ctrlTrigger(): boolean {
+        return this.triggerOnCtrl;
+    }
     get clickTrigger(): ClickTrigger {
         return this.listAction ? this.trigger : "none";
     }
@@ -27,11 +34,15 @@ export class ClickActionHelper {
 interface HelperProps {
     onClickTrigger: ClickTrigger;
     onClick?: ListActionValue | null | object;
+    ctrlTrigger?: boolean;
 }
 
 export function useClickActionHelper(props: HelperProps): ClickActionHelper {
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    const clickActionHelper = useMemo(() => new ClickActionHelper(props.onClickTrigger, props.onClick), []);
+    const clickActionHelper = useMemo(
+        () => new ClickActionHelper(props.onClickTrigger, props.ctrlTrigger ?? false, props.onClick),
+        []
+    );
 
     useEffect(() => {
         clickActionHelper.update(props.onClick);

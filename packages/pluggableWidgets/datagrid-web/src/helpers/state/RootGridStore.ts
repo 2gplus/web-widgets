@@ -5,7 +5,6 @@ import { DerivedPropsGate } from "@mendix/widget-plugin-mobx-kit/props-gate";
 import { generateUUID } from "@mendix/widget-plugin-platform/framework/generate-uuid";
 import { autorun, computed } from "mobx";
 import { DatagridContainerProps } from "../../../typings/DatagridProps";
-import { DatasourceController } from "../../controllers/DatasourceController";
 import { DerivedLoaderController } from "../../controllers/DerivedLoaderController";
 import { PaginationController } from "../../controllers/PaginationController";
 import { RefreshController } from "../../controllers/RefreshController";
@@ -14,6 +13,8 @@ import { ProgressStore } from "../../features/data-export/ProgressStore";
 import { StaticInfo } from "../../typings/static-info";
 import { ColumnGroupStore } from "./ColumnGroupStore";
 import { GridPersonalizationStore } from "./GridPersonalizationStore";
+import { CustomPaginationController } from "../../controllers/CustomControllers/CustomPaginationController";
+import { CustomDatasourceController } from "../../controllers/CustomControllers/CustomDatasourceController";
 
 type Gate = DerivedPropsGate<DatagridContainerProps>;
 
@@ -30,7 +31,6 @@ export class RootGridStore extends BaseControllerHost {
     exportProgressCtrl: ProgressStore;
     loaderCtrl: DerivedLoaderController;
     paginationCtrl: PaginationController;
-    sortingType:string;
 
     private gate: Gate;
 
@@ -45,13 +45,30 @@ export class RootGridStore extends BaseControllerHost {
             name: props.name,
             filtersChannelName: `datagrid/${generateUUID()}`
         };
-        const query = new DatasourceController(this, { gate });
-        const columns = (this.columnsStore = new ColumnGroupStore(props, this.staticInfo, columnsViewState));
+
+        //Register custom FS+ DatasourceController
+        let query = new CustomDatasourceController(this, { gate });
+
+        const columns = (this.columnsStore = new ColumnGroupStore(props, this.staticInfo, columnsViewState, query));
         const header = (this.headerFiltersStore = new HeaderFiltersStore(props, this.staticInfo, headerViewState));
         this.settingsStore = new GridPersonalizationStore(props, this.columnsStore, this.headerFiltersStore);
-        this.paginationCtrl = new PaginationController(this, { gate, query });
+        switch (props.sortingType) {
+            case "remote":
+                break;
+        }
+        //Custom FS+ Remote Paging
+        if (
+            props.remotePaging &&
+            props.pagingDisplayType &&
+            props.pagingTotalCount &&
+            props.pageNumber &&
+            props.pageSizeAttribute
+        ) {
+            this.paginationCtrl = new CustomPaginationController(this, { gate, query });
+        } else {
+            this.paginationCtrl = new PaginationController(this, { gate, query });
+        }
         this.exportProgressCtrl = exportCtrl;
-        this.sortingType = props.sortingType;
 
         new StateSyncController(this, {
             query,

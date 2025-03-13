@@ -180,6 +180,7 @@ export interface DatagridContainerProps {
     selectRowLabel?: DynamicValue<string>;
     rowClickevents: RowClickeventsType[];
     dataObjects: DataObjectsType[];
+    remotePaging: boolean;
     pagingAction?: ActionValue;
     pagingDisplayType: PagingDisplayTypeEnum;
     pagingTotalCount?: EditableValue<Big>;
@@ -241,6 +242,7 @@ export interface DatagridPreviewProps {
     selectRowLabel: string;
     rowClickevents: RowClickeventsPreviewType[];
     dataObjects: DataObjectsPreviewType[];
+    remotePaging: boolean;
     pagingAction: {} | null;
     pagingDisplayType: PagingDisplayTypeEnum;
     pagingTotalCount: string;

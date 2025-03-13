@@ -17,6 +17,7 @@ import { RootGridStore } from "./helpers/state/RootGridStore";
 import { useRootStore } from "./helpers/state/useRootStore";
 import { useDataExport } from "./features/data-export/useDataExport";
 import { ProgressStore } from "./features/data-export/ProgressStore";
+import { CustomPaginationController } from "./controllers/CustomControllers/CustomPaginationController";
 
 interface Props extends DatagridContainerProps {
     columnsStore: IColumnGroupStore;
@@ -38,20 +39,15 @@ const Container = observer((props: Props): ReactElement => {
 
     const clickActionHelper = useClickActionHelper({
         onClickTrigger: props.onClickTrigger,
-        onClick: (e:MouseEvent) => {
-            if(e.ctrlKey){
-                const clickEvent = props.rowClickevents.find(x => x.ctrlTrigger)
-                if(clickEvent){
-                    return clickEvent.onClick;
-                }
-            }
-            else{
-                const clickEvent = props.rowClickevents.find(x => !x.ctrlTrigger)
-                if(clickEvent){
-                    return clickEvent.onClick;
-                }
-            }
-        }
+        onClick: props.onClick
+    });
+    //FS+ implementation for custom row click events
+    const rowClickActionHelpers = props.rowClickevents.map(rowEvent => {
+        return useClickActionHelper({
+            onClickTrigger: rowEvent.defaultTrigger,
+            onClick: rowEvent.onClick,
+            ctrlTrigger: rowEvent.ctrlTrigger
+        });
     });
 
     useOnResetFiltersEvent(rootStore.staticInfo.name, rootStore.staticInfo.filtersChannelName);
@@ -63,10 +59,18 @@ const Container = observer((props: Props): ReactElement => {
     const focusController = useFocusTargetController({
         rows: items.length,
         columns: visibleColumnsCount,
-        pageSize: props.pageSize
+        pageSize:
+            props.remotePaging && props.pageSizeAttribute?.value
+                ? props.pageSizeAttribute.value.toNumber()
+                : props.pageSize
     });
 
-    const cellEventsController = useCellEventsController(selectActionHelper, clickActionHelper, focusController);
+    const cellEventsController = useCellEventsController(
+        selectActionHelper,
+        clickActionHelper,
+        focusController,
+        rowClickActionHelpers
+    );
 
     const checkboxEventsController = useCheckboxEventsController(selectActionHelper, focusController);
 
@@ -100,13 +104,25 @@ const Container = observer((props: Props): ReactElement => {
                     </WidgetHeaderContext>
                 )
             }
-            hasMoreItems={props.datasource.hasMoreItems ?? false}
+            hasMoreItems={
+                props.remotePaging
+                    ? (paginationCtrl as CustomPaginationController).isLastPage
+                    : props.datasource.hasMoreItems ?? false
+            }
             headerWrapperRenderer={useCallback((_columnIndex: number, header: ReactElement) => header, [])}
             id={useMemo(() => `DataGrid${generateUUID()}`, [])}
-            numberOfItems={props.datasource.totalCount}
+            numberOfItems={
+                props.remotePaging && props.pagingTotalCount?.value
+                    ? props.pagingTotalCount.value.toNumber()
+                    : props.datasource.totalCount
+            }
             onExportCancel={abortExport}
             page={paginationCtrl.currentPage}
-            pageSize={props.pageSize}
+            pageSize={
+                props.remotePaging && props.pageSizeAttribute?.value
+                    ? props.pageSizeAttribute.value.toNumber()
+                    : paginationCtrl.pageSize
+            }
             paginationType={props.pagination}
             loadMoreButtonCaption={props.loadMoreButtonCaption?.value}
             paging={paginationCtrl.showPagination}
@@ -134,7 +150,6 @@ const Container = observer((props: Props): ReactElement => {
             isFetchingNextBatch={rootStore.loaderCtrl.isFetchingNextBatch}
             loadingType={props.loadingType}
             columnsLoading={!columnsStore.loaded}
-
             // Custom 2G attributes
             dataAttributes={props.dataObjects}
             headerText={props.tableLabel}

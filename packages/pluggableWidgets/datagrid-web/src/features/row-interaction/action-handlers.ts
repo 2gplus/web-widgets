@@ -22,13 +22,12 @@ const onDoubleClick = (
         if (ctx.selectionMethod === "none") {
             return ctx.clickTrigger === "double";
         }
-
         return ctx.clickTrigger === "double" && !event.metaKey && !event.ctrlKey;
     },
     handler: ({ item }) => execActionFx(item)
 });
 
-const canExecOnSpaceOrEnter = (ctx: CellContext, event: React.KeyboardEvent): boolean => {
+export const canExecOnSpaceOrEnter = (ctx: CellContext, event: React.KeyboardEvent): boolean => {
     if (event.code === "Space" && ctx.clickTrigger !== "none") {
         return event.shiftKey ? ctx.selectionMethod === "none" : true;
     }

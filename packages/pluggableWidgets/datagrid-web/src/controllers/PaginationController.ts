@@ -10,7 +10,7 @@ type Gate = DerivedPropsGate<{
     showNumberOfRows: boolean;
 }>;
 
-type PaginationControllerSpec = {
+export type PaginationControllerSpec = {
     gate: Gate;
     query: QueryController;
 };
@@ -18,8 +18,8 @@ type PaginationControllerSpec = {
 type PaginationKind = `${PaginationEnum}.${ShowPagingButtonsEnum}`;
 
 export class PaginationController implements ReactiveController {
-    private gate: Gate;
-    private query: QueryController;
+    protected gate: Gate;
+    protected query: QueryController;
     readonly pagination: PaginationEnum;
     readonly paginationKind: PaginationKind;
     readonly showPagingButtons: ShowPagingButtonsEnum;
@@ -65,7 +65,7 @@ export class PaginationController implements ReactiveController {
         }
     }
 
-    private setInitParams(): void {
+    protected setInitParams(): void {
         if (this.pagination === "buttons" || this.showNumberOfRows) {
             this.query.requestTotalCount(true);
         }

@@ -16,8 +16,9 @@ import { BaseColumnInfo } from "./BaseColumnInfo";
 import { IColumnParentStore } from "../ColumnGroupStore";
 import { SortDirection } from "../../../typings/sorting";
 import { ColumnPersonalizationSettings } from "../../../typings/personalization-settings";
+import { RemoteColumnsSortingStore } from "../RemoteColumnsSortingStore";
 
-export class ColumnStore implements GridColumn {
+export class CustomColumnStore implements GridColumn {
     columnIndex: number;
     isHidden: boolean;
     size: number | undefined = undefined;
@@ -48,14 +49,14 @@ export class ColumnStore implements GridColumn {
         this.parentStore = parentStore;
 
         this.baseInfo = new BaseColumnInfo(props); // base props never change, it is safe to no update them
-
+        this.sortProperty = props.sortProperty;
         this.columnIndex = index; // this number also never changes
 
         this.isHidden = this.baseInfo.initiallyHidden;
         this.orderWeight = index * 10;
 
         makeObservable<
-            ColumnStore,
+            CustomColumnStore,
             "_visible" | "_header" | "_columnClass" | "_tooltip" | "_attribute" | "_dynamicText" | "_content"
         >(this, {
             _visible: observable.ref,
@@ -149,7 +150,9 @@ export class ColumnStore implements GridColumn {
     }
 
     toggleSort(): void {
-        this.parentStore.sorting.toggleSort(this.columnId);
+        const remoteSortingStore = this.parentStore.sorting as RemoteColumnsSortingStore;
+        remoteSortingStore.setSortProperty(this.sortProperty ?? "");
+        remoteSortingStore.toggleSort(this.columnId);
     }
 
     get columnId(): ColumnId {

@@ -55,7 +55,6 @@ export function sortInstructionsToSortRules(
     if (!sortInstructions || !sortInstructions.length) {
         return [];
     }
-
     return sortInstructions
         .map((si): SortRule | undefined => {
             const [attrId, dir] = si;

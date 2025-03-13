@@ -1,13 +1,14 @@
 import { Pagination } from "@mendix/widget-plugin-grid/components/Pagination";
 import { SelectionStatus } from "@mendix/widget-plugin-grid/selection";
 import classNames from "classnames";
-import {DynamicValue, ListActionValue, ObjectItem} from "mendix";
+import { DynamicValue, ListActionValue, ObjectItem } from "mendix";
 import { CSSProperties, ReactElement, ReactNode, createElement, Fragment } from "react";
 import {
     PagingPositionEnum,
     PaginationEnum,
     ShowPagingButtonsEnum,
-    LoadingTypeEnum, DataObjectsType
+    LoadingTypeEnum,
+    DataObjectsType
 } from "../../typings/DatagridProps";
 import { WidgetPropsProvider } from "../helpers/useWidgetProps";
 import { CellComponent, EventsController } from "../typings/CellComponent";
@@ -90,6 +91,8 @@ export const Widget = observer(<C extends GridColumn>(props: WidgetProps<C>): Re
 
     const selectionEnabled = selectActionHelper.selectionType !== "None";
 
+    console.log(`${props.setPage} ${props.page} ${props.pageSize} ${props.numberOfItems}`);
+
     return (
         <WidgetPropsProvider value={props}>
             <WidgetRoot
@@ -135,7 +138,7 @@ const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
         preview,
         selectActionHelper,
         setPage,
-        visibleColumns,
+        visibleColumns
     } = props;
 
     const showHeader = !!headerContent;
@@ -177,10 +180,7 @@ const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
                         </div>
                     ) : null}
                     {showHeader && (
-                        <WidgetHeader
-                            className={hasHeaderText ? "widgets-align-right" : ""}
-                            headerTitle={headerTitle}
-                        >
+                        <WidgetHeader className={hasHeaderText ? "widgets-align-right" : ""} headerTitle={headerTitle}>
                             {headerContent}
                         </WidgetHeader>
                     )}

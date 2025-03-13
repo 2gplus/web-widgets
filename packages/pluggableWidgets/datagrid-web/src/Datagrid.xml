@@ -481,11 +481,14 @@
                         </propertyGroup>
                     </properties>
                 </property>
-
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Sorting &amp; paging">
             <propertyGroup caption="Paging">
+                <property key="remotePaging" type="boolean" defaultValue="false">
+                    <caption>Remote paging</caption>
+                    <description>Set paging to remote</description>
+                </property>
                 <property key="pagingAction" type="action" required="false">
                     <caption>Paging action</caption>
                     <description>Action to execute to retrieve the batch</description>
