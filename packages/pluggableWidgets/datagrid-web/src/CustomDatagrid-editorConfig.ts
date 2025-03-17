@@ -9,13 +9,13 @@ export const customErrors = (values: DatagridPreviewProps): Problem[] => {
 const customCheckSelectionSettings = (values: DatagridPreviewProps): Problem[] => {
     const errors: Problem[] = [];
     // 2G widget contains multi event, so throw an error when the default events is still being used.
-    if (values.onClick) {
-        errors.push({
-            property: `onClick`,
-            message:
-                "Action is removed please move action to Events / Click events. This action will not be executed on click"
-        });
-    }
+    // if (values.onClick) {
+    //     errors.push({
+    //         property: `onClick`,
+    //         message:
+    //             "Action is removed please move action to Events / Click events. This action will not be executed on click"
+    //     });
+    // }
 
     //On rowclick selection we cannot add a rowClickevent on single click
     if (values.itemSelectionMethod === "rowClick") {

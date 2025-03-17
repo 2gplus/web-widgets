@@ -6,6 +6,7 @@ import { onOwnSpaceKeyDown } from "@mendix/widget-plugin-grid/selection";
 const onClick = (execActionFx: ExecuteActionFx): EventCaseEntry<CellContext, HTMLDivElement, "onClick"> => ({
     eventName: "onClick",
     filter: (ctx, event) => {
+
         if (ctx.clickTrigger === "single" && ctx.selectionMethod === "none") {
             return true;
         }

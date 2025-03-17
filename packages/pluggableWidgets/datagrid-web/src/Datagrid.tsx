@@ -46,7 +46,8 @@ const Container = observer((props: Props): ReactElement => {
         return useClickActionHelper({
             onClickTrigger: rowEvent.defaultTrigger,
             onClick: rowEvent.onClick,
-            ctrlTrigger: rowEvent.ctrlTrigger
+            ctrlTrigger: rowEvent.ctrlTrigger,
+            lastClick: 0
         });
     });
 

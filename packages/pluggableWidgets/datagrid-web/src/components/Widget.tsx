@@ -91,8 +91,6 @@ export const Widget = observer(<C extends GridColumn>(props: WidgetProps<C>): Re
 
     const selectionEnabled = selectActionHelper.selectionType !== "None";
 
-    console.log(`${props.setPage} ${props.page} ${props.pageSize} ${props.numberOfItems}`);
-
     return (
         <WidgetPropsProvider value={props}>
             <WidgetRoot
