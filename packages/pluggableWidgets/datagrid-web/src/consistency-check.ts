@@ -1,6 +1,5 @@
 import { Problem } from "@mendix/pluggable-widgets-tools";
 import { ColumnsPreviewType, DatagridPreviewProps } from "../typings/DatagridProps";
-import {customErrors} from "./CustomDatagrid-editorConfig";
 
 export function check(values: DatagridPreviewProps): Problem[] {
     const errors: Problem[] = [];
@@ -22,7 +21,7 @@ export function check(values: DatagridPreviewProps): Problem[] {
         }
     });
 
-    errors.push(...checkSelectionSettings(values), ...customErrors(values));
+    errors.push(...checkSelectionSettings(values));
 
     return errors;
 }
@@ -120,6 +119,27 @@ const checkHidableSettings = (
 
 const checkSelectionSettings = (values: DatagridPreviewProps): Problem[] => {
     const errors: Problem[] = [];
+    // 2G widget contains multi event, so throw an error when the default events is still being used.
+    if (values.onClick) {
+        // errors.push({
+        //     property: `onClick`,
+        //     message:
+        //         "Action is removed please move action to Events / Click events. This action will not be executed on click"
+        // });
+    }
+
+    //On rowclick selection we cannot add a rowClickevent on single click
+    if (values.itemSelectionMethod === "rowClick") {
+        values.rowClickevents.forEach(x => {
+            if (x.defaultTrigger === "single" && !x.ctrlTrigger) {
+                errors.push({
+                    property: "rowClickevents",
+                    message:
+                        "Button is single click execution but the item selection is set to row click, this action will never be executed."
+                });
+            }
+        });
+    }
 
     if (values.itemSelection === "None" || values.onClick === null) {
         return errors;
