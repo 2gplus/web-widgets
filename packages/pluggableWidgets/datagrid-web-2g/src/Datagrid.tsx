@@ -6,7 +6,7 @@ import { Cell } from "./components/Cell";
 import { Widget } from "./components/Widget";
 import { WidgetHeaderContext } from "./components/WidgetHeaderContext";
 import { useSelectActionHelper } from "./helpers/SelectActionHelper";
-import { useClickActionHelper } from "@mendix/widget-plugin-grid/helpers/ClickActionHelper";
+import { useClickActionHelper } from "./helpers/ClickActionHelper";
 import { useCellEventsController } from "./features/row-interaction/CellEventsController";
 import { useCheckboxEventsController } from "./features/row-interaction/CheckboxEventsController";
 import { useFocusTargetController } from "@mendix/widget-plugin-grid/keyboard-navigation/useFocusTargetController";
