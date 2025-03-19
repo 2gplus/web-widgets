@@ -18,7 +18,7 @@ import { ColumnStore } from "./column/ColumnStore";
 import { ActionValue, EditableValue } from "mendix";
 import { RemoteColumnsSortingStore } from "./RemoteColumnsSortingStore";
 import { CustomColumnStore } from "./column/CustomColumnStore";
-import { QueryController } from "../../controllers/query-controller";
+import {CustomQueryController} from "../../controllers/CustomControllers/query-controller";
 
 export interface IColumnGroupStore {
     loaded: boolean;
@@ -61,7 +61,7 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
         >,
         info: StaticInfo,
         dsViewState: Array<FilterCondition | undefined> | null,
-        query: QueryController
+        query: CustomQueryController
     ) {
         this.isRemoteSorting = props.sortingType === "remote";
         this._allColumns = [];
@@ -75,7 +75,6 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
                 this._allColumns[i] = column;
                 this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
             });
-            // this.sorting = new RemoteColumnsSortingStore([[props.sortAttribute.value.toString(), props.sortAscending ? props.sortAscending.value ? props.sortAscending.value : false:false]], props.sortAttribute, props.sortAscending, props.onSortChangedAction);
             this.sorting = new RemoteColumnsSortingStore(
                 [],
                 query,

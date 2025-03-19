@@ -20,7 +20,6 @@ const onDoubleClick = (
 ): EventCaseEntry<CellContext, HTMLDivElement, "onDoubleClick"> => ({
     eventName: "onDoubleClick",
     filter: (_ctx, event) => {
-        console.log(`Custom double click ${event.ctrlKey} ${event.metaKey}`);
         return !event.metaKey && ((!event.ctrlKey && !ctrlTrigger) || (ctrlTrigger && event.ctrlKey));
     },
     handler: ({ item }) => execActionFx(item)

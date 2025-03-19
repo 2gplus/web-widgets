@@ -1,9 +1,9 @@
-import { DerivedPropsGate } from "@mendix/widget-plugin-mobx-kit/props-gate";
-import { ListValue, ValueStatus } from "mendix";
-import { DatasourceController } from "../DatasourceController";
-import { QueryController } from "../query-controller";
-import { action, autorun, makeAutoObservable } from "mobx";
-import { ReactiveController, ReactiveControllerHost } from "@mendix/widget-plugin-mobx-kit/reactive-controller";
+import {DerivedPropsGate} from "@mendix/widget-plugin-mobx-kit/props-gate";
+import {ListValue, ValueStatus} from "mendix";
+import {DatasourceController} from "../DatasourceController";
+import {QueryController} from "../query-controller";
+import {action, autorun, makeAutoObservable} from "mobx";
+import {ReactiveController, ReactiveControllerHost} from "@mendix/widget-plugin-mobx-kit/reactive-controller";
 
 type Gate = DerivedPropsGate<{ datasource: ListValue; remotePaging: boolean }>;
 type CustomDatasourceControllerSpec = { gate: Gate };
@@ -27,6 +27,15 @@ export class CustomDatasourceController implements ReactiveController, QueryCont
             setRefreshing: action,
             setFetching: action
         });
+    }
+    public startLoad(){
+        this.setRefreshing(true);
+        this.updateFlags(ValueStatus.Loading);
+
+    }
+    public stopLoad(){
+        this.setRefreshing(false);
+        this.updateFlags(ValueStatus.Available);
     }
 
     private resetFlags(): void {
@@ -140,7 +149,7 @@ export class CustomDatasourceController implements ReactiveController, QueryCont
 
     get isLoading(): boolean {
         if (this.gate.props.remotePaging && this.isRefreshing) {
-            return this.isDSLoading;
+            return this.isDSLoading || this.refreshing;
         }
         if (!this.gate.props.remotePaging && (this.isRefreshing || this.isFetchingNextBatch)) {
             return false;

@@ -52,10 +52,6 @@ export class RootGridStore extends BaseControllerHost {
         const columns = (this.columnsStore = new ColumnGroupStore(props, this.staticInfo, columnsViewState, query));
         const header = (this.headerFiltersStore = new HeaderFiltersStore(props, this.staticInfo, headerViewState));
         this.settingsStore = new GridPersonalizationStore(props, this.columnsStore, this.headerFiltersStore);
-        switch (props.sortingType) {
-            case "remote":
-                break;
-        }
         //Custom FS+ Remote Paging
         if (
             props.remotePaging &&
