@@ -12,16 +12,13 @@ export class ClickEventSwitch<Context, Element> {
         const { onClick = [], onDoubleClick = [] } = groupEntries(this.entries);
         const awaitTime = 320; // ms, approx 1/3 of a second
         let startTime = 0;
-        console.log('refresh');
         return {
             eventName: "onClick",
             handler: (ctx, event) => {
                 if (Date.now() - startTime > awaitTime) {
-                    console.log(`single click`);
                     onClick.forEach(entry => this.runEntry(entry, ctx, event));
                     startTime = Date.now();
                 } else {
-                    console.log(`double click`);
                     onDoubleClick.forEach(entry => this.runEntry(entry, ctx, event));
                     startTime = 0;
                 }

@@ -1,18 +1,18 @@
-import {ElementEntry, ElementProps} from "@mendix/widget-plugin-grid/event-switch/base";
-import {eventSwitch} from "@mendix/widget-plugin-grid/event-switch/event-switch";
-import {ObjectItem} from "mendix";
-import {useMemo} from "react";
-import {createActionHandlers} from "./action-handlers";
-import {CellContext} from "./base";
-import {createSelectHandlers} from "./select-handlers";
-import {SelectActionHelper} from "../../helpers/SelectActionHelper";
-import {SelectAdjacentFx, SelectAllFx, SelectFx} from "@mendix/widget-plugin-grid/selection";
-import {ClickActionHelper, ExecuteActionFx} from "@mendix/widget-plugin-grid/helpers/ClickActionHelper";
-import {FocusTargetController} from "@mendix/widget-plugin-grid/keyboard-navigation/FocusTargetController";
-import {FocusTargetFx} from "@mendix/widget-plugin-grid/keyboard-navigation/base";
-import {createFocusTargetHandlers} from "./focus-target-handlers";
-import {ClickEntry, ClickEventSwitch} from "@mendix/widget-plugin-grid/event-switch/ClickEventSwitch";
-import {createRowActionHandlers} from "./custom-action-handler";
+import { ElementEntry, ElementProps } from "@mendix/widget-plugin-grid/event-switch/base";
+import { eventSwitch } from "@mendix/widget-plugin-grid/event-switch/event-switch";
+import { ObjectItem } from "mendix";
+import { useMemo } from "react";
+import { createActionHandlers } from "./action-handlers";
+import { CellContext } from "./base";
+import { createSelectHandlers } from "./select-handlers";
+import { SelectActionHelper } from "../../helpers/SelectActionHelper";
+import { SelectAdjacentFx, SelectAllFx, SelectFx } from "@mendix/widget-plugin-grid/selection";
+import { ClickActionHelper, ExecuteActionFx } from "@mendix/widget-plugin-grid/helpers/ClickActionHelper";
+import { FocusTargetController } from "@mendix/widget-plugin-grid/keyboard-navigation/FocusTargetController";
+import { FocusTargetFx } from "@mendix/widget-plugin-grid/keyboard-navigation/base";
+import { createFocusTargetHandlers } from "./focus-target-handlers";
+import { ClickEntry, ClickEventSwitch } from "@mendix/widget-plugin-grid/event-switch/ClickEventSwitch";
+import { createRowActionHandlers } from "./custom-action-handler";
 
 export class CellEventsController {
     constructor(
@@ -23,8 +23,7 @@ export class CellEventsController {
         private executeActionFx: ExecuteActionFx,
         private focusTargetFx: FocusTargetFx,
         private rowEvents: ClickActionHelper[]
-    ) {
-    }
+    ) {}
 
     getProps(item: ObjectItem): ElementProps<HTMLDivElement> {
         return eventSwitch(() => this.contextFactory(item), this.getEntries());
@@ -37,13 +36,9 @@ export class CellEventsController {
             ...createFocusTargetHandlers(this.focusTargetFx)
         ];
 
-
-        const flatBread = this.rowEvents.flatMap(x => createRowActionHandlers(x));
-        const doubles = flatBread.filter(x => x.eventName === "onDoubleClick");
-        const singles = flatBread.filter(x => x.eventName === "onClick");
-        entries.push(...singles);
-
-
+        for (const extraEntry of this.rowEvents) {
+            entries.push(...createRowActionHandlers(extraEntry));
+        }
         const clickEntries = entries.filter(
             (entry): entry is ClickEntry<CellContext, HTMLDivElement> =>
                 entry.eventName === "onClick" || entry.eventName === "onDoubleClick"
@@ -51,7 +46,7 @@ export class CellEventsController {
         const restEntries = entries.filter(
             entry => entry.eventName !== "onClick" && entry.eventName !== "onDoubleClick"
         );
-        return [new ClickEventSwitch(clickEntries).getClickEntry(), ...restEntries,...doubles];
+        return [new ClickEventSwitch(clickEntries).getClickEntry(), ...restEntries];
     }
 }
 
@@ -70,7 +65,6 @@ export function useCellEventsController(
             selectionMode: selectHelper.selectionMode,
             clickTrigger: clickHelper.clickTrigger
         });
-        console.log(`created new cellContextFactory`);
 
         return new CellEventsController(
             cellContextFactory,
