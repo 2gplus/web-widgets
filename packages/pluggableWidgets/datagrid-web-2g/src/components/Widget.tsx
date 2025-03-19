@@ -1,29 +1,31 @@
 import { Pagination } from "@mendix/widget-plugin-grid/components/Pagination";
 import { SelectionStatus } from "@mendix/widget-plugin-grid/selection";
-import { GridSelectionProps } from "@mendix/widget-plugin-grid/selection/useGridSelectionProps";
-import { Big } from "big.js";
 import classNames from "classnames";
-import { DynamicValue, ObjectItem } from "mendix";
-import { CSSProperties, ReactElement, ReactNode, createElement, useCallback, useMemo, useState } from "react";
-import { DataObjectsType, PagingPositionEnum } from "../../typings/DatagridProps";
+import { DynamicValue, ListActionValue, ObjectItem } from "mendix";
+import { CSSProperties, ReactElement, ReactNode, createElement, Fragment } from "react";
+import {
+    PagingPositionEnum,
+    PaginationEnum,
+    ShowPagingButtonsEnum,
+    LoadingTypeEnum,
+    DataObjectsType
+} from "../../typings/DatagridProps";
 import { WidgetPropsProvider } from "../helpers/useWidgetProps";
-import { CellComponent } from "../typings/CellComponent";
+import { CellComponent, EventsController } from "../typings/CellComponent";
 import { ColumnId, GridColumn } from "../typings/GridColumn";
-import { CheckboxColumnHeader } from "./CheckboxColumnHeader";
-import { ColumnResizer } from "./ColumnResizer";
-import { ColumnSelector } from "./ColumnSelector";
 import { Grid } from "./Grid";
 import { GridBody } from "./GridBody";
-import { Header } from "./Header";
-import { Row } from "./Row";
 import { WidgetContent } from "./WidgetContent";
 import { WidgetFooter } from "./WidgetFooter";
 import { WidgetHeader } from "./WidgetHeader";
 import { WidgetRoot } from "./WidgetRoot";
 import { WidgetTopBar } from "./WidgetTopBar";
 import { ExportWidget } from "./ExportWidget";
-import { KeyNavProvider } from "../features/keyboard-navigation/context";
-import * as GridModel from "../typings/GridModel";
+import { SelectActionHelper } from "../helpers/SelectActionHelper";
+import { FocusTargetController } from "@mendix/widget-plugin-grid/keyboard-navigation/FocusTargetController";
+import { observer } from "mobx-react-lite";
+import { RowsRenderer } from "./RowsRenderer";
+import { GridHeader } from "./GridHeader";
 
 export interface WidgetProps<C extends GridColumn, T extends ObjectItem = ObjectItem> {
     CellComponent: CellComponent<C>;
@@ -45,79 +47,98 @@ export interface WidgetProps<C extends GridColumn, T extends ObjectItem = Object
     numberOfItems?: number;
     onExportCancel?: () => void;
     page: number;
+    paginationType: PaginationEnum;
+    loadMoreButtonCaption?: string;
     pageSize: number;
     paging: boolean;
     pagingPosition: PagingPositionEnum;
+    showPagingButtons: ShowPagingButtonsEnum;
     preview?: boolean;
     processedRows: number;
     rowClass?: (item: T) => string;
+    gridInteractive: boolean;
     setPage?: (computePage: (prevPage: number) => number) => void;
     styles?: CSSProperties;
-    valueForSort: (value: T, columnIndex: number) => string | Big | boolean | Date | undefined;
-    rowAction?: (e: any, isDoubleClick: boolean, value: ObjectItem) => void;
-    selectionProps: GridSelectionProps;
+    rowAction?: ListActionValue;
     selectionStatus: SelectionStatus;
     showSelectAllToggle?: boolean;
-    state: GridModel.State;
-    actions: GridModel.Actions;
     exportDialogLabel?: string;
     cancelExportLabel?: string;
     selectRowLabel?: string;
+    isLoading: boolean;
+    isFetchingNextBatch: boolean;
+    loadingType: LoadingTypeEnum;
+    columnsLoading: boolean;
 
-    /**
-     * Custom 2G props
-     */
-    rowOnClickHandler?: (e: any, isDoubleClick: boolean, value: ObjectItem) => void;
-    dataAttributes?: DataObjectsType[];
+    // Helpers
+    cellEventsController: EventsController;
+    checkboxEventsController: EventsController;
+    selectActionHelper: SelectActionHelper;
+    focusController: FocusTargetController;
+
+    visibleColumns: GridColumn[];
+    availableColumns: GridColumn[];
+
+    columnsSwap: (source: ColumnId, target: [ColumnId, "after" | "before"]) => void;
+    setIsResizing: (status: boolean) => void;
+
     headerText?: DynamicValue<string>;
-    filtersAboveTable: boolean;
+    dataAttributes?: DataObjectsType[];
 }
 
-export interface SortingRule {
-    id: string;
-    desc: boolean;
-}
+export const Widget = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElement => {
+    const { className, exporting, numberOfItems, onExportCancel, selectActionHelper } = props;
 
-export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElement {
+    const selectionEnabled = selectActionHelper.selectionType !== "None";
+
+    return (
+        <WidgetPropsProvider value={props}>
+            <WidgetRoot
+                className={className}
+                selectionMethod={selectActionHelper.selectionMethod}
+                selection={selectionEnabled}
+                style={{}}
+                exporting={exporting}
+            >
+                <Main {...props} data={exporting ? [] : props.data} />
+                {exporting && (
+                    <ExportWidget
+                        alertLabel={props.exportDialogLabel ?? "Export progress"}
+                        cancelLabel={props.cancelExportLabel ?? "Cancel data export"}
+                        failed={false}
+                        onCancel={onExportCancel}
+                        open={exporting}
+                        progress={props.processedRows}
+                        total={numberOfItems}
+                    />
+                )}
+            </WidgetRoot>
+        </WidgetPropsProvider>
+    );
+});
+
+const Main = observer(<C extends GridColumn>(props: WidgetProps<C>): ReactElement => {
     const {
-        className,
-        columnsDraggable,
-        columnsFilterable,
+        CellComponent,
         columnsHidable,
-        columnsResizable,
-        columnsSortable,
         data: rows,
         emptyPlaceholderRenderer,
-        exporting,
-        filterRenderer: filterRendererProp,
+        hasMoreItems,
         headerContent,
         headerTitle,
-        hasMoreItems,
-        headerWrapperRenderer,
-        id,
+        loadMoreButtonCaption,
         numberOfItems,
-        onExportCancel,
         page,
         pageSize,
+        paginationType,
         paging,
         pagingPosition,
         preview,
-        processedRows,
+        selectActionHelper,
         setPage,
-        styles,
-        selectionProps,
-        CellComponent,
-        state,
-        actions
+        visibleColumns
     } = props;
-    const columnsToShow = preview ? state.allColumns : state.visibleColumns;
-    const extraColumnsCount = (columnsHidable ? 1 : 0) + (props.selectionProps.showCheckboxColumn ? 1 : 0);
-    const keyboardNavColumnsCount = columnsToShow.length + (props.selectionProps.showCheckboxColumn ? 1 : 0);
-    const columnsVisibleCount = columnsToShow.length + extraColumnsCount;
 
-    const isInfinite = !paging;
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragOver, setDragOver] = useState<ColumnId | undefined>(undefined);
     const showHeader = !!headerContent;
     const hasHeaderText =
         props.headerText !== undefined &&
@@ -125,16 +146,6 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
         props.headerText.value.trim().length > 0;
     const showTopBar =
         hasHeaderText || showHeader || (paging && (pagingPosition === "top" || pagingPosition === "both"));
-
-    const renderFilterWrapper = useCallback(
-        (children: ReactNode) => (
-            <div className="filter" style={{ pointerEvents: isDragging ? "none" : undefined }}>
-                {children}
-            </div>
-        ),
-        [isDragging]
-    );
-
     const pagination = paging ? (
         <Pagination
             canNextPage={hasMoreItems}
@@ -144,193 +155,130 @@ export function Widget<C extends GridColumn>(props: WidgetProps<C>): ReactElemen
             numberOfItems={numberOfItems}
             page={page}
             pageSize={pageSize}
+            showPagingButtons={props.showPagingButtons}
             previousPage={() => setPage && setPage(prev => prev - 1)}
-            pagination={"buttons"}
+            pagination={paginationType}
         />
     ) : null;
-    const cssGridStyles = useMemo(
-        () =>
-            gridStyle(columnsToShow, props.state.size, {
-                selectItemColumn: selectionProps.showCheckboxColumn,
-                visibilitySelectorColumn: columnsHidable
-            }),
-        [props.state.size, columnsToShow, columnsHidable, selectionProps.showCheckboxColumn]
-    );
-    const selectionEnabled = props.selectionProps.selectionType !== "None";
-    const useHeaderFilters = props.filtersAboveTable;
-    return (
-        <WidgetPropsProvider value={props}>
-            <WidgetRoot
-                className={className}
-                selectionMethod={selectionProps.selectionMethod}
-                selection={selectionEnabled}
-                style={styles}
-                exporting={exporting}
-            >
-                {useHeaderFilters ? (
-                    <div className={"header-filters"}>
-                        {state.allColumns.map(column => filterRendererProp(renderFilterWrapper, column.columnNumber))}
-                    </div>
-                ) : null}
-                {showTopBar && (
-                    <WidgetTopBar>
-                        {hasHeaderText ? (
-                            <div className={"table-label"}>
-                                <h4>{props.headerText?.value}</h4>
-                            </div>
-                        ) : null}
-                        {showHeader && (
-                            <WidgetHeader
-                                className={hasHeaderText ? "widgets-align-right" : ""}
-                                headerTitle={headerTitle}
-                            >
-                                {headerContent}
-                            </WidgetHeader>
-                        )}
-                        {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
-                        {hasHeaderText ? <hr className={"table-header-line"} /> : null}
-                    </WidgetTopBar>
-                )}
-                <WidgetContent isInfinite={isInfinite} hasMoreItems={hasMoreItems} setPage={setPage}>
-                    <Grid
-                        aria-multiselectable={selectionEnabled ? selectionProps.selectionType === "Multi" : undefined}
-                    >
-                        <GridBody style={cssGridStyles}>
-                            <div key="headers_row" className="tr" role="row">
-                                <CheckboxColumnHeader key="headers_column_select_all" />
-                                {columnsToShow.map((column, index) =>
-                                    headerWrapperRenderer(
-                                        index,
-                                        <Header
-                                            key={`${column.columnId}`}
-                                            className={`align-column-${column.alignment}`}
-                                            gridId={props.id}
-                                            column={column}
-                                            draggable={columnsDraggable}
-                                            dragOver={dragOver}
-                                            filterable={columnsFilterable}
-                                            filterWidget={
-                                                !useHeaderFilters ??
-                                                filterRendererProp(renderFilterWrapper, column.columnNumber)
-                                            }
-                                            hidable={columnsHidable}
-                                            isDragging={isDragging}
-                                            preview={preview}
-                                            resizable={columnsResizable}
-                                            resizer={
-                                                <ColumnResizer
-                                                    minWidth={column.minWidth}
-                                                    setColumnWidth={(width: number) =>
-                                                        actions.resize([column.columnId, width])
-                                                    }
-                                                />
-                                            }
-                                            swapColumns={actions.swap}
-                                            setDragOver={setDragOver}
-                                            setIsDragging={setIsDragging}
-                                            setSortBy={actions.sortBy}
-                                            sortable={columnsSortable}
-                                            sortRule={state.sortOrder.find(([id]) => column.columnId === id)}
-                                            visibleColumns={state.visibleColumns}
-                                            sortLoading={state.executingRemoteSort}
-                                        />
-                                    )
-                                )}
-                                {columnsHidable && (
-                                    <ColumnSelector
-                                        key="headers_column_selector"
-                                        columns={state.availableColumns}
-                                        hiddenColumns={state.hidden}
-                                        id={id}
-                                        toggleHidden={actions.toggleHidden}
-                                        visibleLength={state.visibleColumns.length}
-                                    />
-                                )}
-                            </div>
-                            <KeyNavProvider
-                                rows={props.data.length}
-                                columns={keyboardNavColumnsCount}
-                                pageSize={props.pageSize}
-                            >
-                                {rows.map((item, rowIndex) => {
-                                    return (
-                                        <Row
-                                            CellComponent={CellComponent}
-                                            className={props.rowClass?.(item)}
-                                            columns={columnsToShow}
-                                            index={rowIndex}
-                                            item={item}
-                                            key={`row_${item.id}`}
-                                            rowAction={props.rowAction}
-                                            showSelectorCell={columnsHidable}
-                                            preview={preview ?? false}
-                                            selectableWrapper={headerWrapperRenderer}
-                                            dataAttributes={props.dataAttributes}
-                                        />
-                                    );
-                                })}
-                            </KeyNavProvider>
-                            {(rows.length === 0 || preview) &&
-                                emptyPlaceholderRenderer &&
-                                emptyPlaceholderRenderer(children => (
-                                    <div
-                                        key="row-footer"
-                                        className={classNames("td", { "td-borders": !preview })}
-                                        style={{
-                                            gridColumn: `span ${columnsVisibleCount}`
-                                        }}
-                                    >
-                                        <div className="empty-placeholder">{children}</div>
-                                    </div>
-                                ))}
-                        </GridBody>
-                    </Grid>
-                </WidgetContent>
-                <WidgetFooter pagination={pagination} pagingPosition={pagingPosition} />
-                <ExportWidget
-                    alertLabel={props.exportDialogLabel ?? "Export progress"}
-                    cancelLabel={props.cancelExportLabel ?? "Cancel data export"}
-                    failed={false}
-                    onCancel={onExportCancel}
-                    open={exporting}
-                    progress={processedRows}
-                    total={numberOfItems}
-                />
-            </WidgetRoot>
-        </WidgetPropsProvider>
-    );
-}
 
-function gridStyle(
-    columns: GridColumn[],
-    resizeMap: GridModel.ColumnWidthConfig,
-    optional: OptionalColumns
-): CSSProperties {
-    const columnSizes = columns.map(c => {
-        const columnResizedSize = resizeMap[c.columnId];
-        if (columnResizedSize) {
-            return `${columnResizedSize}px`;
-        }
-        switch (c.width) {
-            case "autoFit":
-                return "fit-content(100%)";
-            case "manual":
-                return `${c.weight}fr`;
-            default:
-                return "1fr";
-        }
+    const cssGridStyles = gridStyle(visibleColumns, {
+        selectItemColumn: selectActionHelper.showCheckboxColumn,
+        visibilitySelectorColumn: columnsHidable
     });
+
+    const selectionEnabled = selectActionHelper.selectionType !== "None";
+
+    return (
+        <Fragment>
+            {showTopBar && (
+                <WidgetTopBar>
+                    {hasHeaderText ? (
+                        <div className={"table-label"}>
+                            <h4>{props.headerText?.value}</h4>
+                        </div>
+                    ) : null}
+                    {showHeader && (
+                        <WidgetHeader className={hasHeaderText ? "widgets-align-right" : ""} headerTitle={headerTitle}>
+                            {headerContent}
+                        </WidgetHeader>
+                    )}
+                    {paging && (pagingPosition === "top" || pagingPosition === "both") ? pagination : null}
+                    {hasHeaderText ? <hr className={"table-header-line"} /> : null}
+                </WidgetTopBar>
+            )}
+            <WidgetContent>
+                <Grid
+                    aria-multiselectable={selectionEnabled ? selectActionHelper.selectionType === "Multi" : undefined}
+                    style={cssGridStyles}
+                    setPage={setPage}
+                    paginationType={paginationType}
+                    hasMoreItems={hasMoreItems}
+                >
+                    <GridHeader
+                        availableColumns={props.availableColumns}
+                        columns={visibleColumns}
+                        setIsResizing={props.setIsResizing}
+                        columnsDraggable={props.columnsDraggable}
+                        columnsFilterable={props.columnsFilterable}
+                        columnsHidable={props.columnsHidable}
+                        columnsResizable={props.columnsResizable}
+                        columnsSortable={props.columnsSortable}
+                        columnsSwap={props.columnsSwap}
+                        filterRenderer={props.filterRenderer}
+                        headerWrapperRenderer={props.headerWrapperRenderer}
+                        id={props.id}
+                        isLoading={props.columnsLoading}
+                        preview={props.preview}
+                    />
+                    <GridBody
+                        isLoading={props.isLoading}
+                        isFetchingNextBatch={props.isFetchingNextBatch}
+                        loadingType={props.loadingType}
+                        columnsHidable={columnsHidable}
+                        columnsSize={visibleColumns.length}
+                        rowsSize={rows.length}
+                        pageSize={pageSize}
+                    >
+                        <RowsRenderer
+                            preview={props.preview ?? false}
+                            interactive={props.gridInteractive}
+                            Cell={CellComponent}
+                            columns={visibleColumns}
+                            columnsHidable={columnsHidable}
+                            rows={rows}
+                            rowClass={props.rowClass}
+                            selectableWrapper={props.headerWrapperRenderer}
+                            selectActionHelper={selectActionHelper}
+                            focusController={props.focusController}
+                            eventsController={props.cellEventsController}
+                            pageSize={props.pageSize}
+                            dataAttributes={props.dataAttributes}
+                        />
+                        {(rows.length === 0 || preview) &&
+                            emptyPlaceholderRenderer &&
+                            emptyPlaceholderRenderer(children => (
+                                <div
+                                    key="row-footer"
+                                    className={classNames("td", { "td-borders": !preview })}
+                                    style={{
+                                        gridColumn: `span ${
+                                            visibleColumns.length +
+                                            (columnsHidable ? 1 : 0) +
+                                            (selectActionHelper.showCheckboxColumn ? 1 : 0)
+                                        }`
+                                    }}
+                                >
+                                    <div className="empty-placeholder">{children}</div>
+                                </div>
+                            ))}
+                    </GridBody>
+                </Grid>
+            </WidgetContent>
+            <WidgetFooter
+                pagination={pagination}
+                pagingPosition={pagingPosition}
+                paginationType={paginationType}
+                loadMoreButtonCaption={loadMoreButtonCaption}
+                hasMoreItems={hasMoreItems}
+                setPage={setPage}
+            />
+        </Fragment>
+    );
+});
+
+function gridStyle(columns: GridColumn[], optional: OptionalColumns): CSSProperties {
+    const columnSizes = columns.map(c => c.getCssWidth());
 
     const sizes: string[] = [];
 
     if (optional.selectItemColumn) {
-        sizes.push("fit-content(48px)");
+        sizes.push("48px");
     }
 
     sizes.push(...columnSizes);
 
     if (optional.visibilitySelectorColumn) {
-        sizes.push("fit-content(50px)");
+        sizes.push("54px");
     }
 
     return {

@@ -14,23 +14,11 @@ export type CellElementProps = {
     wrapText?: boolean;
     ["aria-hidden"]?: boolean;
     tabIndex?: number;
-    minWidth: number;
-} & Omit<JSX.IntrinsicElements["div"], "ref">;
+} & Omit<JSX.IntrinsicElements["div"], "ref" | "children">;
 
-const component = memo(
-    // eslint-disable-next-line prefer-arrow-callback
-    forwardRef<HTMLDivElement>(function CellElement(
-        {
-            className,
-            borderTop,
-            clickable,
-            previewAsHidden,
-            wrapText,
-            alignment,
-            tabIndex,
-            minWidth,
-            ...rest
-        }: CellElementProps,
+const component = // eslint-disable-next-line prefer-arrow-callback
+    forwardRef<HTMLDivElement, CellElementProps>(function CellElement(
+        { className, borderTop, clickable, previewAsHidden, wrapText, alignment, tabIndex, ...rest }: CellElementProps,
         ref
     ): ReactElement {
         return (
@@ -46,15 +34,12 @@ const component = memo(
                     },
                     className
                 )}
-                style={{ minWidth: minWidth }}
                 role="gridcell"
                 tabIndex={tabIndex ?? (clickable ? 0 : undefined)}
                 ref={ref}
                 {...rest}
             />
         );
-    })
-);
+    });
 
-// Override react NamedExoticComponent.
-export const CellElement = component as (props: CellElementProps) => ReactElement;
+export const CellElement = memo(component);

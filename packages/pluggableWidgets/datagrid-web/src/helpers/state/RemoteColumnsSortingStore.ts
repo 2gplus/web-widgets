@@ -20,6 +20,7 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     sortAttribute?: EditableValue<string>;
     sortAscending?: EditableValue<boolean>;
     sortChangedAction?: ActionValue;
+    onSortActionControlsDataReload:boolean;
     private sortPropertyUpdate: string;
     private query: QueryController;
 
@@ -28,12 +29,14 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
         query: QueryController,
         sortAttribute?: EditableValue<string>,
         sortAscending?: EditableValue<boolean>,
-        sortChangedAction?: ActionValue
+        sortChangedAction?: ActionValue,
+        onSortActionControlsDataReload:boolean
     ) {
         this.rules = initialRules;
         this.sortAttribute = sortAttribute;
         this.sortAscending = sortAscending;
         this.sortChangedAction = sortChangedAction;
+        this.onSortActionControlsDataReload = onSortActionControlsDataReload;
         this.sortPropertyUpdate = "";
         this.query = query;
         makeObservable(this, {
@@ -43,11 +46,12 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
         });
     }
     public updateProps(
-        props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction">
+        props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction" | "onSortActionControlsDataReload">
     ): void {
         this.sortAttribute = props.sortAttribute;
         this.sortAscending = props.sortAscending;
-        this.sortChangedAction = props.onSortChangedAction;
+        this.onSortActionControlsDataReload = props.onSortActionControlsDataReload;
+
     }
 
     getDirection(columnId: ColumnId): [SortDirection, number] | undefined {
@@ -66,33 +70,31 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
         const [[cId, dir] = []] = this.rules;
         if (!cId || cId !== columnId) {
             // was not sorted or sorted by a different column
-            this.sortAttribute?.setValue(this.sortPropertyUpdate);
-            this.sortAscending?.setValue(true);
-            this.executeChangedAction();
-            this.query.refresh();
+            this.updateSortProperty(true);
             this.rules = [[columnId, "asc", this.sortPropertyUpdate]];
             return;
         }
         if (dir === "asc") {
             // sorted by asc, flip to desc
-            this.sortAttribute?.setValue(this.sortPropertyUpdate);
-            this.sortAscending?.setValue(false);
-            this.executeChangedAction();
-            this.query.refresh();
+            this.updateSortProperty(false);
             this.rules = [[columnId, "desc", this.sortPropertyUpdate]];
             return;
         }
         // sorted by desc, disable
         this.sortPropertyUpdate = "";
-        this.sortAttribute?.setValue(this.sortPropertyUpdate);
-        this.query.refresh();
-        this.executeChangedAction();
+        this.updateSortProperty(true);
         this.rules = [];
     }
-    executeChangedAction() {
-        this.query.refresh();
+
+
+    updateSortProperty(sortAsc:boolean): void {
+        this.sortAscending?.setValue(sortAsc);
+        this.sortAttribute?.setValue(this.sortPropertyUpdate);
         if (this.sortChangedAction) {
             this.sortChangedAction.execute();
+        }
+        if(!this.sortChangedAction || (this.sortChangedAction && !this.sortActionControlsDataReload)) {
+            this.query.refresh();
         }
     }
 }

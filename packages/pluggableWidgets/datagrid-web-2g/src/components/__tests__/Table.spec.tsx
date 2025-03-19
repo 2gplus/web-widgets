@@ -1,17 +1,22 @@
+import "@testing-library/jest-dom";
+import { ClickActionHelper } from "@mendix/widget-plugin-grid/helpers/ClickActionHelper";
 import { MultiSelectionStatus, useSelectionHelper } from "@mendix/widget-plugin-grid/selection";
 import { SelectionMultiValueBuilder, list, listWidget, objectItems } from "@mendix/widget-plugin-test-utils";
-import "@testing-library/jest-dom";
-import * as testingLibrary from "@testing-library/react";
+import { cleanup, getAllByRole, getByRole, queryByRole, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { render } from "enzyme";
 import { ListValue, ObjectItem, SelectionMultiValue } from "mendix";
 import { ReactElement, createElement } from "react";
-import { Column } from "../../helpers/Column";
+import { CellEventsController, useCellEventsController } from "../../features/row-interaction/CellEventsController";
+import {
+    CheckboxEventsController,
+    useCheckboxEventsController
+} from "../../features/row-interaction/CheckboxEventsController";
+import { SelectActionHelper, useSelectActionHelper } from "../../helpers/SelectActionHelper";
 import { GridColumn } from "../../typings/GridColumn";
-import { column, mockState, mockWidgetProps } from "../../utils/test-utils";
+import { column, mockGridColumn, mockWidgetProps } from "../../utils/test-utils";
 import { Widget, WidgetProps } from "../Widget";
-import { useGridSelectionProps } from "@mendix/widget-plugin-grid/selection/useGridSelectionProps";
 import { ItemSelectionMethodEnum } from "typings/DatagridProps";
+
 // you can also pass the mock implementation
 // to jest.fn as an argument
 window.IntersectionObserver = jest.fn(() => ({
@@ -28,53 +33,54 @@ describe("Table", () => {
     it("renders the structure correctly", () => {
         const component = render(<Widget {...mockWidgetProps()} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with sorting", () => {
         const component = render(<Widget {...mockWidgetProps()} columnsSortable />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with resizing", () => {
         const component = render(<Widget {...mockWidgetProps()} columnsResizable />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with dragging", () => {
         const component = render(<Widget {...mockWidgetProps()} columnsDraggable />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with filtering", () => {
         const component = render(<Widget {...mockWidgetProps()} columnsFilterable />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with hiding", () => {
         const component = render(<Widget {...mockWidgetProps()} columnsHidable />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with paging", () => {
         const component = render(<Widget {...mockWidgetProps()} paging />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with custom filtering", () => {
         const props = mockWidgetProps();
-        const columns = [column("Test")].map((col, index) => new Column(col, index));
+        const columns = [column("Test")].map((col, index) => mockGridColumn(col, index));
         props.columnsFilterable = true;
-        props.state = mockState(columns);
+        props.visibleColumns = columns;
+        props.availableColumns = columns;
         const component = render(<Widget {...props} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with empty placeholder", () => {
@@ -82,7 +88,7 @@ describe("Table", () => {
             <Widget {...mockWidgetProps()} emptyPlaceholderRenderer={renderWrapper => renderWrapper(<div />)} />
         );
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with column alignments", () => {
@@ -92,29 +98,32 @@ describe("Table", () => {
                 col.alignment = "center";
             }),
             column("Test 2", col => (col.alignment = "right"))
-        ].map((col, index) => new Column(col, index));
-        props.state = mockState(columns);
+        ].map((col, index) => mockGridColumn(col, index));
+
+        props.visibleColumns = columns;
+        props.availableColumns = columns;
 
         const component = render(<Widget {...props} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with dynamic row class", () => {
         const component = render(<Widget {...mockWidgetProps()} rowClass={() => "myclass"} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly for preview when no header is provided", () => {
         const props = mockWidgetProps();
-        const columns = [column("", col => (col.alignment = "center"))].map((col, index) => new Column(col, index));
+        const columns = [column("", col => (col.alignment = "center"))].map((col, index) => mockGridColumn(col, index));
         props.preview = true;
-        props.state = mockState(columns);
+        props.visibleColumns = columns;
+        props.availableColumns = columns;
 
         const component = render(<Widget {...props} />);
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with header wrapper", () => {
@@ -129,7 +138,7 @@ describe("Table", () => {
             />
         );
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     it("renders the structure correctly with header filters and a11y", () => {
@@ -145,18 +154,16 @@ describe("Table", () => {
             />
         );
 
-        expect(component).toMatchSnapshot();
+        expect(component.asFragment()).toMatchSnapshot();
     });
 
     describe("with selection method checkbox", () => {
-        const { render, screen } = testingLibrary;
         let props: ReturnType<typeof mockWidgetProps>;
 
         beforeEach(() => {
             props = mockWidgetProps();
-            props.selectionProps.selectionType = "Single";
-            props.selectionProps.selectionMethod = "checkbox";
-            props.selectionProps.showCheckboxColumn = true;
+            props.selectActionHelper = new SelectActionHelper("Single", undefined, "checkbox", false, 5, "clear");
+            props.gridInteractive = true;
             props.paging = true;
             props.data = objectItems(3);
         });
@@ -168,7 +175,7 @@ describe("Table", () => {
         });
 
         it("render an extra column and add class to each selected row", () => {
-            props.selectionProps.isSelected = () => true;
+            props.selectActionHelper.isSelected = () => true;
 
             const { asFragment } = render(<Widget {...props} />);
 
@@ -178,7 +185,7 @@ describe("Table", () => {
         it("render correct number of checked checkboxes", () => {
             const [a, b, c, d, e, f] = (props.data = objectItems(6));
             let selection: ObjectItem[] = [];
-            props.selectionProps.isSelected = item => selection.includes(item);
+            props.selectActionHelper.isSelected = item => selection.includes(item);
 
             // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
             const getChecked = () => screen.getAllByRole<HTMLInputElement>("checkbox").filter(elt => elt.checked);
@@ -188,26 +195,39 @@ describe("Table", () => {
             expect(getChecked()).toHaveLength(0);
 
             selection = [a, b, c];
-            rerender(<Widget {...props} />);
+            rerender(<Widget {...props} data={[a, b, c, d, e, f]} />);
             expect(getChecked()).toHaveLength(3);
 
             selection = [c];
-            rerender(<Widget {...props} />);
+            rerender(<Widget {...props} data={[a, b, c, d, e, f]} />);
             expect(getChecked()).toHaveLength(1);
 
             selection = [d, e];
-            rerender(<Widget {...props} />);
+            rerender(<Widget {...props} data={[a, b, c, d, e, f]} />);
             expect(getChecked()).toHaveLength(2);
 
             selection = [f, e, d, a];
-            rerender(<Widget {...props} />);
+            rerender(<Widget {...props} data={[a, b, c, d, e, f]} />);
             expect(getChecked()).toHaveLength(4);
         });
 
         it("call onSelect when checkbox is clicked", async () => {
             const items = props.data;
-            const onSelect = props.selectionProps.onSelect;
-            props.selectionProps.showCheckboxColumn = true;
+            const onSelect = jest.fn();
+            props.selectActionHelper.onSelect = onSelect;
+            props.checkboxEventsController = new CheckboxEventsController(
+                item => ({
+                    item,
+                    selectionMethod: props.selectActionHelper.selectionMethod,
+                    selectionType: "Single",
+                    selectionMode: "clear",
+                    pageSize: props.pageSize
+                }),
+                onSelect,
+                jest.fn(),
+                jest.fn(),
+                jest.fn()
+            );
 
             render(<Widget {...props} />);
 
@@ -215,28 +235,28 @@ describe("Table", () => {
             const checkbox3 = screen.getAllByRole("checkbox")[2];
 
             await userEvent.click(checkbox1);
-            expect(onSelect).toBeCalledTimes(1);
-            expect(onSelect).toHaveBeenLastCalledWith(items[0], false);
+            expect(onSelect).toHaveBeenCalledTimes(1);
+            expect(onSelect).toHaveBeenLastCalledWith(items[0], false, true);
+
             await userEvent.click(checkbox1);
-            expect(onSelect).toBeCalledTimes(2);
-            expect(onSelect).toHaveBeenLastCalledWith(items[0], false);
+            expect(onSelect).toHaveBeenCalledTimes(2);
+            expect(onSelect).toHaveBeenLastCalledWith(items[0], false, true);
 
             await userEvent.click(checkbox3);
-            expect(onSelect).toBeCalledTimes(3);
-            expect(onSelect).toHaveBeenLastCalledWith(items[2], false);
+            expect(onSelect).toHaveBeenCalledTimes(3);
+            expect(onSelect).toHaveBeenLastCalledWith(items[2], false, true);
+
             await userEvent.click(checkbox3);
-            expect(onSelect).toBeCalledTimes(4);
-            expect(onSelect).toHaveBeenLastCalledWith(items[2], false);
+            expect(onSelect).toHaveBeenCalledTimes(4);
+            expect(onSelect).toHaveBeenLastCalledWith(items[2], false, true);
         });
     });
 
     it("not render header checkbox when showCheckboxColumn is false", () => {
-        const { render, screen, queryByRole } = testingLibrary;
         const props = mockWidgetProps();
         props.data = objectItems(5);
         props.paging = true;
-        props.selectionProps.showCheckboxColumn = false;
-
+        props.selectActionHelper = new SelectActionHelper("Multi", undefined, "checkbox", false, 5, "clear");
         render(<Widget {...props} />);
 
         const colheader = screen.getAllByRole("columnheader")[0];
@@ -245,14 +265,10 @@ describe("Table", () => {
 
     describe("with multi selection helper", () => {
         it("render header checkbox if helper is given and checkbox state depends on the helper status", () => {
-            const { render, screen, queryByRole, cleanup } = testingLibrary;
             const props = mockWidgetProps();
             props.data = objectItems(5);
             props.paging = true;
-            props.selectionProps.selectionType = "Multi";
-            props.selectionProps.selectionMethod = "checkbox";
-            props.selectionProps.showCheckboxColumn = true;
-            props.selectionProps.showSelectAllToggle = true;
+            props.selectActionHelper = new SelectActionHelper("Multi", undefined, "checkbox", true, 5, "clear");
 
             const renderWithStatus = (status: MultiSelectionStatus): ReturnType<typeof render> => {
                 return render(<Widget {...props} selectionStatus={status} />);
@@ -271,9 +287,8 @@ describe("Table", () => {
         });
 
         it("not render header checkbox if method is rowClick", () => {
-            const { render, screen, queryByRole } = testingLibrary;
             const props = mockWidgetProps();
-            props.selectionProps.selectionMethod = "rowClick";
+            props.selectActionHelper = new SelectActionHelper("Multi", undefined, "rowClick", false, 5, "clear");
 
             render(<Widget {...props} />);
 
@@ -282,11 +297,9 @@ describe("Table", () => {
         });
 
         it("call onSelectAll when header checkbox is clicked", async () => {
-            const { render, screen } = testingLibrary;
             const props = mockWidgetProps();
-            props.selectionProps.selectionMethod = "checkbox";
-            props.selectionProps.showCheckboxColumn = true;
-            props.selectionProps.showSelectAllToggle = true;
+            props.selectActionHelper = new SelectActionHelper("Multi", undefined, "checkbox", true, 5, "clear");
+            props.selectActionHelper.onSelectAll = jest.fn();
             props.selectionStatus = "none";
 
             render(<Widget {...props} />);
@@ -294,21 +307,20 @@ describe("Table", () => {
             const checkbox = screen.getAllByRole("checkbox")[0];
 
             await userEvent.click(checkbox);
-            expect(props.selectionProps.onSelectAll).toBeCalledTimes(1);
+            expect(props.selectActionHelper.onSelectAll).toHaveBeenCalledTimes(1);
 
             await userEvent.click(checkbox);
-            expect(props.selectionProps.onSelectAll).toBeCalledTimes(2);
+            expect(props.selectActionHelper.onSelectAll).toHaveBeenCalledTimes(2);
         });
     });
 
     describe("with selection method rowClick", () => {
-        const { render, screen, getAllByRole } = testingLibrary;
         let props: ReturnType<typeof mockWidgetProps>;
 
         beforeEach(() => {
             props = mockWidgetProps();
-            props.selectionProps.selectionType = "Single";
-            props.selectionProps.selectionMethod = "rowClick";
+            props.selectActionHelper = new SelectActionHelper("Single", undefined, "rowClick", true, 5, "clear");
+            props.gridInteractive = true;
             props.paging = true;
             props.data = objectItems(3);
         });
@@ -320,7 +332,7 @@ describe("Table", () => {
         });
 
         it("add class to each selected cell", () => {
-            props.selectionProps.isSelected = () => true;
+            props.selectActionHelper.isSelected = () => true;
 
             const { asFragment } = render(<Widget {...props} />);
 
@@ -329,9 +341,25 @@ describe("Table", () => {
 
         it("call onSelect when cell is clicked", async () => {
             const items = props.data;
-            const onSelect = props.selectionProps.onSelect;
-            const columns = [column("Column A"), column("Column B")].map((col, index) => new Column(col, index));
-            props.state = mockState(columns);
+            const onSelect = jest.fn();
+            const columns = [column("Column A"), column("Column B")].map((col, index) => mockGridColumn(col, index));
+            props.visibleColumns = columns;
+            props.availableColumns = columns;
+            props.cellEventsController = new CellEventsController(
+                item => ({
+                    item,
+                    selectionType: props.selectActionHelper.selectionType,
+                    selectionMethod: props.selectActionHelper.selectionMethod,
+                    selectionMode: "clear",
+                    clickTrigger: "none",
+                    pageSize: props.pageSize
+                }),
+                onSelect,
+                jest.fn(),
+                jest.fn(),
+                jest.fn(),
+                jest.fn()
+            );
 
             render(<Widget {...props} />);
 
@@ -342,31 +370,38 @@ describe("Table", () => {
             const [cell1, cell2] = getAllByRole(row1, "gridcell");
             const [cell3, cell4] = getAllByRole(row2, "gridcell");
 
+            const sleep = (t: number): Promise<void> => new Promise(res => setTimeout(res, t));
+
             // Click cell1 two times
             await userEvent.click(cell1);
             expect(onSelect).toHaveBeenCalledTimes(1);
-            expect(onSelect).toHaveBeenLastCalledWith(items[0], false);
+            expect(onSelect).toHaveBeenLastCalledWith(items[0], false, false);
+            await sleep(320);
+
             await userEvent.click(cell1);
             expect(onSelect).toHaveBeenCalledTimes(2);
-            expect(onSelect).toHaveBeenLastCalledWith(items[0], false);
+            expect(onSelect).toHaveBeenLastCalledWith(items[0], false, false);
+            await sleep(320);
 
             // Click cell2
             await userEvent.click(cell2);
             expect(onSelect).toHaveBeenCalledTimes(3);
-            expect(onSelect).toHaveBeenLastCalledWith(items[0], false);
+            expect(onSelect).toHaveBeenLastCalledWith(items[0], false, false);
+            await sleep(320);
 
             // Click cell3 and cell4
             await userEvent.click(cell4);
             expect(onSelect).toHaveBeenCalledTimes(4);
-            expect(onSelect).toHaveBeenLastCalledWith(items[1], false);
+            expect(onSelect).toHaveBeenLastCalledWith(items[1], false, false);
+            await sleep(320);
+
             await userEvent.click(cell3);
             expect(onSelect).toHaveBeenCalledTimes(5);
-            expect(onSelect).toHaveBeenLastCalledWith(items[1], false);
+            expect(onSelect).toHaveBeenLastCalledWith(items[1], false, false);
         });
     });
 
     describe("when selecting is enabled, allow the user to select multiple rows", () => {
-        const { render, screen, getByRole, getAllByRole } = testingLibrary;
         let items: ReturnType<typeof objectItems>;
         let props: ReturnType<typeof mockWidgetProps>;
         let selection: SelectionMultiValue;
@@ -375,19 +410,34 @@ describe("Table", () => {
         function WidgetWithSelectionHelper({
             selectionMethod,
             ...props
-        }: WidgetProps<GridColumn, ObjectItem> & { selectionMethod: ItemSelectionMethodEnum }): ReactElement {
-            const helper = useSelectionHelper(selection, ds, undefined, 10);
-            const sp = useGridSelectionProps({
-                helper,
-                selection,
-                selectionMethod,
-                showSelectAllToggle: false
-            });
+        }: WidgetProps<GridColumn, ObjectItem> & {
+            selectionMethod: ItemSelectionMethodEnum;
+        }): ReactElement {
+            const helper = useSelectionHelper(selection, ds, undefined);
+            const selectHelper = useSelectActionHelper(
+                {
+                    itemSelection: selection,
+                    itemSelectionMethod: selectionMethod,
+                    itemSelectionMode: "clear",
+                    showSelectAllToggle: false,
+                    pageSize: 5
+                },
+                helper
+            );
+            const cellEventsController = useCellEventsController(
+                selectHelper,
+                new ClickActionHelper("single", null),
+                props.focusController
+            );
+
+            const checkboxEventsController = useCheckboxEventsController(selectHelper, props.focusController);
 
             return (
                 <Widget
                     {...props}
-                    selectionProps={sp}
+                    selectActionHelper={selectHelper}
+                    cellEventsController={cellEventsController}
+                    checkboxEventsController={checkboxEventsController}
                     selectionStatus={helper?.type === "Multi" ? helper.selectionStatus : "unknown"}
                 />
             );
@@ -420,8 +470,10 @@ describe("Table", () => {
                     col.showContentAs = "customContent";
                     col.content = listWidget(() => <input />);
                 })
-            ].map((col, index) => new Column(col, index));
-            props.state = mockState(columns);
+            ].map((col, index) => mockGridColumn(col, index));
+
+            props.visibleColumns = columns;
+            props.availableColumns = columns;
         });
 
         it("selects multiple rows with shift+click on a row", async () => {
@@ -550,7 +602,6 @@ describe("Table", () => {
 
     describe("when has interactive element", () => {
         it("should not prevent default on keyboard input (space and Enter)", async () => {
-            const { render, screen } = testingLibrary;
             const items = objectItems(3);
 
             const props = mockWidgetProps();
@@ -560,9 +611,10 @@ describe("Table", () => {
                 c.showContentAs = "customContent";
                 c.content = content;
                 return c;
-            }).map((col, index) => new Column(col, index));
+            }).map((col, index) => mockGridColumn(col, index));
 
-            props.state = mockState(columns);
+            props.visibleColumns = columns;
+            props.availableColumns = columns;
 
             const user = userEvent.setup();
 

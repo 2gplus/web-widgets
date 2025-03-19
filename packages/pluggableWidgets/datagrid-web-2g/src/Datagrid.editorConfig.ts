@@ -1,24 +1,24 @@
 import {
+    changePropertyIn,
+    hideNestedPropertiesIn,
+    hidePropertiesIn,
+    hidePropertyIn,
+    Properties,
+    transformGroupsIntoTabs
+} from "@mendix/pluggable-widgets-tools";
+import {
     container,
     datasource,
     dropzone,
     rowLayout,
     selectable,
+    structurePreviewPalette,
     StructurePreviewProps,
-    text,
-    structurePreviewPalette
+    text
 } from "@mendix/widget-plugin-platform/preview/structure-preview-api";
-import {
-    changePropertyIn,
-    hideNestedPropertiesIn,
-    hidePropertiesIn,
-    hidePropertyIn,
-    Problem,
-    Properties,
-    transformGroupsIntoTabs
-} from "@mendix/pluggable-widgets-tools";
 
 import { ColumnsPreviewType, DatagridPreviewProps } from "../typings/DatagridProps";
+import {customHideProperties} from "./CustomDatagrid-editorConfig";
 
 export function getProperties(
     values: DatagridPreviewProps,
@@ -33,7 +33,11 @@ export function getProperties(
             hidePropertyIn(defaultProperties, values, "columns", index, "dynamicText");
         }
         if (column.showContentAs !== "customContent") {
-            hidePropertyIn(defaultProperties, values, "columns", index, "content");
+            hideNestedPropertiesIn(defaultProperties, values, "columns", index, [
+                "content",
+                "allowEventPropagation",
+                "exportValue"
+            ]);
         }
         if (column.showContentAs === "customContent") {
             hidePropertyIn(defaultProperties, values, "columns", index, "tooltip");
@@ -56,6 +60,12 @@ export function getProperties(
         if (column.width !== "manual") {
             hidePropertyIn(defaultProperties, values, "columns", index, "size");
         }
+        if (column.width !== "autoFit") {
+            hidePropertyIn(defaultProperties, values, "columns", index, "minWidth");
+        }
+        if (column.minWidth !== "manual") {
+            hidePropertyIn(defaultProperties, values, "columns", index, "minWidthLimit");
+        }
         if (!values.advanced && platform === "web") {
             hideNestedPropertiesIn(defaultProperties, values, "columns", index, [
                 "columnClass",
@@ -69,32 +79,36 @@ export function getProperties(
         if (!column.filterAssociation) {
             hideNestedPropertiesIn(defaultProperties, values, "columns", index, [
                 "filterAssociationOptions",
-                "filterAssociationOptionLabel"
+                "filterAssociationOptionLabel",
+                "fetchOptionsLazy",
+                "filterCaptionType",
+                "filterAssociationOptionLabelAttr"
             ]);
         }
+        if (column.filterCaptionType === "attribute") {
+            hidePropertyIn(defaultProperties, values, "columns", index, "filterAssociationOptionLabel");
+        } else {
+            hidePropertyIn(defaultProperties, values, "columns", index, "filterAssociationOptionLabelAttr");
+        }
     });
-    if (values.pagination === "virtualScrolling") {
-        hidePropertyIn(defaultProperties, values, "pagingPosition");
+    if (values.pagination === "buttons") {
+        hidePropertyIn(defaultProperties, values, "showNumberOfRows");
+    } else {
+        hidePropertyIn(defaultProperties, values, "showPagingButtons");
+
+        if (values.showNumberOfRows === false) {
+            hidePropertyIn(defaultProperties, values, "pagingPosition");
+        }
     }
-    // TODO re-enable this after migration
-    // if (values.pagination !== "remote") {
-    //     hidePropertiesIn(defaultProperties, values, [
-    //         "pagingAction",
-    //         "pagingDisplayType",
-    //         "pagingTotalCount",
-    //         "pagingPosition"
-    //     ]);
-    // }
-    if (values.buttons.length === 0) {
-        hidePropertyIn(defaultProperties, values, "buttons");
+
+    if (values.pagination !== "loadMore") {
+        hidePropertyIn(defaultProperties, values, "loadMoreButtonCaption");
     }
     if (values.showEmptyPlaceholder === "none") {
         hidePropertyIn(defaultProperties, values, "emptyPlaceholder");
     }
 
-    if (!values.onClick) {
-        hidePropertyIn(defaultProperties, values, "onClick");
-    }
+
 
     hideSelectionProperties(defaultProperties, values);
 
@@ -119,7 +133,7 @@ export function getProperties(
                     column.width === "autoFill"
                         ? "Auto-fill"
                         : column.width === "autoFit"
-                        ? "Auto-fit content"
+                        ? `Auto-fit content`
                         : `Manual (${column.size})`,
                     alignment ? alignment.charAt(0).toUpperCase() + alignment.slice(1) : ""
                 ];
@@ -152,6 +166,12 @@ export function getProperties(
         hidePropertyIn(defaultProperties, values, "advanced");
     }
 
+    if (values.configurationStorageType === "localStorage") {
+        hidePropertiesIn(defaultProperties, values, ["configurationAttribute", "onConfigurationChange"]);
+    }
+
+    customHideProperties(values,defaultProperties,platform);
+
     return defaultProperties;
 }
 
@@ -159,7 +179,11 @@ function hideSelectionProperties(defaultProperties: Properties, values: Datagrid
     const { itemSelection, itemSelectionMethod } = values;
 
     if (itemSelection === "None") {
-        hidePropertiesIn(defaultProperties, values, ["itemSelectionMethod", "onSelectionChange"]);
+        hidePropertiesIn(defaultProperties, values, ["itemSelectionMethod", "itemSelectionMode", "onSelectionChange"]);
+    }
+
+    if (itemSelectionMethod === "checkbox") {
+        hidePropertyIn(defaultProperties, values, "itemSelectionMode");
     }
 
     if (itemSelection !== "Multi" || itemSelectionMethod !== "checkbox") {
@@ -192,7 +216,9 @@ export const getPreview = (
                   filter: { widgetCount: 0, renderer: () => null },
                   filterAssociation: "",
                   filterAssociationOptionLabel: "",
+                  filterAssociationOptionLabelAttr: "",
                   filterAssociationOptions: {},
+                  filterCaptionType: "attribute",
                   header: "Column",
                   hidable: "no",
                   resizable: false,
@@ -203,8 +229,12 @@ export const getPreview = (
                   visible: "true",
                   width: "autoFit",
                   wrapText: false,
-                  sortProperty: "sort",
-                  minWidth: 100
+                  minWidth: "auto",
+                  minWidthLimit: 100,
+                  allowEventPropagation: true,
+                  exportValue: "",
+                  fetchOptionsLazy: true,
+                  sortProperty:""
               }
           ];
     const columns = rowLayout({
@@ -241,37 +271,15 @@ export const getPreview = (
             padding: 4
         })(text({ fontColor: palette.text.data })("Data grid 2"))
     );
-    let gridHeaderWidgets = null;
-    if (values.tableLabel.length === 0) {
-        gridHeaderWidgets = rowLayout({
-            columnSize: "fixed",
-            borders: true
-        })(
-            dropzone(
-                dropzone.placeholder("Place widgets like filter widget(s) and action button(s) here"),
-                dropzone.hideDataSourceHeaderIf(canHideDataSourceHeader)
-            )(values.filtersPlaceholder)
-        );
-    } else {
-        gridHeaderWidgets = rowLayout({
-            columnSize: "grow",
-            borders: true
-        })(
-            container({
-                padding: 4,
-                grow: 0
-            })(
-                text({
-                    bold: true,
-                    fontSize: 11
-                })(values.tableLabel)
-            ),
-            dropzone(
-                dropzone.placeholder("Place button(s) here"),
-                dropzone.hideDataSourceHeaderIf(canHideDataSourceHeader)
-            )(values.filtersPlaceholder)
-        );
-    }
+    const gridHeaderWidgets = rowLayout({
+        columnSize: "fixed",
+        borders: true
+    })(
+        dropzone(
+            dropzone.placeholder("Place widgets like filter widget(s) and action button(s) here"),
+            dropzone.hideDataSourceHeaderIf(canHideDataSourceHeader)
+        )(values.filtersPlaceholder)
+    );
 
     const columnHeaders = rowLayout({
         columnSize: "fixed"
@@ -359,195 +367,7 @@ export const getPreview = (
     );
 };
 
-const columnPropPath = (prop: string, index: number): string => `columns/${index + 1}/${prop}`;
-
-// const buttonsPropPath = (prop: string, index: number): string => `rowClickEvents/${index + 1}/${prop}`;
-
-const checkAssociationSettings = (
-    values: DatagridPreviewProps,
-    column: ColumnsPreviewType,
-    index: number
-): Problem | undefined => {
-    if (!values.columnsFilterable) {
-        return;
-    }
-
-    if (!column.filterAssociation) {
-        return;
-    }
-
-    if (!column.filterAssociationOptionLabel) {
-        return {
-            property: columnPropPath("filterAssociationOptionLabel", index),
-            message: `A caption is required when using associations. Please set 'Option caption' property for column (${column.header})`
-        };
-    }
-};
-
-const checkFilteringSettings = (
-    values: DatagridPreviewProps,
-    column: ColumnsPreviewType,
-    index: number
-): Problem | undefined => {
-    if (!values.columnsFilterable) {
-        return;
-    }
-
-    if (!column.attribute && !column.filterAssociation) {
-        return {
-            property: columnPropPath("attribute", index),
-            message: `An attribute or reference is required when filtering is enabled. Please select 'Attribute' or 'Reference' property for column (${column.header})`
-        };
-    }
-};
-
-const checkDisplaySettings = (
-    _values: DatagridPreviewProps,
-    column: ColumnsPreviewType,
-    index: number
-): Problem | undefined => {
-    if (column.showContentAs === "attribute" && !column.attribute) {
-        return {
-            property: columnPropPath("attribute", index),
-            message: `An attribute is required when 'Show' is set to 'Attribute'. Select the 'Attribute' property for column (${column.header})`
-        };
-    }
-};
-
-const checkSortingSettings = (
-    values: DatagridPreviewProps,
-    column: ColumnsPreviewType,
-    index: number
-): Problem | undefined => {
-    if (!values.columnsSortable) {
-        return;
-    }
-
-    if (column.sortable && !column.attribute) {
-        return {
-            property: columnPropPath("attribute", index),
-            message: `An attribute is required when column sorting is enabled. Select the 'Attribute' property for column (${column.header}) or disable sorting in column settings`
-        };
-    }
-};
-/**
- * Single click events are only valid when selection is off or when the ctrlTrigger is used.
- */
-
-const checkSelectionSettings = (values: DatagridPreviewProps): Problem[] => {
-    const retVal: Problem[] = [];
-
-    if (values.itemSelection !== "None" && values.onClick !== null) {
-        retVal.push(
-            ...values.rowClickevents
-                .filter(rowClickEvent => {
-                    return rowClickEvent.defaultTrigger === "singleClick" && !rowClickEvent.ctrlTrigger;
-                })
-                .map((): Problem => {
-                    return {
-                        property: "rowClickevents",
-                        message:
-                            '"Default trigger" must be set to "double click" or "ctrl trigger" must be set when "Selection" is enabled'
-                    };
-                })
-        );
-    }
-
-    return retVal;
-};
-
-export function check(values: DatagridPreviewProps): Problem[] {
-    const errors: Problem[] = [];
-
-    const columnChecks = [checkAssociationSettings, checkFilteringSettings, checkDisplaySettings, checkSortingSettings];
-    if (values.pagination === "remote") {
-        if (!values.pagingTotalCount) {
-            errors.push({
-                property: "pagingTotalCount",
-                message: "Paging total count is required when Pagination is Remote"
-            });
-        }
-        if (!values.pagingAction) {
-            errors.push({
-                property: "pagingAction",
-                message: "Paging action is required when Pagination is Remote"
-            });
-        }
-        if (!values.pagingDisplayType) {
-            errors.push({
-                property: "pagingDisplayType",
-                message: "Paging display type is required when Pagination is Remote"
-            });
-        }
-        if (!values.pageSizeAttribute) {
-            errors.push({
-                property: "pageSizeAttribute",
-                message: "Page size attribute is required when Pagination is Remote"
-            });
-        }
-    }
-    if (
-        values.pagingPosition !== "bottom" &&
-        values.filtersPlaceholder.widgetCount > 0 &&
-        values.tableLabel.length > 0
-    ) {
-        errors.push({
-            property: `pagingPosition`,
-            message:
-                "Paging position can only be bottom when widgets are placed in the header and the header text is set."
-        });
-    }
-
-    
-    if (values.onClick) {
-        errors.push({
-            property: `onClick`,
-            message:
-                "Action is removed please move action to Events / Click events. This action will not be executed on click"
-        });
-    }
-
-    if (
-        values.pagination !== "remote" &&
-        !(!values.pageSize || !values.pageNumber || !values.pageSizeAttribute || !values.pagingAction)
-    ) {
-        errors.push({
-            property: "pagination",
-            message: `Pagination set as ${values.pagination} but Paging page size or page number are still set, please select set remote as pagination or remove the attributes from remote pagination`
-        });
-    }
-    //On rowclick selection we cannot add a rowClickevent on single click
-    if (values.itemSelectionMethod === "rowClick") {
-        values.rowClickevents.forEach(x => {
-            if (x.defaultTrigger === "singleClick") {
-                errors.push({
-                    property: "rowClickevents",
-                    message:
-                        "Button is single click execution but the item selection is set to row click, this action will never be executed."
-                });
-            }
-        });
-    }
-
-    values.columns.forEach((column: ColumnsPreviewType, index) => {
-        for (const check of columnChecks) {
-            const error = check(values, column, index);
-            if (error) {
-                errors.push(error);
-            }
-        }
-
-        if (values.columnsHidable && column.hidable !== "no" && !column.header) {
-            errors.push({
-                property: columnPropPath("hidable", index),
-                message:
-                    "A caption is required if 'Can hide' is Yes or Yes, hidden by default. This can be configured under 'Column capabilities' in the column item properties"
-            });
-        }
-    });
-    errors.push(...checkSelectionSettings(values));
-    return errors;
-}
+export { check } from "./consistency-check";
 
 export function getCustomCaption(values: DatagridPreviewProps): string {
     type DsProperty = { caption?: string };

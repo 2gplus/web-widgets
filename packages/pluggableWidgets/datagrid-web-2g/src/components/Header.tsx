@@ -1,23 +1,22 @@
 import {
     createElement,
     Dispatch,
-    ReactElement,
-    SetStateAction,
     DragEvent,
     DragEventHandler,
-    KeyboardEvent,
-    useCallback,
     HTMLAttributes,
+    KeyboardEvent,
+    ReactElement,
     ReactNode,
-    useState
+    SetStateAction,
+    useCallback
 } from "react";
 import classNames from "classnames";
-import { ColumnResizerProps } from "./ColumnResizer";
-import * as Grid from "../typings/GridModel";
-import { ColumnId, GridColumn } from "../typings/GridColumn";
 import { FaCaretUp } from "./icons/FaCaretUp";
 import { FaCaretDown } from "./icons/FaCaretDown";
-import { FaLoader } from "./icons/Loader";
+
+import { ColumnResizerProps } from "./ColumnResizer";
+import { ColumnId, GridColumn } from "../typings/GridColumn";
+
 
 export interface HeaderProps {
     className?: string;
@@ -26,85 +25,69 @@ export interface HeaderProps {
     sortable: boolean;
     resizable: boolean;
     filterable: boolean;
-    filterWidget?: ReactNode;
-    draggable: boolean;
-    dragOver?: ColumnId;
     hidable: boolean;
-    isDragging?: boolean;
+    draggable: boolean;
+    filterWidget?: ReactNode;
     preview?: boolean;
     resizer: ReactElement<ColumnResizerProps>;
-    swapColumns: Grid.Actions["swap"];
-    setDragOver: Dispatch<SetStateAction<ColumnId | undefined>>;
-    setIsDragging: Dispatch<SetStateAction<boolean>>;
-    setSortBy: Grid.Actions["sortBy"];
-    sortRule?: Grid.SortRule;
-    visibleColumns: GridColumn[];
-    sortLoading: boolean;
+    dropTarget?: [ColumnId, "before" | "after"];
+    isDragging?: [ColumnId | undefined, ColumnId, ColumnId | undefined];
+    setDropTarget: Dispatch<SetStateAction<[ColumnId, "before" | "after"] | undefined>>;
+    setIsDragging: Dispatch<SetStateAction<[ColumnId | undefined, ColumnId, ColumnId | undefined] | undefined>>;
+    swapColumns: (source: ColumnId, target: [ColumnId, "before" | "after"]) => void;
 }
 
 export function Header(props: HeaderProps): ReactElement {
     const canSort = props.sortable && props.column.canSort;
     const canDrag = props.draggable && (props.column.canDrag ?? false);
-    const draggableProps = useDraggable(canDrag, props.swapColumns, props.setDragOver, props.setIsDragging);
-    const [prevSortRule, setPrevSortRule] = useState<Grid.SortRule | undefined>(undefined);
-    const showSortLoading = !!props.sortRule && prevSortRule && props.sortLoading;
-    if (props.sortRule !== prevSortRule) {
-        setPrevSortRule(props.sortRule);
-    }
-    const isSorted = !!props.sortRule;
-    const isSortedDesc = isSorted && props.sortRule?.[1] === "desc";
-    const sortIcon = canSort ? (
-        isSorted || showSortLoading ? (
-            props.sortLoading ? (
-                <FaLoader />
-            ) : isSortedDesc ? (
-                <FaCaretDown />
-            ) : (
-                <FaCaretUp />
-            )
-        ) : null
-    ) : null;
+    const draggableProps = useDraggable(
+        canDrag,
+        props.swapColumns,
+        props.dropTarget,
+        props.setDropTarget,
+        props.isDragging,
+        props.setIsDragging
+    );
+
+    const sortIcon = canSort ? getSortIcon(props.column) : null;
+    const sortProps = canSort ? getSortProps(props.column) : null;
     const caption = props.column.header.trim();
-
-    const onSortBy = (): void => {
-        props.setSortBy(props.column.columnId);
-    };
-
-    const sortProps: HTMLAttributes<HTMLDivElement> = {
-        onClick: onSortBy,
-        onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onSortBy();
-            }
-        },
-        role: "button",
-        tabIndex: 0
-    };
 
     return (
         <div
-            aria-sort={canSort ? (isSorted ? (isSortedDesc ? "descending" : "ascending") : "none") : undefined}
-            className={classNames("th", {
-                "hidden-column-preview":
-                    props.preview && ((props.hidable && props.column.initiallyHidden) || !props.column.visible)
-            })}
+            aria-sort={getAriaSort(canSort, props.column)}
+            className={classNames(
+                "th",
+                {
+                    "hidden-column-preview":
+                        props.preview && (!props.column.isAvailable || (props.hidable && props.column.isHidden))
+                },
+                {
+                    [`drop-${props.dropTarget?.[1]}`]: props.column.columnId === props.dropTarget?.[0],
+                    dragging: props.column.columnId === props.isDragging?.[1],
+                    "dragging-over-self": props.column.columnId === props.isDragging?.[1] && !props.dropTarget
+                }
+            )}
             role="columnheader"
-            style={!props.sortable || !props.column.canSort ? { cursor: "unset" } : undefined}
+            style={!canSort ? { cursor: "unset" } : undefined}
             title={caption}
+            ref={ref => props.column.setHeaderElementRef(ref)}
+            data-column-id={props.column.columnId}
+            onDrop={draggableProps.onDrop}
+            onDragEnter={draggableProps.onDragEnter}
+            onDragOver={draggableProps.onDragOver}
         >
             <div
-                className={classNames("column-container", {
-                    dragging: canDrag && props.column.columnId === props.dragOver
-                })}
+                className={classNames("column-container")}
                 id={`${props.gridId}-column${props.column.columnId}`}
-                data-column-id={props.column.columnId}
-                {...draggableProps}
+                draggable={draggableProps.draggable}
+                onDragStart={draggableProps.onDragStart}
+                onDragEnd={draggableProps.onDragEnd}
             >
                 <div
-                    className={classNames("column-header", canSort ? "clickable" : "", props.className)}
+                    className={classNames("column-header", { clickable: canSort }, props.className)}
                     style={{ pointerEvents: props.isDragging ? "none" : undefined }}
-                    {...(canSort ? sortProps : undefined)}
+                    {...sortProps}
                     aria-label={canSort ? "sort " + caption : caption}
                 >
                     <span>{caption.length > 0 ? caption : "\u00a0"}</span>
@@ -117,13 +100,13 @@ export function Header(props: HeaderProps): ReactElement {
     );
 }
 
-const DATA_FORMAT_ID = "application/x-mx-widget-web-datagrid-column-id";
-
 function useDraggable(
     columnsDraggable: boolean,
-    setColumnOrder: Grid.Actions["swap"],
-    setDragOver: Dispatch<SetStateAction<ColumnId | undefined>>,
-    setIsDragging: Dispatch<SetStateAction<boolean>>
+    setColumnOrder: (source: ColumnId, target: [ColumnId, "after" | "before"]) => void,
+    dropTarget: [ColumnId, "before" | "after"] | undefined,
+    setDropTarget: Dispatch<SetStateAction<[ColumnId, "before" | "after"] | undefined>>,
+    dragging: [ColumnId | undefined, ColumnId, ColumnId | undefined] | undefined,
+    setDragging: Dispatch<SetStateAction<[ColumnId | undefined, ColumnId, ColumnId | undefined] | undefined>>
 ): {
     draggable?: boolean;
     onDragStart?: DragEventHandler;
@@ -134,44 +117,78 @@ function useDraggable(
 } {
     const handleDragStart = useCallback(
         (e: DragEvent<HTMLDivElement>): void => {
-            setIsDragging(true);
-            const elt = e.target as HTMLDivElement;
-            e.dataTransfer.setData(DATA_FORMAT_ID, elt.dataset.columnId ?? "");
+            const elt = (e.target as HTMLDivElement).closest(".th") as HTMLDivElement;
+            const columnId = elt.dataset.columnId ?? "";
+
+            const columnAtTheLeft = (elt.previousElementSibling as HTMLDivElement)?.dataset?.columnId as ColumnId;
+            const columnAtTheRight = (elt.nextElementSibling as HTMLDivElement)?.dataset?.columnId as ColumnId;
+
+            setDragging([columnAtTheLeft, columnId as ColumnId, columnAtTheRight]);
         },
-        [setIsDragging]
+        [setDragging]
     );
 
-    const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>): void => {
+    const handleDragOver = useCallback(
+        (e: DragEvent<HTMLDivElement>): void => {
+            if (!dragging) {
+                return;
+            }
+            const columnId = (e.currentTarget as HTMLDivElement).dataset.columnId as ColumnId;
+            if (!columnId) {
+                return;
+            }
+            e.preventDefault();
+
+            const [leftSiblingColumnId, draggingColumnId, rightSiblingColumnId] = dragging;
+
+            if (columnId === draggingColumnId) {
+                // hover on itself place, no highlight
+                if (dropTarget !== undefined) {
+                    setDropTarget(undefined);
+                }
+                return;
+            }
+
+            let isAfter: boolean;
+
+            if (columnId === leftSiblingColumnId) {
+                isAfter = false;
+            } else if (columnId === rightSiblingColumnId) {
+                isAfter = true;
+            } else {
+                // check position in element
+                const rect = e.currentTarget.getBoundingClientRect();
+                isAfter = rect.width / 2 + (dropTarget?.[1] === "after" ? -10 : 10) < e.clientX - rect.left;
+            }
+
+            const newPosition = isAfter ? "after" : "before";
+
+            if (columnId !== dropTarget?.[0] || newPosition !== dropTarget?.[1]) {
+                setDropTarget([columnId, newPosition]);
+            }
+        },
+        [dragging, dropTarget, setDropTarget]
+    );
+
+    const handleDragEnter = useCallback((e: DragEvent<HTMLDivElement>): void => {
         e.preventDefault();
     }, []);
 
-    const handleDragEnter = useCallback(
-        (e: DragEvent<HTMLDivElement>): void => {
-            const {
-                dataset: { columnId }
-            } = e.target as HTMLDivElement;
-            const colDestination = e.dataTransfer.getData(DATA_FORMAT_ID);
-            if (columnId !== colDestination) {
-                setDragOver(columnId as ColumnId);
-            }
-        },
-        [setDragOver]
-    );
-
     const handleDragEnd = useCallback((): void => {
-        setIsDragging(false);
-        setDragOver(undefined);
-    }, [setDragOver, setIsDragging]);
+        setDragging(undefined);
+        setDropTarget(undefined);
+    }, [setDropTarget, setDragging]);
 
     const handleOnDrop = useCallback(
-        (e: DragEvent<HTMLDivElement>): void => {
+        (_e: DragEvent<HTMLDivElement>): void => {
             handleDragEnd();
-            const columnA = (e.target as HTMLDivElement).dataset.columnId as ColumnId;
-            const columnB = e.dataTransfer.getData(DATA_FORMAT_ID) as ColumnId;
+            if (!dragging || !dropTarget) {
+                return;
+            }
 
-            setColumnOrder([columnA, columnB]);
+            setColumnOrder(dragging[1], dropTarget);
         },
-        [handleDragEnd, setColumnOrder]
+        [handleDragEnd, setColumnOrder, dragging, dropTarget]
     );
 
     return columnsDraggable
@@ -184,4 +201,46 @@ function useDraggable(
               onDragEnd: handleDragEnd
           }
         : {};
+}
+
+function getSortIcon(column: GridColumn): ReactNode {
+    switch (column.sortDir) {
+        case "asc":
+            return <FaCaretUp />;
+        case "desc":
+            return <FaCaretDown />;
+        default:
+            return;
+    }
+}
+
+function getAriaSort(canSort: boolean, column: GridColumn): "ascending" | "descending" | "none" | undefined {
+    if (!canSort) {
+        return undefined;
+    }
+
+    switch (column.sortDir) {
+        case "asc":
+            return "ascending";
+        case "desc":
+            return "descending";
+        default:
+            return "none";
+    }
+}
+
+function getSortProps(column: GridColumn): HTMLAttributes<HTMLDivElement> {
+    return {
+        onClick: () => {
+            column.toggleSort();
+        },
+        onKeyDown: (e: KeyboardEvent<HTMLDivElement>) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                column.toggleSort();
+            }
+        },
+        role: "button",
+        tabIndex: 0
+    };
 }
