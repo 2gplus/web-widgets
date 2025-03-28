@@ -70,7 +70,6 @@ export function useCellEventsController(
             selectionMode: selectHelper.selectionMode,
             clickTrigger: clickHelper.clickTrigger
         });
-        console.log(`created new cellContextFactory`);
 
         return new CellEventsController(
             cellContextFactory,

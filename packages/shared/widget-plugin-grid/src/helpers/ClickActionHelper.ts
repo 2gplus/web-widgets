@@ -10,9 +10,11 @@ export class ClickActionHelper {
     constructor(
         private trigger: ClickTrigger,
         private triggerOnCtrl: boolean,
+        public lastClick:number,
         private listAction?: ListActionValue | null | object
-    ) {}
 
+    ) {
+}
     get ctrlTrigger(): boolean {
         return this.triggerOnCtrl;
     }
@@ -22,6 +24,9 @@ export class ClickActionHelper {
 
     update(listAction?: ListActionValue | null | object): void {
         this.listAction = listAction;
+    }
+    setLastClick(time:number):void{
+        this.lastClick = time;
     }
 
     onExecuteAction: ExecuteActionFx = item => {
@@ -33,6 +38,7 @@ export class ClickActionHelper {
 
 interface HelperProps {
     onClickTrigger: ClickTrigger;
+    lastClick: number;
     onClick?: ListActionValue | null | object;
     ctrlTrigger?: boolean;
 }
@@ -40,8 +46,8 @@ interface HelperProps {
 export function useClickActionHelper(props: HelperProps): ClickActionHelper {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const clickActionHelper = useMemo(
-        () => new ClickActionHelper(props.onClickTrigger, props.ctrlTrigger ?? false, props.onClick),
-        []
+        () => new ClickActionHelper(props.onClickTrigger, props.ctrlTrigger ?? false, props.lastClick, props.onClick),
+        [props.lastClick]
     );
 
     useEffect(() => {

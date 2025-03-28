@@ -12,7 +12,7 @@
     "license": "Apache-2.0",
     "config": {},
     "mxpackage": {
-        "name": "Datagrid",
+        "name": "Datagrid2G",
         "type": "widget",
         "mpkName": "com.2gplus.widget.web.Datagrid.mpk"
     },

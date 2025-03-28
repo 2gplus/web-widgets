@@ -1,23 +1,23 @@
-import { disposeFx } from "@mendix/widget-plugin-filtering/mobx-utils";
-import { FiltersSettingsMap } from "@mendix/widget-plugin-filtering/typings/settings";
-import { FilterCondition } from "mendix/filters";
-import { action, computed, makeObservable, observable } from "mobx";
-import { DatagridContainerProps } from "../../../typings/DatagridProps";
-import { ColumnId, GridColumn } from "../../typings/GridColumn";
-import { ColumnFilterSettings, ColumnPersonalizationSettings } from "../../typings/personalization-settings";
-import { SortInstruction, SortRule } from "../../typings/sorting";
-import { StaticInfo } from "../../typings/static-info";
+import {disposeFx} from "@mendix/widget-plugin-filtering/mobx-utils";
+import {FiltersSettingsMap} from "@mendix/widget-plugin-filtering/typings/settings";
+import {FilterCondition} from "mendix/filters";
+import {action, computed, makeObservable, observable} from "mobx";
+import {DatagridContainerProps} from "../../../typings/DatagridProps";
+import {ColumnId, GridColumn} from "../../typings/GridColumn";
+import {ColumnFilterSettings, ColumnPersonalizationSettings} from "../../typings/personalization-settings";
+import {SortInstruction, SortRule} from "../../typings/sorting";
+import {StaticInfo} from "../../typings/static-info";
 import {
     ColumnsSortingStore,
     IColumnSortingStore,
     sortInstructionsToSortRules,
     sortRulesToSortInstructions
 } from "./ColumnsSortingStore";
-import { ColumnFilterStore } from "./column/ColumnFilterStore";
-import { ColumnStore } from "./column/ColumnStore";
-import { ActionValue, EditableValue } from "mendix";
-import { RemoteColumnsSortingStore } from "./RemoteColumnsSortingStore";
-import { CustomColumnStore } from "./column/CustomColumnStore";
+import {ColumnFilterStore} from "./column/ColumnFilterStore";
+import {ColumnStore} from "./column/ColumnStore";
+import {ActionValue, EditableValue} from "mendix";
+import {RemoteColumnsSortingStore, RemoteSortRule} from "./RemoteColumnsSortingStore";
+import {CustomColumnStore} from "./column/CustomColumnStore";
 import {CustomQueryController} from "../../controllers/CustomControllers/query-controller";
 
 export interface IColumnGroupStore {
@@ -28,6 +28,7 @@ export interface IColumnGroupStore {
     columnFilters: ColumnFilterStore[];
 
     swapColumns(source: ColumnId, target: [ColumnId, "after" | "before"]): void;
+
     setIsResizing(status: boolean): void;
 
     //Custom props to set the SortProperty and ASC / DESC
@@ -39,6 +40,7 @@ export interface IColumnGroupStore {
 
 export interface IColumnParentStore {
     isLastVisible(column: ColumnStore | CustomColumnStore): boolean;
+
     isResizing: boolean;
     sorting: IColumnSortingStore;
 }
@@ -68,21 +70,29 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
         this.columnFilters = [];
         //Update remote sorting
         if (this.isRemoteSorting && props.sortAttribute && props.sortAscending !== undefined) {
+
+            var initialSortRule: RemoteSortRule[] = [];
             props.columns.forEach((columnProps, i) => {
                 const initCond = dsViewState?.at(i) ?? null;
                 const column = new CustomColumnStore(i, columnProps, this);
                 this._allColumnsById.set(column.columnId, column);
                 this._allColumns[i] = column;
                 this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
+                console.log(`Column sortprop = ${column.sortProperty} && sortAttr = ${props.sortAttribute?.displayValue}`);
+                if (this.hasSort(props.sortAttribute) && column.sortProperty === props.sortAttribute?.displayValue && props.sortAscending?.value) {
+                    initialSortRule.push([column.columnId, props.sortAscending.value ? "asc" : "desc", column.sortProperty ?? ""])
+                }
             });
+
+            console.log(`InitialSortRules ${initialSortRule}`)
             this.sorting = new RemoteColumnsSortingStore(
-                [],
+                initialSortRule,
                 query,
                 props.onSortActionControlsDataReload,
                 props.sortAttribute,
                 props.sortAscending,
                 props.onSortChangedAction
-        );
+            );
         } else {
             props.columns.forEach((columnProps, i) => {
                 const initCond = dsViewState?.at(i) ?? null;
@@ -106,7 +116,7 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
             visibleColumns: computed,
             conditions: computed.struct,
             columnSettings: computed.struct,
-            filterSettings: computed({ keepAlive: true }),
+            filterSettings: computed({keepAlive: true}),
             updateProps: action,
             setIsResizing: action,
             swapColumns: action,
@@ -123,7 +133,7 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
     }
 
     updateProps(
-        props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction"| "onSortActionControlsDataReload">
+        props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction" | "onSortActionControlsDataReload">
     ): void {
         props.columns.forEach((columnProps, i) => {
             this._allColumns[i].updateProps(columnProps);
@@ -190,6 +200,13 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
         });
     }
 
+    get sortRules(): RemoteSortRule[] {
+        if (this.isRemoteSorting) {
+            return (this.sorting as RemoteColumnsSortingStore).getSortRules();
+        }
+        return [];
+    }
+
     get sortInstructions(): SortInstruction[] | undefined {
         return sortRulesToSortInstructions(this.sorting.rules as SortRule[], this._allColumns as ColumnStore[]);
     }
@@ -235,5 +252,9 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
 
     isLastVisible(column: ColumnStore | CustomColumnStore): boolean {
         return this.visibleColumns.at(-1) === column;
+    }
+
+    hasSort(sortPropertyAttribute: EditableValue<string> | undefined): boolean {
+        return sortPropertyAttribute?.value !== undefined && sortPropertyAttribute.value.length > 0;
     }
 }

@@ -150,6 +150,7 @@ export class ColumnStore implements GridColumn {
 
     toggleSort(): void {
         this.parentStore.sorting.toggleSort(this.columnId);
+
     }
 
     get columnId(): ColumnId {

@@ -17,8 +17,10 @@ export class AttributePersonalizationStorage implements PersonalizationStorage {
         });
     }
 
-    updateProps(props: Pick<DatagridContainerProps, "configurationAttribute">): void {
+    updateProps(props: Pick<DatagridContainerProps, "configurationAttribute" >): void {
         this._storageAttr = props.configurationAttribute;
+
+
     }
 
     get _value(): string | undefined {
@@ -35,6 +37,7 @@ export class AttributePersonalizationStorage implements PersonalizationStorage {
 
     updateSettings(newSettings: any): void {
         // Prevent saving empty string or null to the attribute
+        console.log("Update settings called")
         newSettings = newSettings === "" || newSettings === null ? undefined : newSettings;
         if (this._storageAttr && !this._storageAttr.readOnly) {
             const newSettingsJson = JSON.stringify(newSettings);

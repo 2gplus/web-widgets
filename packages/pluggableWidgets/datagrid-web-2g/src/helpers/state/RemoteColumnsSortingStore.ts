@@ -1,5 +1,5 @@
 import { ColumnId } from "../../typings/GridColumn";
-import { action, makeObservable } from "mobx";
+import {action, makeObservable} from "mobx";
 import { SortDirection } from "../../typings/sorting";
 
 import { IColumnSortingStore } from "./ColumnsSortingStore";
@@ -8,11 +8,15 @@ import { ActionValue, EditableValue } from "mendix";
 import { DatagridContainerProps } from "../../../typings/DatagridProps";
 import {CustomQueryController} from "../../controllers/CustomControllers/query-controller";
 
+
+
+
 export interface ICustomColumnSortingStore extends IColumnSortingStore {
     sortAttribute?: EditableValue<string>;
     sortAscending?: EditableValue<boolean>;
     sortChangedAction?: ActionValue;
     setSortProperty: (sortProperty: string) => void;
+    getSortRules: () => RemoteSortRule[];
 }
 export type RemoteSortRule = [columnId: ColumnId, sortAsc: SortDirection, sortProperty: string];
 export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
@@ -23,7 +27,6 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     sortChangedAction?: ActionValue;
     onSortActionControlsDataReload:boolean;
 
-    // private _sortRules:RemoteSortRule[];
     constructor(
         initialRules: RemoteSortRule[],
         query: CustomQueryController,
@@ -42,8 +45,15 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
         this.query = query;
         makeObservable(this, {
 
-            toggleSort: action
+            toggleSort: action,
+            getSortRules:action,
+
+            // rules: observable
         });
+    }
+
+    public getSortRules = (): RemoteSortRule[] => {
+        return this.rules;
     }
     private sortPropertyUpdate: string;
 
@@ -51,9 +61,6 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     public updateProps(
         props: Pick<DatagridContainerProps, "columns" | "sortAscending" | "sortAttribute" | "onSortChangedAction" | "onSortActionControlsDataReload">
     ): void {
-        // if(this.sortChangedAction?.isExecuting  && !props.onSortChangedAction?.isExecuting) {
-        //     this.rules = this._sortRules;
-        // }
         this.sortAttribute = props.sortAttribute;
         this.sortAscending = props.sortAscending;
         this.sortChangedAction = props.onSortChangedAction;
@@ -73,6 +80,7 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     setSortProperty(sortProperty: string): void {
         this.sortPropertyUpdate = sortProperty;
     }
+
     toggleSort(columnId: ColumnId): void {
         const [[cId, dir] = []] = this.rules;
         if (!cId || cId !== columnId) {
@@ -91,9 +99,9 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     }
 
     updateSortProperty(sortAsc:boolean, sortAttr:string, newSortRules: RemoteSortRule[]): void {
+        console.log(`updateSortProperty console watch test`)
         this.sortAscending?.setValue(sortAsc);
         this.sortAttribute?.setValue(sortAttr);
-        console.log(`test`)
         if (this.sortChangedAction && this.sortChangedAction.canExecute) {
             this.query.startLoad()
             this.sortChangedAction.execute();

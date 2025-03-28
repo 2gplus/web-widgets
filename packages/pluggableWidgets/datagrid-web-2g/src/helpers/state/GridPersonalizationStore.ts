@@ -14,11 +14,13 @@ import { AttributePersonalizationStorage } from "../storage/AttributePersonaliza
 import { LocalStoragePersonalizationStorage } from "../storage/LocalStoragePersonalizationStorage";
 import { PersonalizationStorage } from "../storage/PersonalizationStorage";
 import { ColumnGroupStore } from "./ColumnGroupStore";
+import {RemoteSortRule} from "./RemoteColumnsSortingStore";
 export class GridPersonalizationStore {
     private readonly gridName: string;
     private readonly gridColumnsHash: string;
     private readonly schemaVersion: GridPersonalizationStorageSettings["schemaVersion"] = 2;
     private readonly storeFilters: boolean;
+
 
     private storage: PersonalizationStorage;
 
@@ -32,7 +34,6 @@ export class GridPersonalizationStore {
         this.gridName = props.name;
         this.gridColumnsHash = getHash(this.columnsStore._allColumns, this.gridName);
         this.storeFilters = props.storeFiltersInPersonalization;
-
         makeObservable<GridPersonalizationStore, "applySettings">(this, {
             settings: computed,
 
@@ -54,9 +55,29 @@ export class GridPersonalizationStore {
     }
 
     updateProps(props: DatagridContainerProps): void {
+        console.log("Grid personalization props updated", props)
         this.storage.updateProps?.(props);
+        console.log(`Update props and check sortrules `, this.columnsStore.sortRules , this.settings.sortOrder);
+        if(this.sortRulesUpdated(this.settings.sortOrder, this.columnsStore.sortRules)){
+            console.log('Updated sortOrder');
+            this.settings.sortOrder = this.columnsStore.sortRules;
+            this.storage.updateSettings(this.settings);
+        }
     }
+    private sortRulesUpdated(oldSortrules: RemoteSortRule[] | SortRule[], newSortRules: RemoteSortRule[]): boolean {
+        const toCheck:any =newSortRules;
+        if(toCheck.length > 0 && toCheck[0].length > 2){
+           toCheck[0] = toCheck[0].slice(0, -1);
+        }
+        if(oldSortrules.length !== toCheck.length || oldSortrules.length > 0 && toCheck.length === 0){
+            return true;
+        }
+        if((oldSortrules.length === 0 && toCheck.length === 0 )){
+            return false;
+        }
+        return JSON.stringify(toCheck[0]) !== JSON.stringify(oldSortrules[0]);
 
+    }
     private setupReadReaction(): IReactionDisposer {
         return reaction<GridPersonalizationStorageSettings | null, true>(
             () => {
@@ -73,6 +94,7 @@ export class GridPersonalizationStore {
                 return result.value;
             },
             settings => {
+                console.log("reaction (settings) fired");
                 if (settings == null) {
                     return;
                 }
@@ -86,6 +108,7 @@ export class GridPersonalizationStore {
         return reaction(
             () => this.settings,
             settings => {
+                console.log(`setupWriteReaction , update settings called`)
                 this.storage.updateSettings(settings);
             },
             { delay: 250, equals: comparer.structural }

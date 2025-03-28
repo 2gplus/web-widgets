@@ -1,6 +1,7 @@
 import { FilterData } from "@mendix/widget-plugin-filtering/typings/settings";
 import { ColumnId } from "./GridColumn";
 import { SortDirection, SortRule } from "./sorting";
+import {RemoteSortRule} from "../helpers/state/RemoteColumnsSortingStore";
 
 export interface ColumnPersonalizationSettings {
     columnId: ColumnId;
@@ -29,5 +30,5 @@ export interface GridPersonalizationStorageSettings {
     groupFilters: GroupFilterSettings;
     columnFilters: ColumnFilterSettings;
     columnOrder: ColumnId[];
-    sortOrder: SortRule[];
+    sortOrder: SortRule[] | RemoteSortRule[];
 }
