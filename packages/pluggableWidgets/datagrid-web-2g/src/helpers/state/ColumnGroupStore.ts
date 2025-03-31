@@ -78,13 +78,11 @@ export class ColumnGroupStore implements IColumnGroupStore, IColumnParentStore {
                 this._allColumnsById.set(column.columnId, column);
                 this._allColumns[i] = column;
                 this.columnFilters[i] = new ColumnFilterStore(columnProps, info, initCond);
-                console.log(`Column sortprop = ${column.sortProperty} && sortAttr = ${props.sortAttribute?.displayValue}`);
                 if (this.hasSort(props.sortAttribute) && column.sortProperty === props.sortAttribute?.displayValue && props.sortAscending?.value) {
                     initialSortRule.push([column.columnId, props.sortAscending.value ? "asc" : "desc", column.sortProperty ?? ""])
                 }
             });
 
-            console.log(`InitialSortRules ${initialSortRule}`)
             this.sorting = new RemoteColumnsSortingStore(
                 initialSortRule,
                 query,

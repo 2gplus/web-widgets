@@ -37,7 +37,6 @@ export class AttributePersonalizationStorage implements PersonalizationStorage {
 
     updateSettings(newSettings: any): void {
         // Prevent saving empty string or null to the attribute
-        console.log("Update settings called")
         newSettings = newSettings === "" || newSettings === null ? undefined : newSettings;
         if (this._storageAttr && !this._storageAttr.readOnly) {
             const newSettingsJson = JSON.stringify(newSettings);

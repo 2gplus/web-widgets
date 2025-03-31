@@ -99,7 +99,6 @@ export class RemoteColumnsSortingStore implements ICustomColumnSortingStore {
     }
 
     updateSortProperty(sortAsc:boolean, sortAttr:string, newSortRules: RemoteSortRule[]): void {
-        console.log(`updateSortProperty console watch test`)
         this.sortAscending?.setValue(sortAsc);
         this.sortAttribute?.setValue(sortAttr);
         if (this.sortChangedAction && this.sortChangedAction.canExecute) {

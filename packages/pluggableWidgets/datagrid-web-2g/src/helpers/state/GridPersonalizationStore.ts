@@ -55,11 +55,9 @@ export class GridPersonalizationStore {
     }
 
     updateProps(props: DatagridContainerProps): void {
-        console.log("Grid personalization props updated", props)
         this.storage.updateProps?.(props);
-        console.log(`Update props and check sortrules `, this.columnsStore.sortRules , this.settings.sortOrder);
         if(this.sortRulesUpdated(this.settings.sortOrder, this.columnsStore.sortRules)){
-            console.log('Updated sortOrder');
+
             this.settings.sortOrder = this.columnsStore.sortRules;
             this.storage.updateSettings(this.settings);
         }
@@ -94,7 +92,6 @@ export class GridPersonalizationStore {
                 return result.value;
             },
             settings => {
-                console.log("reaction (settings) fired");
                 if (settings == null) {
                     return;
                 }
@@ -108,7 +105,6 @@ export class GridPersonalizationStore {
         return reaction(
             () => this.settings,
             settings => {
-                console.log(`setupWriteReaction , update settings called`)
                 this.storage.updateSettings(settings);
             },
             { delay: 250, equals: comparer.structural }

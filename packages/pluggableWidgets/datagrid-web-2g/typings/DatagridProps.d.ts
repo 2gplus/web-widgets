@@ -11,7 +11,7 @@ export type ItemSelectionMethodEnum = "checkbox" | "rowClick";
 
 export type ItemSelectionModeEnum = "toggle" | "clear";
 
-export type LoadingTypeEnum = "spinner" | "skeleton";
+export type LoadingTypeEnum = "skeleton" | "spinner";
 
 export type ShowContentAsEnum = "attribute" | "dynamicText" | "customContent";
 
