@@ -43,7 +43,7 @@
                         <enumerationValue key="rowClick">Row click</enumerationValue>
                     </enumerationValues>
                 </property>
-                <property key="itemSelectionMode" type="enumeration" defaultValue="clear">
+                <property key="itemSelectionMode" type="enumeration" defaultValue="toggle">
                     <caption>Toggle on click</caption>
                     <description>Defines item selection behavior.</description>
                     <enumerationValues>
